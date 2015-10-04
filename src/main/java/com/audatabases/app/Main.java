@@ -1,26 +1,21 @@
 package com.audatabases.app;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Main {
+    
+    private static String version = "AUDB 0.0.1";
+
+    static {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MMM/dd HH:mm");
+        Date date = new Date();
+        version += dateFormat.format(date); 
+    }
 
     public static void main(String[] args) {
-        try {
-
-        	PageCache pc = new PageCache("db/tst");
-        	Page p = pc.getPage(1);
-        	for(byte i = 0; i < 100; i++)
-        		p.data[i] = i;
-        	p.write();
-        	pc.close();
-
-        	pc = new PageCache("db/tst");
-        	p = pc.getPage(1);
-        	for(byte i = 0; i < 100; i++)
-        		System.out.println(p.data[i]);
-        	pc.close();
-
-        } catch(Exception e) {
-            System.out.println("Something goes wrong.");
-        }
+        System.out.println(version);
     }
 
 }

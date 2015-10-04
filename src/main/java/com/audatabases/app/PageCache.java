@@ -1,11 +1,7 @@
 package com.audatabases.app;
 
-// import java.util.Arrays;
-import java.util.PriorityQueue;
-import java.util.TreeSet;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 
 public class PageCache {
@@ -54,11 +50,9 @@ public class PageCache {
     }
 
     public void close() {
-        for (Element el: hashMap.values())
-            if (el.page.isDirty()) {
-                // System.out.println("Closed: " + el.page.getPageNumber());
-                pageManager.writePage(el.page);
-            }
+        for (Element el: hashMap.values()) {    
+            pageManager.writePage(el.page);
+        }
         hashMap.clear();
     }
 

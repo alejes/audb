@@ -35,4 +35,25 @@ public class AppTest
     {
         assertTrue( true );
     }
+
+    public void testAdd1Plus1() 
+    {
+        try {
+            PageCache pc = new PageCache("db/tst");
+            Page p = pc.getPage(1);
+            for(byte i = 0; i < 100; i++)
+                p.data[i] = i;
+            p.write();
+            pc.close();
+
+            pc = new PageCache("db/tst");
+            p = pc.getPage(1);
+            for (byte i = 0; i < 100; i++)
+                assertEquals(i, p.data[i]);
+            pc.close();
+
+        } catch(Exception e) {
+            assertTrue(false);
+        }
+    }
 }
