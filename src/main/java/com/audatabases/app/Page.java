@@ -8,7 +8,6 @@ public class Page {
 
     public byte[] data;
 
-
     public Page(byte[] arr, long number) {
         data = arr;
         pageNumber = number;
@@ -25,7 +24,7 @@ public class Page {
     }
 
     public boolean unpin() {
-        if(pinCount == 0) return false;
+        if (pinCount == 0) return false;
         pinCount -= 1;
         return true;
     }
