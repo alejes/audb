@@ -1,4 +1,4 @@
-package pages;
+package com.audatabases.pages;
 
 import java.io.File;
 import java.io.RandomAccessFile;

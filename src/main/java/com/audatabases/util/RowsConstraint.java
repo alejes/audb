@@ -1,4 +1,4 @@
-package com.database.util;
+package com.audatabases.util;
 
 enum ConstraintOperator {
 	EQUAL,

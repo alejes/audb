@@ -2,7 +2,7 @@ package com.audatabases.parser;
 
 import java.util.List;
 
-import com.database.util.TableColumn;
+import com.audatabases.util.TableColumn;
 
 public class CreateTableCommand extends Command {
 	

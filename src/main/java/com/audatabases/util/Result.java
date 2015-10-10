@@ -1,4 +1,4 @@
-package com.database.util;
+package com.audatabases.util;
 
 import java.util.EnumMap;
 import java.util.List;

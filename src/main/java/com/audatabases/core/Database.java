@@ -1,15 +1,16 @@
 package com.audatabases.core;
 
-import pages.PageManager;
 
+import com.audatabases.pages.PageManager;
 import com.audatabases.parser.CreateIndex;
 import com.audatabases.parser.CreateTableCommand;
+import com.audatabases.parser.ExitCommand;
 import com.audatabases.parser.InsertCommand;
 import com.audatabases.parser.SelectCommand;
 import com.audatabases.parser.UpdateCommand;
-import com.database.util.Result;
+import com.audatabases.util.Result;
 
-public class Database {
+class Database {
 	private PageManager pageManager = null;
 	private String name;
 	
@@ -43,7 +44,12 @@ public class Database {
 		return null;
 	}
 	
-	Result performOperationsBeforeShutDown() {
+	Result commitChanges() {
+		
+		return null;
+	}
+	
+	Result evaluateCommand(ExitCommand command) {
 		
 		return null;
 	}

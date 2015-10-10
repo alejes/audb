@@ -1,6 +1,6 @@
 package com.audatabases.io;
 
-import com.database.util.Result;
+import com.audatabases.util.Result;
 
 public interface IOInterface {
 	String readCommand();

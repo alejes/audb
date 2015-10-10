@@ -1,7 +1,8 @@
 package com.audatabases.app;
 
-import pages.Page;
-import pages.PageCache;
+import com.audatabases.pages.Page;
+import com.audatabases.pages.PageCache;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -38,7 +39,7 @@ public class AppTest
         assertTrue( true );
     }
 
-    public void testAdd1Plus1() 
+    public void testHundreadNumbers() 
     {
         try {
             PageCache pc = new PageCache("db/tst");

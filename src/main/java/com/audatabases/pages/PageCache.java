@@ -1,4 +1,4 @@
-package pages;
+package com.audatabases.pages;
 
 import java.util.HashMap;
 import java.util.TreeSet;

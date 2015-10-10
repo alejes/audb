@@ -1,6 +1,6 @@
 package com.audatabases.parser;
 
-import com.database.util.RowsConstraint;
+import com.audatabases.util.RowsConstraint;
 
 
 public class DeleteCommand extends Command {

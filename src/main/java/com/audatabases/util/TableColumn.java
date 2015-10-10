@@ -1,6 +1,6 @@
-package com.database.util;
+package com.audatabases.util;
 
-import com.database.data.ConstSizeType;
+import com.audatabases.data.ConstSizeType;
 
 
 public class TableColumn {

@@ -2,7 +2,7 @@ package com.audatabases.io;
 
 import java.util.Scanner;
 
-import com.database.util.Result;
+import com.audatabases.util.Result;
 
 public class IOHandler implements IOInterface {
 	Scanner terminalInput = new Scanner(System.in);

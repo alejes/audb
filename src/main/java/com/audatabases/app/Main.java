@@ -4,7 +4,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.audatabases.core.Database;
 import com.audatabases.core.DatabaseHandler;
 import com.audatabases.io.IOHandler;
 import com.audatabases.io.IOInterface;

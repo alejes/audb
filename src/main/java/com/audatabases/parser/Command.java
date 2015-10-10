@@ -7,4 +7,8 @@ public abstract class Command {
 	protected Command(String tableName) {
 		this.tableName = tableName;
 	}
+	
+	public String getTableName() {
+		return tableName;
+	}
 }

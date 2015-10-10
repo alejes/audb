@@ -2,7 +2,7 @@ package com.audatabases.parser;
 
 import java.util.List;
 
-import com.database.util.RowsConstraint;
+import com.audatabases.util.RowsConstraint;
 
 public class UpdateCommand extends Command {
 	

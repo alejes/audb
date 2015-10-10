@@ -1,4 +1,4 @@
-package com.database.data;
+package com.audatabases.data;
 
 public enum ExistingTypes {
 	VARCHAR,
