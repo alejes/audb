@@ -1,4 +1,4 @@
-package com.audatabases.app;
+package pages;
 
 public class Page {
 

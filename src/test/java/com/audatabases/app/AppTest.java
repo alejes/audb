@@ -1,5 +1,7 @@
 package com.audatabases.app;
 
+import pages.Page;
+import pages.PageCache;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
