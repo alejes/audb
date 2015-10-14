@@ -1,6 +1,6 @@
 *.jar
 *.class
-db/*
+*/db/*
 target/*
 .classpath
 .project
