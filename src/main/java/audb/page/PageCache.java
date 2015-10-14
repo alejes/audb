@@ -10,12 +10,15 @@ import java.util.HashMap;
 
 public class PageCache {
     private int MAX_SIZE = 100;
+    private boolean DEBUG = true;
+    private long timer;
     private TreeSet<Element> treeSetFreq;
     private TreeSet<Long> treeSetPage;
     private PageManager pageManager;
     private HashMap<Long, Element> hashMap;
 
     public PageCache(String fileName) throws Exception {
+        timer = 0;
         hashMap = new HashMap<Long, Element>();
         pageManager = new PageManager(fileName);
     }
@@ -24,39 +27,46 @@ public class PageCache {
         Element el;
         if(hashMap.containsKey(number)) {
             el = hashMap.remove(number);
-            el.freq += 1; // TODO
+            el.time = timer;
         } else {
             if(hashMap.size() >= MAX_SIZE) {
                 Page minPage = null;
-                long minFreq = Long.MAX_VALUE;
+                Page somePage = null;
+                long minTime = Long.MAX_VALUE;
                 for(Long name: hashMap.keySet()) {
                     el = hashMap.get(name);
-                    if(el.page.isUnpinned() && el.freq < minFreq) {
-                        minFreq = el.freq;
+                    somePage = el.page;
+                    if(el.time < minTime && el.page.isUnpinned()) {
+                        minTime = el.time;
                         minPage = el.page;
                     }
                 }
-                if(minFreq == Long.MAX_VALUE)
-                    return null;
+                if(minTime == Long.MAX_VALUE)
+                    minPage = somePage;
                 removePage(minPage);
             }
-            el = new Element(1, pageManager.readPage(number));
+            el = new Element(timer, pageManager.readPage(number));
         }
+
+        timer += 1;
         hashMap.put(number, el);
 
-        // for (Long name: hashMap.keySet()){
-        //     String key = name.toString();
-        //     Long value = hashMap.get(name).freq;  
-        //     System.out.println(key + " " + value);  
-        // } 
-        // System.out.println();
+        if(DEBUG) {
+            for (Long name: hashMap.keySet()){
+                String key = name.toString();
+                Long value = hashMap.get(name).time;  
+                System.out.println(key + " " + value);  
+            } 
+            System.out.println();
+        }
+
         return el.page;
     }
 
     public void close() {
         for(Element el: hashMap.values())
             if(el.page.isDirty()) {
-                // System.out.println("Closed: " + el.page.getPageNumber());
+                if(DEBUG) System.out.println("Page closed: " + el.page.getPageNumber());
                 pageManager.writePage(el.page);
             }
         hashMap.clear();
@@ -64,7 +74,7 @@ public class PageCache {
 
     private void removePage(Page page) { 
         if(page.isDirty()) {
-            // System.out.println("Closed: " + page.getPageNumber());
+            if(DEBUG) System.out.println("Page closed: " + page.getPageNumber());
             pageManager.writePage(page);
         }
         hashMap.remove(page.getPageNumber());
@@ -72,10 +82,10 @@ public class PageCache {
     }
 
     private class Element {
-        public long freq;
+        public long time;
         public Page page;
-        public Element(int freq, Page page) {
-            this.freq = freq;
+        public Element(long time, Page page) {
+            this.time = time;
             this.page = page;
         }
     }

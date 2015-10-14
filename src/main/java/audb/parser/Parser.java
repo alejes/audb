@@ -12,7 +12,6 @@ public class Parser {
     	Command command = new CreateTableCommand();
 
         return command;
-
     }
 
 }
