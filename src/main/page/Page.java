@@ -1,4 +1,4 @@
-package com.audatabases.pages;
+
 
 public class Page {
 
@@ -7,6 +7,7 @@ public class Page {
     private boolean isDirty;
 
     public byte[] data;
+
 
     public Page(byte[] arr, long number) {
         data = arr;
@@ -24,7 +25,7 @@ public class Page {
     }
 
     public boolean unpin() {
-        if (pinCount == 0) return false;
+        if(pinCount == 0) return false;
         pinCount -= 1;
         return true;
     }

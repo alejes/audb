@@ -1,11 +1,13 @@
-package com.audatabases.pages;
-
-import java.util.HashMap;
+// import java.util.Arrays;
+import java.util.PriorityQueue;
 import java.util.TreeSet;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.HashMap;
 
 
 public class PageCache {
-    private final int MAX_SIZE = 100;
+    private int MAX_SIZE = 100;
     private TreeSet<Element> treeSetFreq;
     private TreeSet<Long> treeSetPage;
     private PageManager pageManager;
@@ -18,21 +20,21 @@ public class PageCache {
 
     public Page getPage(long number) {
         Element el;
-        if (hashMap.containsKey(number)) {
+        if(hashMap.containsKey(number)) {
             el = hashMap.remove(number);
             el.freq += 1; // TODO
         } else {
-            if (hashMap.size() >= MAX_SIZE) {
+            if(hashMap.size() >= MAX_SIZE) {
                 Page minPage = null;
                 long minFreq = Long.MAX_VALUE;
-                for (Long name: hashMap.keySet()) {
+                for(Long name: hashMap.keySet()) {
                     el = hashMap.get(name);
-                    if (el.page.isUnpinned() && el.freq < minFreq) {
+                    if(el.page.isUnpinned() && el.freq < minFreq) {
                         minFreq = el.freq;
                         minPage = el.page;
                     }
                 }
-                if (minFreq == Long.MAX_VALUE)
+                if(minFreq == Long.MAX_VALUE)
                     return null;
                 removePage(minPage);
             }
@@ -50,16 +52,21 @@ public class PageCache {
     }
 
     public void close() {
-        for (Element el: hashMap.values()) {    
-            pageManager.writePage(el.page);
-        }
+        for(Element el: hashMap.values())
+            if(el.page.isDirty()) {
+                // System.out.println("Closed: " + el.page.getPageNumber());
+                pageManager.writePage(el.page);
+            }
         hashMap.clear();
     }
 
     private void removePage(Page page) { 
-        // System.out.println("Closed: " + page.getPageNumber());
-        pageManager.writePage(page);
+        if(page.isDirty()) {
+            // System.out.println("Closed: " + page.getPageNumber());
+            pageManager.writePage(page);
+        }
         hashMap.remove(page.getPageNumber());
+
     }
 
     private class Element {

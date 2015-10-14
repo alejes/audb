@@ -1,7 +1,6 @@
-package com.audatabases.pages;
-
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.util.Arrays;
 
 
 public class PageManager {
@@ -15,24 +14,23 @@ public class PageManager {
 
     public PageManager(String fileName) throws Exception {
         file = new File(fileName);
-        if (!file.exists()) {
+        if(!file.exists()) {
             file.getParentFile().mkdirs();
             file.createNewFile();
         }
         raf = new RandomAccessFile(file, "rw");
         pageCount = file.length() / PAGE_SIZE + 1;
-        for (long i = pageCount; i < START_SIZE; i++) 
-            addPage();
+        for(long i = pageCount; i < START_SIZE; i++) addPage();
     }
 
     public Page readPage(long number) {
-        if (number >= pageCount)
+        if(number >= pageCount)
             return null;
         byte[] arr = new byte[PAGE_SIZE];
-        try {
+        try{
             raf.seek(number * PAGE_SIZE);
             raf.read(arr);
-        } catch (Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
         }
         return new Page(arr, number);
@@ -53,7 +51,8 @@ public class PageManager {
         raf.seek(pageCount * PAGE_SIZE);
         byte[] arr = new byte[PAGE_SIZE];
         raf.write(arr);
-        return new Page(arr, pageCount++);
+        pageCount += 1;
+        return new Page(arr, pageCount - 1);
     }
 
 }
