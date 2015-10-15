@@ -1,17 +1,29 @@
 package audb.command;
 
+import audb.type.Type;
+import audb.type.StringType;
+
 import java.util.HashMap;
+
 
 public class CreateTableResult implements Result {
 
-	private int num = 0;
+	private int num;
+    private Type[] params;
 
-    public HashMap<String, String> getNext() {
+    public CreateTableResult() {
+        num = 0;
+        params = new Type[2];
+        params[0] = new StringType();
+        params[1] = params[0];
+    }
+
+    public Object[] getNext() {
 
         
-        HashMap<String, String> next = new HashMap<String, String>();
-        next.put("val1", String.valueOf(num));
-        next.put("val2", String.valueOf(9 - num));
+        Object[] next = new Object[2];
+        next[0] = "val" + num;
+        next[1] = "val" + (9 - num);
         num += 1;
 
         return next;
@@ -21,6 +33,11 @@ public class CreateTableResult implements Result {
     public boolean hasNext() {
 
     	return num < 10;
+    }
+
+    public Type[] getColumns() {
+
+        return params;
     }
 
 }

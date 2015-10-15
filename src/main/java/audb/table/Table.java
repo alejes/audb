@@ -1,17 +1,32 @@
 package audb.table;
 
-import java.util.HashMap;
+import audb.page.PageCache;
+import audb.page.Page;
 
 
 public class Table {
 
-    public HashMap<String, String> read(long pageNum, int offset) {
+	private PageCache pageCache;
+
+	public Table(String tablename) {
+		pageCache = new PageCache("db/" + tablename);
+	}
+
+	public createTable(Type[] types) {
+
+	}
+
+    public Object[] read(long pageNum, int offset) {
 
         return null;
     }
 
-    public void write(HashMap<String, String> data) {
+    public void write(Object[] data) {
     	
+    }
+
+    public void close() {
+    	pageCache.close();
     }
 
 }

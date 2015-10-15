@@ -5,6 +5,7 @@ import audb.page.PageCache;
 import audb.parser.Parser;
 import audb.command.Command;
 import audb.command.Result;
+import audb.type.Type;
 
 import java.io.*;
 import java.util.HashMap;
@@ -24,11 +25,17 @@ public class Main {
                 Result result  = command.exec();
 
                 while(result.hasNext()) {
-                    HashMap<String, String> cur = result.getNext();
+                    Object[] cur = result.getNext();
+
                     System.out.print("| ");
-                    for (String name: cur.keySet()) {
-                        String out = name + ": " + cur.get(name) + " | ";
-                        System.out.print(out);
+                    for (int i = 0; i < cur.length; i++) {
+                        Type curType = result.getColumns()[i];
+                        if(curType.getType() == Type.STRING) {
+                            String out = String.
+                                format("%1$" + (curType.getSize() + ((String)cur[i]).length()) + "s", cur[i]);
+                            out = out + " | ";
+                            System.out.print(out);
+                        }
                     } 
                     System.out.println();  
                 }
