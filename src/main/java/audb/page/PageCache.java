@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public class PageCache {
     private int MAX_SIZE = 100;
-    private boolean DEBUG = true;
+    private boolean DEBUG = false;
     private long timer;
     private TreeSet<Element> treeSetFreq;
     private TreeSet<Long> treeSetPage;

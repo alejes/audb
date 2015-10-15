@@ -6,12 +6,13 @@ import java.util.Arrays;
 
 
 public class PageManager {
+    
+    public static final int PAGE_SIZE = 4096;
+    public static final long START_SIZE = 512;
 
     private File file;
     private RandomAccessFile raf;
     private long pageCount;
-    private static final int PAGE_SIZE = 4096;
-    private static final long START_SIZE = 512;
 
 
     public PageManager(String fileName) throws Exception {
