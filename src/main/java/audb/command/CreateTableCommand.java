@@ -1,5 +1,7 @@
 package audb.command;
 
+import audb.result.Result;
+
 
 public class CreateTableCommand implements Command {
 

@@ -1,4 +1,4 @@
-package audb.command;
+package audb.result;
 
 import audb.type.Type;
 import audb.type.StringType;
@@ -35,9 +35,13 @@ public class CreateTableResult implements Result {
     	return num < 10;
     }
 
-    public Type[] getColumns() {
+    public Type[] getTypes() {
 
         return params;
+    }
+
+    public close() {
+
     }
 
 }

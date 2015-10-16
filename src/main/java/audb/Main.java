@@ -4,7 +4,8 @@ import audb.page.Page;
 import audb.page.PageCache;
 import audb.parser.Parser;
 import audb.command.Command;
-import audb.command.Result;
+import audb.result.Result;
+import audb.result.FullScanResult;
 import audb.type.Type;
 import audb.type.TypeUtil;
 import audb.type.VarcharType;
@@ -47,52 +48,37 @@ public class Main {
         //      e.printStackTrace();
         // }
 
-        // try {
-
-        // 	// PageCache pc;
-        // 	// Page p;
-        // 	PageCache pc = new PageCache("db/tst");
-        // 	Page p = pc.getPage(1);
-        // 	for(byte i = 0; i < 100; i++)
-        // 		p.data[i] = i;
-        // 	p.write();
-        // 	pc.close();
-
-        // 	pc = new PageCache("db/tst");
-        // 	p = pc.getPage(1);
-        // 	for(byte i = 0; i < 100; i++)
-        // 		System.out.println(p.data[i]);
-        // 	pc.close();
-
-        // } catch(Exception e) {
-        //     System.out.println("Something goes wrong.");
-        // }
-
         try {
 
             Table table = new Table("table1");
-            Type[] types = new Type[]{new VarcharType(3), new VarcharType(5)};
-            String[] names = new String[]{"arg1", "argu2"};
+            Type[] types = new Type[]{new VarcharType(3), new VarcharType(9)};
+            String[] names = new String[]{"number", "text"};
             table.create(types, names);
             table.close();
-
             table = new Table("table1");
             table.init();
 
-            String s1 = "123";
-            String s2 = "bcdef";
-            Object arr[] = new Object[]{s1, s2};
+            for(int i = 0; i < 10; i++) {
+                String s1 = String.format("%03d", i);;
+                String s2 = "some_text";
+                Object arr[] = new Object[]{s1, s2};
+                table.addRecord(arr);
+                
+            }
 
-            table.write(2, 0, arr);
-            arr = table.read(2, 0);
+            Result res = new FullScanResult(table);
 
-            for(int i = 0; i < arr.length; i++) {
-                if(TypeUtil.isVarchar(table.getTypes()[i])) {
-                    System.out.print(((String)arr[i]) + " ");
+            while(res.hasNext()) {
+                Object[] arr = res.getNext();
+                for(int i = 0; i < arr.length; i++) {
+                    if(TypeUtil.isVarchar(table.getTypes()[i])) {
+                        System.out.print(((String)arr[i]) + " ");
+                    }
                 }
                 System.out.println();
             }
 
+            res.close();
             table.close();
 
         } catch(Exception e) {

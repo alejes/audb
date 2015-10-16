@@ -1,5 +1,8 @@
 package audb.page;
 
+import audb.util.ByteUtils;
+
+
 public class Page {
 
     private int pinCount;
@@ -41,4 +44,17 @@ public class Page {
     public long getPageNumber() {
         return pageNumber;
     }
+
+
+    public long readLong(int offset) {
+        byte[] bytes = new byte[Long.BYTES];
+        System.arraycopy(data, offset, bytes, 0, bytes.length);
+        return ByteUtils.bytesToLong(bytes);
+    }
+
+    public void writeLong(int offset, long pageNum) {
+        byte[] bytes = ByteUtils.longToBytes(pageNum);
+        System.arraycopy(bytes, 0, data, offset, bytes.length);
+    }
+
 }

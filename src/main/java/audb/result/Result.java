@@ -1,4 +1,4 @@
-package audb.command;
+package audb.result;
 
 import audb.type.Type;
 
@@ -11,6 +11,8 @@ public interface Result {
 
     public boolean hasNext();
 
-    public Type[] getColumns();
+    public Type[] getTypes();
+
+    public void close();
 
 }
