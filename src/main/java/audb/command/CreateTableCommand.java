@@ -1,15 +1,27 @@
 package audb.command;
 
+import audb.type.Type;
 import audb.result.Result;
 
 
 public class CreateTableCommand implements Command {
 
-    public Result exec() {
+	private String tableName;
+	private Type[] types;
+	private String[] names;
 
-        System.out.println("Fake CreateTableCommand returned fake CreateTableResult.");
+	public CreateTableCommand(String tableName, Type[] types, String[] names) throws Exception {
+		this.tableName = tableName;
+		this.names = names;
+		this.types = types;
+	}
 
-        return new CreateTableResult();
+    public Result exec() throws Exception {
+		if(tableManager.hasTable(tableName))
+			throw new Exception("CreateTableCommand.java");
+		tableManager.createTable(tableName, types, names);				
+
+    	return null;
 
     }
 

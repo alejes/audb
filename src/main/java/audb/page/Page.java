@@ -1,6 +1,6 @@
 package audb.page;
 
-import audb.util.ByteUtils;
+import java.nio.ByteBuffer;
 
 
 public class Page {
@@ -49,12 +49,28 @@ public class Page {
     public long readLong(int offset) {
         byte[] bytes = new byte[Long.BYTES];
         System.arraycopy(data, offset, bytes, 0, bytes.length);
-        return ByteUtils.bytesToLong(bytes);
+        return bytesToLong(bytes);
     }
 
     public void writeLong(int offset, long pageNum) {
-        byte[] bytes = ByteUtils.longToBytes(pageNum);
+        byte[] bytes = longToBytes(pageNum);
         System.arraycopy(bytes, 0, data, offset, bytes.length);
+    }
+
+
+    private static ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+
+    public static byte[] longToBytes(long x) {
+        buffer.clear();
+        buffer.putLong(0, x);
+        return buffer.array();
+    }
+
+    public static long bytesToLong(byte[] bytes) {
+        buffer.clear();
+        buffer.put(bytes, 0, bytes.length);
+        buffer.flip(); 
+        return buffer.getLong();
     }
 
 }

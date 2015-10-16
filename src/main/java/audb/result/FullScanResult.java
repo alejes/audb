@@ -116,7 +116,7 @@ public class FullScanResult implements Result {
 		}
     }
 
-    public Type[] getTypes() { // RENAME
+    public Type[] getTypes() {
     	return types;
     }
 

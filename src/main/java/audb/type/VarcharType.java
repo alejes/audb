@@ -32,4 +32,10 @@ public class VarcharType implements Type {
         return new String(bytes, StandardCharsets.US_ASCII);
     }
 
+    public boolean isValid(Object o) {
+        if(o instanceof String && ((String)o).length() == length )
+            return true;
+        return false;
+    }
+
 }

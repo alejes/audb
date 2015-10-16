@@ -34,7 +34,7 @@ public class Table {
 
 
 	public Table(String tablename) throws Exception {
-		pageCache = new PageCache("db/" + tablename);
+		pageCache = new PageCache(tablename);
 	}
 
 	public int getRecordSize() {
@@ -71,10 +71,7 @@ public class Table {
 		calculateRecordInfo();
 	}
 
-	public void create(Type[] types, String[] names) throws Exception {
-
-		if(types.length != names.length)
-			throw new Exception("Table.java"); // TODO
+	public void create(Type[] types, String[] names) {
 
 		Page page = pageCache.getPage(INFO_PAGE);
 		page.pin();
@@ -185,7 +182,7 @@ public class Table {
 		return types;
 	}
 
-    public Object[] read(long pageNum, int offset) {
+    private Object[] read(long pageNum, int offset) {
 		Page page = pageCache.getPage(pageNum);
 		page.pin();
 		int ptr = offset * recordSize;
@@ -200,7 +197,7 @@ public class Table {
         return objects;
     }
 
-    public void write(long pageNum, int offset, Object[] objects) throws Exception {
+    private void write(long pageNum, int offset, Object[] objects) throws Exception {
     	Page page = pageCache.getPage(pageNum);
 		int ptr = offset * recordSize;
 		for(int i = 0; i < types.length; i++) {
