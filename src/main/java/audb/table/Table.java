@@ -1,12 +1,12 @@
 package audb.table;
 
+import java.nio.charset.StandardCharsets;
+
 import audb.page.Page;
 import audb.page.PageCache;
 import audb.page.PageManager;
 import audb.type.Type;
 import audb.type.TypeUtil;
-
-import java.nio.charset.StandardCharsets;
 
 
 public class Table {

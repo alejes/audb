@@ -1,21 +1,16 @@
 package audb;
 
-import audb.page.Page;
-import audb.page.PageCache;
-import audb.parser.Parser;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 import audb.command.Command;
 import audb.command.CreateTableCommand;
 import audb.command.InsertCommand;
-import audb.command.SelectCommand;
+import audb.parser.Parser;
 import audb.result.Result;
 import audb.type.Type;
 import audb.type.TypeUtil;
 import audb.type.VarcharType;
-import audb.table.Table;
-import audb.table.TableManager;
-
-import java.io.*;
-import java.util.HashMap;
 
 public class Main {
 

@@ -1,9 +1,9 @@
 package audb.result;
 
-import audb.type.Type;
-import audb.table.Table;
 import audb.page.Page;
 import audb.page.PageCache;
+import audb.table.Table;
+import audb.type.Type;
 
 
 public class FullScanResult implements Result {

@@ -33,9 +33,7 @@ public class VarcharType implements Type {
     }
 
     public boolean isValid(Object o) {
-        if(o instanceof String && ((String)o).length() == length )
-            return true;
-        return false;
+        return (o instanceof String && ((String)o).length() == length);
     }
 
 }

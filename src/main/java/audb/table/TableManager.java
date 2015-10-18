@@ -1,9 +1,8 @@
 package audb.table;
 
-import audb.table.Table;
-import audb.type.Type;
-
 import java.util.HashMap;
+
+import audb.type.Type;
 
 
 public class TableManager {

@@ -1,11 +1,10 @@
-package com.audatabases.app;
-
-import com.audatabases.pages.Page;
-import com.audatabases.pages.PageCache;
+package audb;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import audb.page.Page;
+import audb.page.PageCache;
 
 /**
  * Unit test for simple App.

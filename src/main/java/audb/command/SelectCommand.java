@@ -1,8 +1,7 @@
 package audb.command;
 
-import audb.result.Result;
 import audb.result.FullScanResult;
-import audb.table.TableManager;
+import audb.result.Result;
 
 
 public class SelectCommand implements Command {

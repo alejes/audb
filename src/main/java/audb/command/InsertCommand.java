@@ -1,7 +1,6 @@
 package audb.command;
 
 import audb.result.Result;
-import audb.table.TableManager;
 import audb.table.Table;
 
 

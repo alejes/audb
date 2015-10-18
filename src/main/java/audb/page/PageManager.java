@@ -2,7 +2,6 @@ package audb.page;
 
 import java.io.File;
 import java.io.RandomAccessFile;
-import java.util.Arrays;
 
 
 public class PageManager {

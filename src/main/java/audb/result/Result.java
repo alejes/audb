@@ -2,8 +2,6 @@ package audb.result;
 
 import audb.type.Type;
 
-import java.util.HashMap;
-
 
 public interface Result {
 

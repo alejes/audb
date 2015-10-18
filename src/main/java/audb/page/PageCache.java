@@ -1,11 +1,8 @@
 package audb.page;
 
 // import java.util.Arrays;
-import java.util.PriorityQueue;
-import java.util.TreeSet;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 
 public class PageCache {

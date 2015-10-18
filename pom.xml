@@ -28,7 +28,7 @@
           <manifest>
             <addClasspath>true</addClasspath>
             <classpathPrefix>lib/</classpathPrefix>
-            <mainClass>com.audatabases.app.Main</mainClass>
+            <mainClass>audb.Main</mainClass>
           </manifest>
         </archive>
       </configuration>
