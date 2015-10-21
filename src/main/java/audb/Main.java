@@ -50,11 +50,11 @@ public class Main {
                     }
                     System.out.println();
                 }
-                Command.tableManager.close();
 
                 res.close();
 
             }
+            Command.tableManager.close();
         } catch(Exception e) {
              e.printStackTrace();
         }

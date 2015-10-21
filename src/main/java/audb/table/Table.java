@@ -12,6 +12,7 @@ import audb.type.TypeUtil;
 public class Table {
 
 	public PageCache pageCache;
+    private PageManager pageManager;
 
 	public static final int TYPES_INFO = 20;
 
@@ -23,7 +24,6 @@ public class Table {
     public static final int NEXT_PAGE = PAGE_SIZE - 16;
     public static final int PREV_PAGE = PAGE_SIZE - 24;
 
-
 	private String[] names;
 	private Type[] types;
 	private int recordSize;
@@ -32,10 +32,18 @@ public class Table {
 	private long nextFullPage;
 	private long countOfPages;
 
+    public Table(PageManager pm, PageCache pc) {
+        pageCache = pc;
+        pageManager = pm;
+    }
 
-	public Table(String tablename) throws Exception {
-		pageCache = new PageCache(tablename);
-	}
+    public PageManager getPageManager() {
+        return pageManager;
+    }
+
+    public PageCache getPageCache() {
+        return pageCache;
+    }
 
 	public int getRecordSize() {
 		return recordSize;
@@ -43,7 +51,7 @@ public class Table {
 
 	public void init() throws Exception {
 
-		Page page = pageCache.getPage(INFO_PAGE);
+		Page page = pageCache.getPage(pageManager, INFO_PAGE);
 		page.pin();
 		int ptr = TYPES_INFO;
 		int length = page.data[ptr++];
@@ -73,7 +81,7 @@ public class Table {
 
 	public void create(Type[] types, String[] names) {
 
-		Page page = pageCache.getPage(INFO_PAGE);
+		Page page = pageCache.getPage(pageManager, INFO_PAGE);
 		page.pin();
 		int ptr = TYPES_INFO;
 		page.data[ptr++] = (byte) types.length;
@@ -107,36 +115,36 @@ public class Table {
 
 	private void addPageEmpty(long pageNum) {
 		refresh();
-		Page page = pageCache.getPage(INFO_PAGE);
+		Page page = pageCache.getPage(pageManager, INFO_PAGE);
 		long nextPage = page.readLong(NEXT_PAGE);
 		page.writeLong(NEXT_PAGE, pageNum);
 		page.write();
 
-		page = pageCache.getPage(pageNum);
+		page = pageCache.getPage(pageManager, pageNum);
 		page.writeLong(PREV_PAGE, INFO_PAGE);
 		page.writeLong(NEXT_PAGE, nextPage);
 		page.write();
 
 		if(nextPage != INFO_PAGE) {
-			page = pageCache.getPage(nextPage);
+			page = pageCache.getPage(pageManager, nextPage);
 			page.writeLong(PREV_PAGE, pageNum);
 		}
 	}
 
 	private void addPageFull(long pageNum) {
 		refresh();
-		Page page = pageCache.getPage(INFO_PAGE);
+		Page page = pageCache.getPage(pageManager, INFO_PAGE);
 		long nextPage = page.readLong(PREV_PAGE);
 		page.writeLong(PREV_PAGE, pageNum);
 		page.write();
 
-		page = pageCache.getPage(pageNum);
+		page = pageCache.getPage(pageManager, pageNum);
 		page.writeLong(PREV_PAGE, INFO_PAGE);
 		page.writeLong(NEXT_PAGE, nextPage);
 		page.write();
 
 		if(nextPage != INFO_PAGE) {
-			page = pageCache.getPage(nextPage);
+			page = pageCache.getPage(pageManager, nextPage);
 			page.writeLong(PREV_PAGE, pageNum);
 			page.write();
 		}
@@ -145,16 +153,16 @@ public class Table {
 
 	private void removePage(long pageNum) {
 		refresh();
-		Page page = pageCache.getPage(pageNum);
+		Page page = pageCache.getPage(pageManager, pageNum);
 		long prevPage = page.readLong(PREV_PAGE);
 		long nextPage = page.readLong(NEXT_PAGE);
 
-		page = pageCache.getPage(prevPage);
+		page = pageCache.getPage(pageManager, prevPage);
 		page.writeLong(NEXT_PAGE, nextPage);
 		page.write();
 
 		if(nextPage != INFO_PAGE) {
-			page = pageCache.getPage(nextPage);
+			page = pageCache.getPage(pageManager, nextPage);
 			page.writeLong(PREV_PAGE, prevPage);
 			page.write();
 		}
@@ -163,11 +171,11 @@ public class Table {
 	private long getNewPage() {
 		refresh();
 		countOfPages += 1;
-		Page page = pageCache.getPage(countOfPages);
+		Page page = pageCache.getPage(pageManager, countOfPages);
 		page.writeLong(COUNT_OF_RECORDS, 0l);
 		page.write();
 
-		page = pageCache.getPage(INFO_PAGE);
+		page = pageCache.getPage(pageManager, INFO_PAGE);
 		page.writeLong(COUNT_OF_RECORDS, countOfPages);
 		page.write();
 
@@ -183,7 +191,7 @@ public class Table {
 	}
 
     private Object[] read(long pageNum, int offset) {
-		Page page = pageCache.getPage(pageNum);
+		Page page = pageCache.getPage(pageManager, pageNum);
 		page.pin();
 		int ptr = offset * recordSize;
 		Object[] objects = new Object[types.length];
@@ -198,7 +206,7 @@ public class Table {
     }
 
     private void write(long pageNum, int offset, Object[] objects) throws Exception {
-    	Page page = pageCache.getPage(pageNum);
+    	Page page = pageCache.getPage(pageManager, pageNum);
 		int ptr = offset * recordSize;
 		for(int i = 0; i < types.length; i++) {
 			byte[] data = types[i].toBytes(objects[i]);
@@ -220,7 +228,7 @@ public class Table {
 
     public void addRecord(Object[] data) throws Exception {
     	refresh();
-    	Page page = pageCache.getPage(nextEmptyPage);
+    	Page page = pageCache.getPage(pageManager, nextEmptyPage);
     	long countOfRecords = page.readLong(COUNT_OF_RECORDS);
     	write(nextEmptyPage, (int)countOfRecords, data);
     	countOfRecords += 1;
@@ -238,7 +246,7 @@ public class Table {
     }
 
     private void refresh() {
-		Page page = pageCache.getPage(INFO_PAGE);
+		Page page = pageCache.getPage(pageManager, INFO_PAGE);
 		countOfPages = page.readLong(COUNT_OF_RECORDS);
 		nextEmptyPage = page.readLong(NEXT_PAGE);
 		nextFullPage = page.readLong(PREV_PAGE);

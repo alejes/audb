@@ -11,10 +11,12 @@ public class PageManager {
 
     private File file;
     private RandomAccessFile raf;
+    private String fileName;
     private long pageCount;
 
 
     public PageManager(String fileName) throws Exception {
+        this.fileName = fileName;
         file = new File(fileName);
         if(!file.exists()) {
             file.getParentFile().mkdirs();
@@ -35,7 +37,7 @@ public class PageManager {
         } catch(Exception e) {
             e.printStackTrace();
         }
-        return new Page(arr, number);
+        return new Page(this, arr, number);
     }
 
     public void writePage(Page p) {
@@ -49,12 +51,16 @@ public class PageManager {
         }
     }
 
-    private Page addPage() throws Exception {
+    private void addPage() throws Exception {
         raf.seek(pageCount * PAGE_SIZE);
         byte[] arr = new byte[PAGE_SIZE];
         raf.write(arr);
         pageCount += 1;
-        return new Page(arr, pageCount - 1);
+        // return new Page(arr, pageCount - 1);
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 
 }

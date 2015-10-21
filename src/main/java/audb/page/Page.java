@@ -10,17 +10,23 @@ public class Page {
     private boolean isDirty;
 
     public byte[] data;
+    private PageManager pageManager;
 
 
-    public Page(byte[] arr, long number) {
+    public Page(PageManager pm, byte[] arr, long number) {
         data = arr;
         pageNumber = number;
         pinCount = 0;
         isDirty = false;
+        pageManager = pm;
     }
 
     public void write() {
         isDirty = true;
+    }
+
+    public void flush() {
+        pageManager.writePage(this);
     }
 
     public void pin() {

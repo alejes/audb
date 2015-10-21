@@ -2,6 +2,7 @@ package audb.result;
 
 import audb.page.Page;
 import audb.page.PageCache;
+import audb.page.PageManager;
 import audb.table.Table;
 import audb.type.Type;
 
@@ -14,6 +15,7 @@ public class FullScanResult implements Result {
     public static final int PREV_PAGE = Table.PREV_PAGE;
 
 	private PageCache pageCache;
+    private PageManager pageManager;
 	private Type[] types;
 	private String[] names;
 	private int recordSize;
@@ -32,11 +34,12 @@ public class FullScanResult implements Result {
 	private long firstEmpty;
 
 	public FullScanResult(Table table) {
-		this.pageCache = table.pageCache;
+		this.pageCache = table.getPageCache();
+        this.pageManager = table.getPageManager();
 		this.types = table.getTypes();
 		this.names = table.getNames();
 		this.recordSize = table.getRecordSize();
-		page = pageCache.getPage(INFO_PAGE);
+		page = pageCache.getPage(pageManager, INFO_PAGE);
 
 		count = 0;
 		offset = 0;
@@ -57,7 +60,7 @@ public class FullScanResult implements Result {
     private Object[] findNext() {
     	if(offset == count) {
     		page.unpin();
-    		page = pageCache.getPage(nextPage);
+    		page = pageCache.getPage(pageManager, nextPage);
     		page.pin();
     		offset = 0;
     		count = (int)page.readLong(COUNT_OF_RECORDS);
@@ -121,7 +124,7 @@ public class FullScanResult implements Result {
     }
 
     public Object[] read(long pageNum, int offset) {
-		Page page = pageCache.getPage(pageNum);
+		Page page = pageCache.getPage(pageManager, pageNum);
 		page.pin();
 		int ptr = offset * recordSize;
 		Object[] objects = new Object[types.length];
