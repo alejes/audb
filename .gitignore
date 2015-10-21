@@ -5,5 +5,7 @@ target/*
 .classpath
 .project
 .settings
+audb.sublime-project
+audb.sublime-workspace
 /target
 db*
