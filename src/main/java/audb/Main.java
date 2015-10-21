@@ -10,7 +10,6 @@ import audb.parser.Parser;
 import audb.result.Result;
 import audb.table.TableManager;
 import audb.type.Type;
-import audb.type.TypeUtil;
 import audb.type.VarcharType;
 
 public class Main {
@@ -29,7 +28,7 @@ public class Main {
             command = new CreateTableCommand("table1", types, names);
             command.exec();
 
-            for(int i = 0; i < 20; i++) {
+            for(int i = 0; i < 21; i++) {
                 String s1 = String.format("%03d", i);;
                 String s2 = "some_text";
                 Object arr[] = new Object[]{s1, s2};
@@ -49,7 +48,7 @@ public class Main {
                 while(res != null && res.hasNext()) {
                     Object[] arr = res.getNext();
                     for(int i = 0; i < arr.length; i++) {
-                        if(TypeUtil.isVarchar(res.getTypes()[i])) {
+                        if(res.getTypes()[i] instanceof VarcharType) {
                             System.out.print(((String)arr[i]) + " ");
                         }
                     }

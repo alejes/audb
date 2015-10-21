@@ -6,7 +6,6 @@ import audb.page.Page;
 import audb.page.PageCache;
 import audb.page.PageManager;
 import audb.type.Type;
-import audb.type.TypeUtil;
 
 
 public class Table {
@@ -14,22 +13,22 @@ public class Table {
 	private PageCache pageCache;
     private PageManager pageManager;
 
-	public static final int TYPES_INFO = 20;
-
-	public static final int PAGE_SIZE = PageManager.PAGE_SIZE;
-
-    public static final long INFO_PAGE = 0;
-    public static final int INFO_SIZE = 32;
-    public static final int COUNT_OF_RECORDS = PAGE_SIZE - 8;
-    public static final int NEXT_PAGE = PAGE_SIZE - 16;
-    public static final int PREV_PAGE = PAGE_SIZE - 24;
-
-    public static final int FIRST_EMPTY = PAGE_SIZE - 16;
-    public static final int LAST_EMPTY = PAGE_SIZE - 24;
-    public static final int FIRST_FULL = PAGE_SIZE - 32;
-    public static final int LAST_FULL = PAGE_SIZE - 40;
-    public static final long EMPTY_END = -1;
-    public static final long FULL_END = -2;    
+    public static final int TYPES_INFO       = 20;
+    
+    public static final int PAGE_SIZE        = PageManager.PAGE_SIZE;
+    
+    public static final long INFO_PAGE       = 0;
+    public static final int COUNT_OF_RECORDS = PageManager.PAGE_SIZE - Long.BYTES;
+    public static final int NEXT_PAGE        = PageManager.PAGE_SIZE - 2 * Long.BYTES;
+    public static final int PREV_PAGE        = PageManager.PAGE_SIZE - 3 * Long.BYTES;
+    public static final int INFO_SIZE        = 4 * Long.BYTES;
+    
+    public static final int FIRST_EMPTY      = PageManager.PAGE_SIZE - 2 * Long.BYTES;
+    public static final int LAST_EMPTY       = PageManager.PAGE_SIZE - 3 * Long.BYTES;
+    public static final int FIRST_FULL       = PageManager.PAGE_SIZE - 4 * Long.BYTES;
+    public static final int LAST_FULL        = PageManager.PAGE_SIZE - 5 * Long.BYTES;
+    public static final long EMPTY_END       = -1;
+    public static final long FULL_END        = -2;    
 
 	private String[] names;
 	private Type[] types;
@@ -76,7 +75,7 @@ public class Table {
 				name[j] = page.data[ptr + j];
 			ptr += name.length;
 			this.names[i] = new String(name, StandardCharsets.UTF_8);
-			this.types[i] = TypeUtil.makeType(type);
+			this.types[i] = Type.makeType(type);
 		}
 
 		page.write();

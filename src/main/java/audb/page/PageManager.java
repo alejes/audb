@@ -6,7 +6,7 @@ import java.io.RandomAccessFile;
 
 public class PageManager {
     
-    public static final int PAGE_SIZE = 128;
+    public static final int PAGE_SIZE   = 128;
     public static final long START_SIZE = 512;
 
     private File file;

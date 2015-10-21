@@ -3,12 +3,12 @@ package audb.type;
 import java.nio.charset.StandardCharsets;
 
 
-public class VarcharType implements Type {
+public class VarcharType extends Type {
 
     private int length;
 
     public VarcharType(int length) throws Exception {
-        if(length >= 100)
+        if(length >= 100 || length <= 0)
             throw new Exception("VarcharType.java");
         this.length = length;
     }
