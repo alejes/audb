@@ -2,15 +2,17 @@ package audb.command;
 
 import audb.type.Type;
 import audb.result.Result;
+import audb.table.TableManager;
 
 
 public class CreateTableCommand implements Command {
 
-	private String tableName;
-	private Type[] types;
-	private String[] names;
+    private TableManager tableManager = null;
+    private String tableName;
+    private Type[] types;
+    private String[] names;
 
-	public CreateTableCommand(String tableName, Type[] types, String[] names) throws Exception {
+	public CreateTableCommand(String tableName, Type[] types, String[] names) {
 		this.tableName = tableName;
 		this.names = names;
 		this.types = types;
@@ -22,7 +24,10 @@ public class CreateTableCommand implements Command {
 		tableManager.createTable(tableName, types, names);				
 
     	return null;
+    }
 
+    public void setTableManager(TableManager tm) {
+        tableManager = tm;
     }
 
 }

@@ -8,6 +8,7 @@ import audb.command.CreateTableCommand;
 import audb.command.InsertCommand;
 import audb.parser.Parser;
 import audb.result.Result;
+import audb.table.TableManager;
 import audb.type.Type;
 import audb.type.TypeUtil;
 import audb.type.VarcharType;
@@ -17,19 +18,24 @@ public class Main {
     public static void main(String[] args) {
 
         Parser parser = new Parser();
+        TableManager tableManager = new TableManager();
 
         try {
             Command command;
             Type[] types = new Type[]{new VarcharType(3), new VarcharType(9)};
             String[] names = new String[]{"number", "text"};
+
             command = new CreateTableCommand("table1", types, names);
+            command.setTableManager(tableManager);
             command.exec();
 
             for(int i = 0; i < 20; i++) {
                 String s1 = String.format("%03d", i);;
                 String s2 = "some_text";
                 Object arr[] = new Object[]{s1, s2};
+
                 command = new InsertCommand("table1", arr);
+                command.setTableManager(tableManager);
                 command.exec();
             }
             
@@ -39,6 +45,7 @@ public class Main {
 
 
                 command = parser.getCommand(s);
+                command.setTableManager(tableManager);
                 Result res = command.exec();
 
                 while(res != null && res.hasNext()) {
@@ -51,7 +58,7 @@ public class Main {
                     System.out.println();
                 }
             }
-            Command.tableManager.close();
+            tableManager.close();
         } catch(Exception e) {
              e.printStackTrace();
         }

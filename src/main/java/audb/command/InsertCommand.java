@@ -2,12 +2,14 @@ package audb.command;
 
 import audb.result.Result;
 import audb.table.Table;
+import audb.table.TableManager;
 
 
 public class InsertCommand implements Command {
 
-	private String tableName;
-	private Object[] data;
+    private TableManager tableManager = null;
+    private String tableName;
+    private Object[] data;
 
 	public InsertCommand(String tableName, Object[] data) {
 		this.tableName = tableName;
@@ -27,6 +29,10 @@ public class InsertCommand implements Command {
 		table.addRecord(data);
 
     	return null;
+    }
+
+    public void setTableManager(TableManager tm) {
+        tableManager = tm;
     }
 
 }

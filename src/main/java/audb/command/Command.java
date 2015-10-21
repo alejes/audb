@@ -8,6 +8,6 @@ public interface Command {
 
     public Result exec() throws Exception;
 
-    static TableManager tableManager = new TableManager();
+    public void setTableManager(TableManager tm);
 
 }
