@@ -6,9 +6,8 @@ import audb.table.PageFullScan;
 import audb.table.TableManager;
 
 
-public class SelectCommand implements Command {
+public class SelectCommand extends Command {
 
-    private TableManager tableManager = null;
     private String tableName;
 
 	public SelectCommand(String tableName) {
@@ -20,10 +19,5 @@ public class SelectCommand implements Command {
             throw new Exception("InsertCommand.java");
         return new FullScanResult(tableManager.getTable(tableName));
     }
-
-    public void setTableManager(TableManager tm) {
-        tableManager = tm;
-    }
-
 
 }

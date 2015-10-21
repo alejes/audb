@@ -5,9 +5,8 @@ import audb.table.Table;
 import audb.table.TableManager;
 
 
-public class InsertCommand implements Command {
+public class InsertCommand extends Command {
 
-    private TableManager tableManager = null;
     private String tableName;
     private Object[] data;
 
@@ -29,10 +28,6 @@ public class InsertCommand implements Command {
 		table.addRecord(data);
 
     	return null;
-    }
-
-    public void setTableManager(TableManager tm) {
-        tableManager = tm;
     }
 
 }

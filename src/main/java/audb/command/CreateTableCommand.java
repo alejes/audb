@@ -5,9 +5,8 @@ import audb.result.Result;
 import audb.table.TableManager;
 
 
-public class CreateTableCommand implements Command {
+public class CreateTableCommand extends Command {
 
-    private TableManager tableManager = null;
     private String tableName;
     private Type[] types;
     private String[] names;
@@ -24,10 +23,6 @@ public class CreateTableCommand implements Command {
 		tableManager.createTable(tableName, types, names);				
 
     	return null;
-    }
-
-    public void setTableManager(TableManager tm) {
-        tableManager = tm;
     }
 
 }
