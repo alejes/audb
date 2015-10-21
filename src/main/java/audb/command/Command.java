@@ -6,11 +6,11 @@ import audb.table.TableManager;
 
 public abstract class Command {
 
-    protected TableManager tableManager = null;
+    protected static TableManager tableManager = null;
 
     public abstract Result exec() throws Exception;
 
-    public void setTableManager(TableManager tm) {
+    public static void setTableManager(TableManager tm) {
         tableManager = tm;
     }
 

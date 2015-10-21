@@ -19,6 +19,7 @@ public class Main {
 
         Parser parser = new Parser();
         TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
 
         try {
             Command command;
@@ -26,7 +27,6 @@ public class Main {
             String[] names = new String[]{"number", "text"};
 
             command = new CreateTableCommand("table1", types, names);
-            command.setTableManager(tableManager);
             command.exec();
 
             for(int i = 0; i < 20; i++) {
@@ -35,7 +35,6 @@ public class Main {
                 Object arr[] = new Object[]{s1, s2};
 
                 command = new InsertCommand("table1", arr);
-                command.setTableManager(tableManager);
                 command.exec();
             }
             
@@ -45,7 +44,6 @@ public class Main {
 
 
                 command = parser.getCommand(s);
-                command.setTableManager(tableManager);
                 Result res = command.exec();
 
                 while(res != null && res.hasNext()) {
