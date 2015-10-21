@@ -10,8 +10,6 @@ import audb.type.Type;
 
 public class FullScanResult implements Result {
 
-	public static final int COUNT_OF_RECORDS = Table.COUNT_OF_RECORDS;
-
 	private PageCache pageCache;
     private PageManager pageManager;
 	private Type[] types;
@@ -40,7 +38,7 @@ public class FullScanResult implements Result {
 
         if(pfs.hasNext()) {
             page = pfs.getNext();
-            countOfRecords = page.readLong(COUNT_OF_RECORDS);
+            countOfRecords = page.readLong(Table.COUNT_OF_RECORDS);
         }
 
         if(countOfRecords > 0)
@@ -55,7 +53,7 @@ public class FullScanResult implements Result {
             offset = 0;
             if(pfs.hasNext()) {
                 page = pfs.getNext();
-                countOfRecords = page.readLong(COUNT_OF_RECORDS);
+                countOfRecords = page.readLong(Table.COUNT_OF_RECORDS);
             } else {
                 page = null;
                 countOfRecords = 0;
@@ -92,5 +90,6 @@ public class FullScanResult implements Result {
     }
 
     public void close() {
+        pfs.close();
     }
 }

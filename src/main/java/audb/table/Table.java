@@ -14,9 +14,7 @@ public class Table {
     private PageManager pageManager;
 
     public static final int TYPES_INFO       = 20;
-    
-    public static final int PAGE_SIZE        = PageManager.PAGE_SIZE;
-    
+        
     public static final long INFO_PAGE       = 0;
     public static final int COUNT_OF_RECORDS = PageManager.PAGE_SIZE - Long.BYTES;
     public static final int NEXT_PAGE        = PageManager.PAGE_SIZE - 2 * Long.BYTES;
@@ -27,6 +25,7 @@ public class Table {
     public static final int LAST_EMPTY       = PageManager.PAGE_SIZE - 3 * Long.BYTES;
     public static final int FIRST_FULL       = PageManager.PAGE_SIZE - 4 * Long.BYTES;
     public static final int LAST_FULL        = PageManager.PAGE_SIZE - 5 * Long.BYTES;
+    
     public static final long EMPTY_END       = -1;
     public static final long FULL_END        = -2;    
 

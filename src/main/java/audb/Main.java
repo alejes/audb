@@ -28,7 +28,7 @@ public class Main {
             command = new CreateTableCommand("table1", types, names);
             command.exec();
 
-            for(int i = 0; i < 21; i++) {
+            for(int i = 0; i < 15; i++) {
                 String s1 = String.format("%03d", i);;
                 String s2 = "some_text";
                 Object arr[] = new Object[]{s1, s2};
