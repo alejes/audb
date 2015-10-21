@@ -58,8 +58,8 @@ public class Page {
         return bytesToLong(bytes);
     }
 
-    public void writeLong(int offset, long pageNum) {
-        byte[] bytes = longToBytes(pageNum);
+    public void writeLong(int offset, long value) {
+        byte[] bytes = longToBytes(value);
         System.arraycopy(bytes, 0, data, offset, bytes.length);
     }
 

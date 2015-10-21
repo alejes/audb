@@ -50,9 +50,6 @@ public class Main {
                     }
                     System.out.println();
                 }
-
-                res.close();
-
             }
             Command.tableManager.close();
         } catch(Exception e) {

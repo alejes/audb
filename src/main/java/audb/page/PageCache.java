@@ -1,15 +1,12 @@
 package audb.page;
 
 import java.util.HashMap;
-import java.util.TreeSet;
-
 
 public class PageCache {
     private boolean DEBUG = false;
     private int MAX_SIZE = 100;
+
     private long timer;
-    private TreeSet<Element> treeSetFreq;
-    private TreeSet<Long> treeSetPage;
     private HashMap<String, Element> hashMap;
 
     public PageCache() {

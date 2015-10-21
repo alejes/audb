@@ -11,25 +11,36 @@ import audb.type.TypeUtil;
 
 public class Table {
 
-	public PageCache pageCache;
+	private PageCache pageCache;
     private PageManager pageManager;
 
 	public static final int TYPES_INFO = 20;
 
 	public static final int PAGE_SIZE = PageManager.PAGE_SIZE;
-    public static final int INFO_SIZE = 32;
 
-	public static final long INFO_PAGE = 0;
+    public static final long INFO_PAGE = 0;
+    public static final int INFO_SIZE = 32;
     public static final int COUNT_OF_RECORDS = PAGE_SIZE - 8;
     public static final int NEXT_PAGE = PAGE_SIZE - 16;
     public static final int PREV_PAGE = PAGE_SIZE - 24;
 
+    public static final int FIRST_EMPTY = PAGE_SIZE - 16;
+    public static final int LAST_EMPTY = PAGE_SIZE - 24;
+    public static final int FIRST_FULL = PAGE_SIZE - 32;
+    public static final int LAST_FULL = PAGE_SIZE - 40;
+    public static final long EMPTY_END = -1;
+    public static final long FULL_END = -2;    
+
 	private String[] names;
 	private Type[] types;
+
 	private int recordSize;
 	private int maxRecords;
+
 	private long nextEmptyPage;
 	private long nextFullPage;
+    private long lastEmptyPage;
+    private long lastFullPage;
 	private long countOfPages;
 
     public Table(PageManager pm, PageCache pc) {
@@ -68,15 +79,10 @@ public class Table {
 			this.types[i] = TypeUtil.makeType(type);
 		}
 
-		nextEmptyPage = page.readLong(NEXT_PAGE);
-		nextFullPage = page.readLong(PREV_PAGE);
-		countOfPages = page.readLong(COUNT_OF_RECORDS);
-
-
 		page.write();
 		page.unpin();
 
-		calculateRecordInfo();
+        calculateRecordInfo();
 	}
 
 	public void create(Type[] types, String[] names) {
@@ -94,12 +100,11 @@ public class Table {
 			ptr += name.length;
 		}
 
-		countOfPages = 0l;
-		nextEmptyPage = 0l;
-		nextFullPage = 0l;
-		page.writeLong(COUNT_OF_RECORDS, countOfPages);
-		page.writeLong(NEXT_PAGE, nextEmptyPage);
-		page.writeLong(PREV_PAGE, nextFullPage);
+		page.writeLong(COUNT_OF_RECORDS, 0l);
+		page.writeLong(FIRST_EMPTY, EMPTY_END);
+		page.writeLong(FIRST_FULL, FULL_END);
+        page.writeLong(LAST_EMPTY, EMPTY_END);
+        page.writeLong(LAST_FULL, FULL_END);
 
 		addPageEmpty(getNewPage());
 
@@ -116,36 +121,41 @@ public class Table {
 	private void addPageEmpty(long pageNum) {
 		refresh();
 		Page page = pageCache.getPage(pageManager, INFO_PAGE);
-		long nextPage = page.readLong(NEXT_PAGE);
-		page.writeLong(NEXT_PAGE, pageNum);
+		long nextPage = page.readLong(FIRST_EMPTY);
+        if(nextPage == EMPTY_END)
+            page.writeLong(LAST_EMPTY, pageNum);
+		page.writeLong(FIRST_EMPTY, pageNum);
 		page.write();
 
 		page = pageCache.getPage(pageManager, pageNum);
-		page.writeLong(PREV_PAGE, INFO_PAGE);
+		page.writeLong(PREV_PAGE, EMPTY_END);
 		page.writeLong(NEXT_PAGE, nextPage);
 		page.write();
 
-		if(nextPage != INFO_PAGE) {
+		if(nextPage != EMPTY_END) {
 			page = pageCache.getPage(pageManager, nextPage);
 			page.writeLong(PREV_PAGE, pageNum);
+            page.write();
 		}
 	}
 
 	private void addPageFull(long pageNum) {
 		refresh();
 		Page page = pageCache.getPage(pageManager, INFO_PAGE);
-		long nextPage = page.readLong(PREV_PAGE);
-		page.writeLong(PREV_PAGE, pageNum);
-		page.write();
+		long nextPage = page.readLong(LAST_FULL);
+        if(nextPage == FULL_END)
+            page.writeLong(FIRST_FULL, pageNum);
+        page.writeLong(LAST_FULL, pageNum);
+        page.write();
 
 		page = pageCache.getPage(pageManager, pageNum);
-		page.writeLong(PREV_PAGE, INFO_PAGE);
-		page.writeLong(NEXT_PAGE, nextPage);
+		page.writeLong(PREV_PAGE, nextPage);
+		page.writeLong(NEXT_PAGE, FULL_END);
 		page.write();
 
-		if(nextPage != INFO_PAGE) {
+		if(nextPage != FULL_END) {
 			page = pageCache.getPage(pageManager, nextPage);
-			page.writeLong(PREV_PAGE, pageNum);
+			page.writeLong(NEXT_PAGE, pageNum);
 			page.write();
 		}
 	}
@@ -157,15 +167,33 @@ public class Table {
 		long prevPage = page.readLong(PREV_PAGE);
 		long nextPage = page.readLong(NEXT_PAGE);
 
-		page = pageCache.getPage(pageManager, prevPage);
-		page.writeLong(NEXT_PAGE, nextPage);
-		page.write();
+        if(prevPage != EMPTY_END && prevPage != FULL_END) {
+            page = pageCache.getPage(pageManager, prevPage);
+            page.writeLong(NEXT_PAGE, prevPage);
+            page.write();
+        } else if(prevPage == EMPTY_END) {
+            page = pageCache.getPage(pageManager, INFO_PAGE);
+            page.writeLong(FIRST_EMPTY, nextPage);
+            page.write();
+        } else {
+            page = pageCache.getPage(pageManager, INFO_PAGE);
+            page.writeLong(FIRST_FULL, nextPage);
+            page.write();
+        }
 
-		if(nextPage != INFO_PAGE) {
-			page = pageCache.getPage(pageManager, nextPage);
-			page.writeLong(PREV_PAGE, prevPage);
-			page.write();
-		}
+        if(nextPage != EMPTY_END && nextPage != FULL_END) {
+            page = pageCache.getPage(pageManager, nextPage);
+            page.writeLong(PREV_PAGE, prevPage);
+            page.write();
+        } else if(nextPage == EMPTY_END) {
+            page = pageCache.getPage(pageManager, INFO_PAGE);
+            page.writeLong(LAST_EMPTY, prevPage);
+            page.write();
+        } else {
+            page = pageCache.getPage(pageManager, INFO_PAGE);
+            page.writeLong(LAST_FULL, prevPage);
+            page.write();
+        }
 	}
 
 	private long getNewPage() {
@@ -236,20 +264,22 @@ public class Table {
     	page.write();
 
     	if(countOfRecords >= maxRecords) {
-    		long curPage = nextEmptyPage;
+            long curPage = nextEmptyPage;
     		removePage(curPage);
     		addPageFull(curPage);
     		refresh();
-    		if(nextEmptyPage == INFO_PAGE)
+    		if(nextEmptyPage == EMPTY_END)
     			addPageEmpty(getNewPage());
     	}
     }
 
     private void refresh() {
 		Page page = pageCache.getPage(pageManager, INFO_PAGE);
-		countOfPages = page.readLong(COUNT_OF_RECORDS);
-		nextEmptyPage = page.readLong(NEXT_PAGE);
-		nextFullPage = page.readLong(PREV_PAGE);
+		nextEmptyPage = page.readLong(FIRST_EMPTY);
+        nextFullPage = page.readLong(FIRST_FULL);
+        lastEmptyPage = page.readLong(LAST_EMPTY);
+        lastFullPage = page.readLong(LAST_FULL);
+        countOfPages = page.readLong(COUNT_OF_RECORDS);
     }
 
     public void close() {
