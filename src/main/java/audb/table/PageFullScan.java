@@ -3,19 +3,18 @@ package audb.table;
 import audb.page.Page;
 import audb.page.PageCache;
 import audb.page.PageManager;
+import audb.page.PageStructure;
 import audb.table.Table;
 import audb.type.Type;
 
-import java.io.Closeable;
 
-
-public class PageFullScan implements Closeable {
+public class PageFullScan {
 
     private PageCache pageCache;
-    private PageManager pageManager;
+    private PageStructure pageStructure;
 
     long firstFullPage;
-    long firstEmptyPage;
+    long currentPage;
 
     private Page curPage = null;
     private long nextPage;
@@ -24,21 +23,19 @@ public class PageFullScan implements Closeable {
 
 
     public PageFullScan(Table table) {
-        this.pageCache = table.getPageCache();
-        this.pageManager = table.getPageManager();
+        this.pageStructure = table.getPageStructure();
         
-        curPage = pageCache.getPage(pageManager, Table.INFO_PAGE);
+        curPage = pageStructure.getPage(Table.INFO_PAGE);
         curPage.pin();
         isPagePinned = true;
 
         firstFullPage = curPage.readLong(Table.FIRST_FULL);
-        firstEmptyPage = curPage.readLong(Table.FIRST_EMPTY);
+        currentPage = curPage.readLong(Table.CURRENT_PAGE);
 
-        nextPage = Table.INFO_PAGE;
+        nextPage = currentPage;
         if(firstFullPage != Table.FULL_END)
             nextPage = firstFullPage;
-        else if(firstEmptyPage != Table.EMPTY_END)
-            nextPage = firstEmptyPage;
+    
     }
 
     public Page getNext() {
@@ -46,14 +43,17 @@ public class PageFullScan implements Closeable {
             return null;
 
         curPage.unpin();
-        curPage = pageCache.getPage(pageManager, nextPage);
+        curPage = pageStructure.getPage(nextPage);
         isPagePinned = true;
         curPage.pin();
-        nextPage = curPage.readLong(Table.NEXT_PAGE);
-        if(nextPage == Table.FULL_END)
-            nextPage = firstEmptyPage;
-        if(nextPage == Table.EMPTY_END)
+
+        if(nextPage == currentPage)
             nextPage = Table.INFO_PAGE;
+        else
+            nextPage = curPage.readLong(Table.NEXT_PAGE);
+
+        if(nextPage == Table.FULL_END)
+            nextPage = currentPage;
 
         return curPage;
     }

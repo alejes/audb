@@ -1,8 +1,7 @@
 package audb.result;
 
 import audb.page.Page;
-import audb.page.PageCache;
-import audb.page.PageManager;
+import audb.page.PageStructure;
 import audb.table.Table;
 import audb.table.PageFullScan;
 import audb.type.Type;
@@ -10,8 +9,7 @@ import audb.type.Type;
 
 public class FullScanResult implements Result {
 
-	private PageCache pageCache;
-    private PageManager pageManager;
+    private PageStructure pageStructure;
 	private Type[] types;
 	private String[] names;
 	private int recordSize;
@@ -25,8 +23,7 @@ public class FullScanResult implements Result {
     long countOfRecords;
 
 	public FullScanResult(Table table) {
-		pageCache = table.getPageCache();
-        pageManager = table.getPageManager();
+        pageStructure = table.getPageStructure();
 		types = table.getTypes();
 		names = table.getNames();
 		recordSize = table.getRecordSize();
@@ -49,7 +46,7 @@ public class FullScanResult implements Result {
     public Object[] getNext() {
 
         Object[] tmp = next;
-        if(offset == countOfRecords) {
+        if(offset >= countOfRecords) {
             offset = 0;
             if(pfs.hasNext()) {
                 page = pfs.getNext();

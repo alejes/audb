@@ -1,8 +1,11 @@
 package audb.page;
 
 import java.util.HashMap;
+import java.io.IOException;
+
 
 public class PageCache {
+
     private boolean DEBUG = false;
     private int MAX_SIZE = 100;
 
@@ -55,13 +58,14 @@ public class PageCache {
         return el.page;
     }
 
-    public void close() {
+    public void flush() {
         for(Element el: hashMap.values())
             if(el.page.isDirty()) {
                 if(DEBUG) System.out.println("Page closed: " + el.page.getPageNumber());
                 el.page.flush();
             }
         hashMap.clear();
+        System.err.println("Cache flushed.");
     }
 
     private void removePage(Page page) { 
@@ -70,7 +74,6 @@ public class PageCache {
             page.flush();
         }
         hashMap.remove(page.getPageNumber());
-
     }
 
     private class Element {
