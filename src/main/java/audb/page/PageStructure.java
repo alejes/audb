@@ -6,7 +6,7 @@ import audb.type.MutableLong;
 
 public class PageStructure {
 
-    private static PageCache pageCache = new PageCache();
+    private static PageCache pageCache = PageCache.getInstance();
     private PageManager pageManager;
     
     public static final long INFO_PAGE     = 0;

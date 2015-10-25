@@ -5,16 +5,21 @@ import java.io.IOException;
 
 
 public class PageCache {
-
+	private static final PageCache instance = new PageCache();
+	
     private boolean DEBUG = false;
     private int MAX_SIZE = 100;
 
     private long timer;
     private HashMap<String, Page> hashMap;
 
-    public PageCache() {
+    private PageCache() {
         timer = 0;
         hashMap = new HashMap<String, Page>();
+    }
+    
+    public static PageCache getInstance() {
+    	return instance;
     }
 
     public Page getPage(PageManager pm, long number) {
@@ -55,20 +60,17 @@ public class PageCache {
     }
 
     public void flush() {
-        for(Page page: hashMap.values())
-            if(page.isDirty()) {
-                if(DEBUG) System.out.println("Page closed: " + page.getPageNumber());
-                page.flush();
-            }
+        for(Page page: hashMap.values()) {
+            if(DEBUG) System.out.println("Page closed: " + page.getPageNumber());
+            page.flush();
+        }
         hashMap.clear();
         System.err.println("Cache flushed.");
     }
 
     private void removePage(Page page) { 
-        if(page.isDirty()) {
-            if(DEBUG) System.out.println("Page closed: " + page.getPageNumber());
-            page.flush();
-        }
+        if(DEBUG) System.out.println("Page closed: " + page.getPageNumber());
+        page.flush();
         hashMap.remove(page.getPageNumber());
     }
 
