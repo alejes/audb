@@ -17,7 +17,7 @@ public class PageFullScan {
     long currentPageNumber;
 
     private Page curPage = null;
-    private long nextPage;
+    private long nextPageNumber;
 
     private boolean isPagePinned;
 
@@ -32,38 +32,38 @@ public class PageFullScan {
         firstFullPageNumber = curPage.readLong(Table.FIRST_FULL);
         currentPageNumber = curPage.readLong(Table.CURRENT_PAGE);
 
-        nextPage = currentPageNumber;
+        nextPageNumber = currentPageNumber;
         if(firstFullPageNumber != Table.FULL_END)
-            nextPage = firstFullPageNumber;
+            nextPageNumber = firstFullPageNumber;
     
     }
 
     public Page getNext() {
-        if(nextPage == Table.INFO_PAGE)
+        if(nextPageNumber == Table.INFO_PAGE)
             return null;
 
         curPage.unpin();
-        curPage = pageStructure.getPage(nextPage);
+        curPage = pageStructure.getPage(nextPageNumber);
         isPagePinned = true;
         curPage.pin();
 
-        if(nextPage == currentPageNumber)
-            nextPage = Table.INFO_PAGE;
+        if(nextPageNumber == currentPageNumber)
+            nextPageNumber = Table.INFO_PAGE;
         else
-            nextPage = curPage.readLong(Table.NEXT_PAGE);
+            nextPageNumber = curPage.readLong(Table.NEXT_PAGE);
 
-        if(nextPage == Table.FULL_END)
-            nextPage = currentPageNumber;
+        if(nextPageNumber == Table.FULL_END)
+            nextPageNumber = currentPageNumber;
 
         return curPage;
     }
 
     public boolean hasNext() {
-        if(nextPage == Table.INFO_PAGE && isPagePinned) {
+        if(nextPageNumber == Table.INFO_PAGE && isPagePinned) {
             isPagePinned = false;
             curPage.unpin();
         }
-        return nextPage != Table.INFO_PAGE;
+        return nextPageNumber != Table.INFO_PAGE;
     }
 
     public void close() {
