@@ -11,7 +11,7 @@ public class Page {
 
     public byte[] data;
     private PageManager pageManager;
-
+    private long lastAccessTime = -1;
 
     public Page(PageManager pm, byte[] arr, long number) {
         data = arr;
@@ -78,5 +78,13 @@ public class Page {
         buffer.flip(); 
         return buffer.getLong();
     }
+
+	public long getLastAccessTime() {
+		return lastAccessTime;
+	}
+
+	public void setLastAccessTime(long lastAccessTime) {
+		this.lastAccessTime = lastAccessTime;
+	}
 
 }

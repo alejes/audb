@@ -10,59 +10,55 @@ public class PageCache {
     private int MAX_SIZE = 100;
 
     private long timer;
-    private HashMap<String, Element> hashMap;
+    private HashMap<String, Page> hashMap;
 
     public PageCache() {
         timer = 0;
-        hashMap = new HashMap<String, Element>();
+        hashMap = new HashMap<String, Page>();
     }
 
     public Page getPage(PageManager pm, long number) {
-        Element el;
+        Page page = null;
         String key = pm.getFileName() + "/" + number;
         if(hashMap.containsKey(key)) {
-            el = hashMap.get(key);
-            el.time = timer;
+            page = hashMap.get(key);
         } else {
             if(hashMap.size() >= MAX_SIZE) {
                 Page minPage = null;
                 Page somePage = null;
                 long minTime = Long.MAX_VALUE;
                 for(String name: hashMap.keySet()) {
-                    el = hashMap.get(name);
-                    somePage = el.page;
-                    if(el.time < minTime && el.page.isUnpinned()) {
-                        minTime = el.time;
-                        minPage = el.page;
+                    page = hashMap.get(name);
+                    if(page.getLastAccessTime() < minTime && page.isUnpinned()) {
+                        minTime = page.getLastAccessTime();
+                        minPage = page;
                     }
                 }
                 if(minTime == Long.MAX_VALUE)
                     minPage = somePage;
                 removePage(minPage);
             }
-            el = new Element(timer, pm.readPage(number)); 
-            hashMap.put(key, el);
+            hashMap.put(key, page);
         }
-
-        timer += 1;
-       
+        page.setLastAccessTime(timer++);
+        
         if(DEBUG) {
             for (String name: hashMap.keySet()){
                 String keyName = name.toString();
-                Long value = hashMap.get(name).time;  
+                Long value = hashMap.get(name).getLastAccessTime();  
                 System.out.println(keyName + " " + value);  
             } 
             System.out.println();
         }
 
-        return el.page;
+        return page;
     }
 
     public void flush() {
-        for(Element el: hashMap.values())
-            if(el.page.isDirty()) {
-                if(DEBUG) System.out.println("Page closed: " + el.page.getPageNumber());
-                el.page.flush();
+        for(Page page: hashMap.values())
+            if(page.isDirty()) {
+                if(DEBUG) System.out.println("Page closed: " + page.getPageNumber());
+                page.flush();
             }
         hashMap.clear();
         System.err.println("Cache flushed.");
@@ -75,15 +71,5 @@ public class PageCache {
         }
         hashMap.remove(page.getPageNumber());
     }
-
-    private class Element {
-        public long time;
-        public Page page;
-        public Element(long time, Page page) {
-            this.time = time;
-            this.page = page;
-        }
-    }
-
 
 }
