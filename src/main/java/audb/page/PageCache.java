@@ -33,16 +33,17 @@ public class PageCache {
                 Page somePage = null;
                 long minTime = Long.MAX_VALUE;
                 for(String name: hashMap.keySet()) {
-                    page = hashMap.get(name);
-                    if(page.getLastAccessTime() < minTime && page.isUnpinned()) {
-                        minTime = page.getLastAccessTime();
-                        minPage = page;
+                    somePage = hashMap.get(name);
+                    if(somePage.getLastAccessTime() < minTime && somePage.isUnpinned()) {
+                        minTime = somePage.getLastAccessTime();
+                        minPage = somePage;
                     }
                 }
                 if(minTime == Long.MAX_VALUE)
                     minPage = somePage;
                 removePage(minPage);
             }
+            page = pm.readPage(number);
             hashMap.put(key, page);
         }
         page.setLastAccessTime(timer++);

@@ -5,6 +5,10 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import audb.page.Page;
 import audb.page.PageCache;
+import audb.table.Table;
+import audb.table.TableManager;
+import audb.type.Type;
+import audb.type.VarcharType;
 
 /**
  * Unit test for simple App.
@@ -41,19 +45,20 @@ public class AppTest
     public void testHundreadNumbers() 
     {
         try {
-            PageCache pc = new PageCache("db/tst");
-            Page p = pc.getPage(1);
-            for(byte i = 0; i < 100; i++)
-                p.data[i] = i;
-            p.write();
-            pc.close();
-
-            pc = new PageCache("db/tst");
-            p = pc.getPage(1);
-            for (byte i = 0; i < 100; i++)
-                assertEquals(i, p.data[i]);
-            pc.close();
-
+            TableManager tableManager = new TableManager();
+            String tableName = "dummy_table";
+            int columnsNumber = 3;
+            
+            Type types[] = new Type[columnsNumber];
+            String names[] = new String[columnsNumber];
+            
+            for (int i = 0; i < columnsNumber; ++i) {
+            	types[i] = new VarcharType(10);
+            	names[i] = "column" + Integer.toString(i);
+            }
+            tableManager.createTable(tableName, types, names);
+        	PageCache pc = PageCache.getInstance();
+            
         } catch(Exception e) {
             assertTrue(false);
         }
