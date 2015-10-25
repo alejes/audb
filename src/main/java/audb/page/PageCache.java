@@ -21,7 +21,7 @@ public class PageCache {
         Element el;
         String key = pm.getFileName() + "/" + number;
         if(hashMap.containsKey(key)) {
-            el = hashMap.remove(key);
+            el = hashMap.get(key);
             el.time = timer;
         } else {
             if(hashMap.size() >= MAX_SIZE) {
@@ -40,12 +40,12 @@ public class PageCache {
                     minPage = somePage;
                 removePage(minPage);
             }
-            el = new Element(timer, pm.readPage(number));
+            el = new Element(timer, pm.readPage(number)); 
+            hashMap.put(key, el);
         }
 
         timer += 1;
-        hashMap.put(key, el);
-
+       
         if(DEBUG) {
             for (String name: hashMap.keySet()){
                 String keyName = name.toString();
