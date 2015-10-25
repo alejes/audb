@@ -13,8 +13,8 @@ public class PageFullScan {
     private PageCache pageCache;
     private PageStructure pageStructure;
 
-    long firstFullPage;
-    long currentPage;
+    long firstFullPageNumber;
+    long currentPageNumber;
 
     private Page curPage = null;
     private long nextPage;
@@ -29,12 +29,12 @@ public class PageFullScan {
         curPage.pin();
         isPagePinned = true;
 
-        firstFullPage = curPage.readLong(Table.FIRST_FULL);
-        currentPage = curPage.readLong(Table.CURRENT_PAGE);
+        firstFullPageNumber = curPage.readLong(Table.FIRST_FULL);
+        currentPageNumber = curPage.readLong(Table.CURRENT_PAGE);
 
-        nextPage = currentPage;
-        if(firstFullPage != Table.FULL_END)
-            nextPage = firstFullPage;
+        nextPage = currentPageNumber;
+        if(firstFullPageNumber != Table.FULL_END)
+            nextPage = firstFullPageNumber;
     
     }
 
@@ -47,13 +47,13 @@ public class PageFullScan {
         isPagePinned = true;
         curPage.pin();
 
-        if(nextPage == currentPage)
+        if(nextPage == currentPageNumber)
             nextPage = Table.INFO_PAGE;
         else
             nextPage = curPage.readLong(Table.NEXT_PAGE);
 
         if(nextPage == Table.FULL_END)
-            nextPage = currentPage;
+            nextPage = currentPageNumber;
 
         return curPage;
     }
