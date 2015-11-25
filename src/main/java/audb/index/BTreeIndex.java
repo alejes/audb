@@ -23,6 +23,9 @@ public class BTreeIndex extends Index {
     	
     }
 
+    public void add(Object[] data) {
+    	
+    }
 
     public boolean canResolve(String[] columnNames) {
         return false;

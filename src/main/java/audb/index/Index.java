@@ -28,6 +28,8 @@ public abstract class Index {
 
     public abstract void add(TableElement[] data);
 
+    public abstract void add(Object[] data);
+    
     public abstract boolean canResolve(String[] names);
 
     public abstract Table find(String columnNames[], Constraint[] constraints);
