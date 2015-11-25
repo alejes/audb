@@ -13,16 +13,10 @@ public abstract class Type {
     public final static byte DOUBLE = 101;
 
     public static Type makeType(byte id) throws Exception {
-        Type type = null;
-        if(id == INT) {
+        if(id >= 100 || id <= 0) {
             throw new Exception("Wrong type.");
-        } else if(id == DOUBLE) {
-            throw new Exception("Wrong type.");
-        } else if(id < 100 && id > 0) {
-            type = new VarcharType(id);
-        } else {
-            throw new Exception("Wrong type.");
-        }
-        return type;
+        } 
+        
+        return new VarcharType(id);
     }
 }

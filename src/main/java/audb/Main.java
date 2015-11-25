@@ -12,6 +12,7 @@ import audb.parser.Parser;
 import audb.table.Table;
 import audb.table.TableElement;
 import audb.table.TableManager;
+import audb.table.VarcharElement;
 import audb.type.Type;
 import audb.type.VarcharType;
 
@@ -51,8 +52,8 @@ public class Main {
                 
                 for (HashMap<String, TableElement> arr : res) {
                     for (String name : res.getNames()) {
-                        if (arr.get(name).type instanceof VarcharType) {
-                            System.out.print(((String)arr.get(name).value) + " ");
+                        if (arr.get(name) instanceof VarcharElement) {
+                            System.out.print(arr.get(name).toString() + " ");
                         }
 
                     }
