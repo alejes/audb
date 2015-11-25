@@ -1,8 +1,15 @@
 package audb.table;
 
-public class IntegerElement implements TableElement {
+import audb.type.Type;
 
+public class IntegerElement implements TableElement {
+	Type type;
 	final Integer value;
+	
+	public IntegerElement(int value, Type type) {
+		this.value = value;
+		this.type = type;
+	}
 	
 	public IntegerElement(int value) {
 		this.value = value;

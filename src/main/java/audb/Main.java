@@ -26,7 +26,7 @@ public class Main {
 
         try {
             Command command;
-            Type[] types = new Type[]{new VarcharType(3), new VarcharType(9)};
+            Type[] types = new Type[]{new VarcharType((byte)3), new VarcharType((byte)9)};
             String[] names = new String[]{"number", "text"};
 
             command = new CreateTableCommand("table1", types, names);

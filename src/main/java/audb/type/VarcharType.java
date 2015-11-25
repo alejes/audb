@@ -2,12 +2,16 @@ package audb.type;
 
 import java.nio.charset.StandardCharsets;
 
+import audb.table.TableElement;
+import audb.table.VarcharElement;
+
 
 public class VarcharType extends Type {
 
     private int length;
 
-    public VarcharType(int length) throws Exception {
+    public VarcharType(byte length) throws Exception {
+    	super(length);
         if(length >= 100 || length <= 0)
             throw new Exception("VarcharType.java");
         this.length = length;
@@ -28,12 +32,12 @@ public class VarcharType extends Type {
         return bytes;
     }
 
-    public Object fromBytes(byte[] bytes) {
-        return new String(bytes, StandardCharsets.US_ASCII);
-    }
-
     public boolean isValid(Object o) {
         return (o instanceof String && ((String)o).length() == length);
     }
+    
+    public TableElement fromBytes(byte[] data) {
+		return new VarcharElement(new String(data, StandardCharsets.US_ASCII));
+	}
 
 }

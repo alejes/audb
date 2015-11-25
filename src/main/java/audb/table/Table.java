@@ -140,21 +140,6 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		return types;
 	}
 	
-    private Object[] read(long pageNum, int offset) {
-		Page page = pageStructure.getPage(pageNum);
-		page.pin();
-		int ptr = offset * recordSize;
-		Object[] objects = new Object[types.length];
-		for(int i = 0; i < types.length; i++) {
-			byte[] data = new byte[types[i].getSize()];
-			System.arraycopy(page.data, ptr, data, 0, types[i].getSize());
-			objects[i] = types[i].fromBytes(data);
-			ptr += types[i].getSize();
-		}
-		page.unpin();
-        return objects;
-    }
-
     private void write(long pageNum, int offset, Object[] objects) throws Exception {
     	Page page = pageStructure.getPage(pageNum);
 		int ptr = offset * recordSize;

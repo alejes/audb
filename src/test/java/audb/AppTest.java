@@ -56,7 +56,7 @@ public class AppTest
             String names[] = new String[columnsNumber];
             
             for (int i = 0; i < columnsNumber; ++i) {
-            	types[i] = new VarcharType(10);
+            	types[i] = new VarcharType((byte)10);
             	names[i] = "column" + Integer.toString(i);
             }
             tableManager.createTable(tableName, types, names);

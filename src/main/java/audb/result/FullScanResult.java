@@ -7,7 +7,6 @@ import audb.page.Page;
 import audb.page.PageStructure;
 import audb.table.Table;
 import audb.table.TableElement;
-import audb.table.TableElementFactory;
 import audb.table.TableIterator;
 import audb.type.Type;
 
@@ -85,7 +84,7 @@ public class FullScanResult implements Iterator<HashMap<String, TableElement>> {
 		for(int i = 0; i < types.length; i++) {
 			byte[] data = new byte[types[i].getSize()];
 			System.arraycopy(page.data, ptr, data, 0, types[i].getSize());
-			objects.put(names[i], TableElementFactory.makeElement(types[i].getId(), data));
+			objects.put(names[i], types[i].fromBytes(data));
 			ptr += types[i].getSize();
 		}
         return objects;
