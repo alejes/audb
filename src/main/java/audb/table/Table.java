@@ -1,6 +1,7 @@
 package audb.table;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import audb.page.Page;
@@ -12,7 +13,7 @@ import audb.type.Type;
 import audb.type.MutableLong;
 
 
-public class Table implements Iterable<Object[]> {
+public class Table implements Iterable<HashMap<String, TableElement>> {
 
     public static final int TYPES_INFO       = 0;
     
@@ -196,7 +197,7 @@ public class Table implements Iterable<Object[]> {
 
 // ============================================================== //
     
-	public Iterator<Object[]> iterator() {
+	public Iterator<HashMap<String, TableElement>> iterator() {
 		return new FullScanResult(this);
 	}
 
