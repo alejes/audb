@@ -1,6 +1,7 @@
 package audb.table;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import audb.page.Page;
@@ -14,7 +15,7 @@ import audb.index.Index.Order;
 import audb.index.BTreeIndex;
 
 
-public class Table implements Iterable<Object[]> {
+public class Table implements Iterable<HashMap<String, TableElement>> {
 
     public static final int TYPES_INFO       = 0;
     
@@ -143,8 +144,6 @@ public class Table implements Iterable<Object[]> {
 		return types;
 	}
 	
-	
-
     private Object[] read(long pageNum, int offset) {
 		Page page = pageStructure.getPage(pageNum);
 		page.pin();
@@ -212,20 +211,7 @@ public class Table implements Iterable<Object[]> {
         }
     }
     
-    private Object[] read(Page page, int offset) {
-		int ptr = offset * recordSize;
-		Object[] objects = new Object[types.length];
-		for(int i = 0; i < types.length; i++) {
-			byte[] data = new byte[types[i].getSize()];
-			System.arraycopy(page.data, ptr, data, 0, types[i].getSize());
-			objects[i] = types[i].fromBytes(data);
-			ptr += types[i].getSize();
-		}
-        return objects;
-    }
-
-    
-	public Iterator<Object[]> iterator() {
+	public Iterator<HashMap<String, TableElement>> iterator() {
 		return new FullScanResult(this);
 	}
 

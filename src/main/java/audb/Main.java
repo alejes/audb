@@ -2,6 +2,7 @@ package audb;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 
 import audb.command.Command;
 import audb.command.CreateTableCommand;
@@ -9,6 +10,7 @@ import audb.command.InsertCommand;
 import audb.page.PageStructure;
 import audb.parser.Parser;
 import audb.table.Table;
+import audb.table.TableElement;
 import audb.table.TableManager;
 import audb.type.Type;
 import audb.type.VarcharType;
@@ -47,11 +49,12 @@ public class Main {
                 if (null == res)
                 	continue;
                 
-                for (Object[] arr : res) {
-                    for(int i = 0; i < arr.length; i++) {
-                        if(res.getTypes()[i] instanceof VarcharType) {
-                            System.out.print(((String)arr[i]) + " ");
+                for (HashMap<String, TableElement> arr : res) {
+                    for (String name : res.getNames()) {
+                        if (arr.get(name).type instanceof VarcharType) {
+                            System.out.print(((String)arr.get(name).value) + " ");
                         }
+
                     }
                     System.out.println();
                 }

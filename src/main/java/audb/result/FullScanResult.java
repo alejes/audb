@@ -1,25 +1,27 @@
 package audb.result;
 
+import java.util.HashMap;
 import java.util.Iterator;
 
 import audb.page.Page;
 import audb.page.PageStructure;
 import audb.table.Table;
-import audb.table.PageFullScan;
+import audb.table.TableElement;
+import audb.table.TableIterator;
 import audb.type.Type;
 
 
-public class FullScanResult implements Iterator<Object[]> {
+public class FullScanResult implements Iterator<HashMap<String, TableElement>> {
 
     private PageStructure pageStructure;
 	private Type[] types;
 	private String[] names;
 	private int recordSize;
 
-    private PageFullScan pfs;
+    private TableIterator pfs;
 
 
-	private Object[] next;
+	private HashMap<String, TableElement> next;
     private Page page;
     int offset;
     long countOfRecords;
@@ -30,7 +32,7 @@ public class FullScanResult implements Iterator<Object[]> {
 		names = table.getNames();
 		recordSize = table.getRecordSize();
 
-        pfs = new PageFullScan(table);
+        pfs = new TableIterator(table);
 		offset = 0;
         next = null;
         countOfRecords = 0;
@@ -45,9 +47,9 @@ public class FullScanResult implements Iterator<Object[]> {
 
 	}
 
-    public Object[] next() {
+    public HashMap<String, TableElement> next() {
 
-        Object[] tmp = next;
+    	HashMap<String, TableElement> tmp = next;
         if(offset >= countOfRecords) {
             offset = 0;
             if(pfs.hasNext()) {
@@ -76,13 +78,13 @@ public class FullScanResult implements Iterator<Object[]> {
     	return types;
     }
 
-    private Object[] read(Page page, int offset) {
+    private HashMap<String, TableElement> read(Page page, int offset) {
 		int ptr = offset * recordSize;
-		Object[] objects = new Object[types.length];
+		HashMap<String, TableElement> objects = new HashMap<String, TableElement>();
 		for(int i = 0; i < types.length; i++) {
 			byte[] data = new byte[types[i].getSize()];
 			System.arraycopy(page.data, ptr, data, 0, types[i].getSize());
-			objects[i] = types[i].fromBytes(data);
+			objects.put(names[i], new TableElement(types[i], types[i].fromBytes(data)));
 			ptr += types[i].getSize();
 		}
         return objects;
