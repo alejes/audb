@@ -16,13 +16,8 @@ public class InsertCommand extends Command {
     public Table exec() throws Exception {
 
     	if(!tableManager.hasTable(tableName))
-			throw new Exception("InsertCommand.java");
+			throw new Exception("No such table.");
 		Table table = tableManager.getTable(tableName);
-		for(int i = 0; i < table.getTypes().length; i++) {
-			if(!table.getTypes()[i].isValid(data[i]))
-				throw new Exception("InsertCommand.java");
-
-		}
 		table.addRecord(data);
 
     	return table;
