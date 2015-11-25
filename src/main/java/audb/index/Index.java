@@ -12,15 +12,20 @@ public abstract class Index {
     }
 
     private PageStructure pageStructure;
+    private long mainPage;
 
-    public Index(PageStructure pageStructure) {
+    public Index(Table table, long mainPage, PageStructure pageStructure) {
         this.pageStructure = pageStructure;
+        this.mainPage = mainPage;
     }
 
-    public abstract void createIndex(Table elements, String[] indexNames,
-        Type[] indexTypes, Order[] orders) throws Exception;
+    public abstract void init() throws Exception;
 
-    public abstract boolean canResolve(String[] names, Type[] types);
+    public abstract void create(String[] names, Order[] orders) throws Exception;
 
-    public abstract Table find(String[] names, Type[] types);
+    public abstract void add(Object[] data);
+
+    public abstract boolean canResolve(String[] names);
+
+    public abstract Table find(String[] names);
 }

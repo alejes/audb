@@ -6,23 +6,28 @@ import audb.table.Table;
 
 public class BTreeIndex extends Index {
 
-    long mainPage;
-
-    public BTreeIndex(long mainPage, PageStructure pageStructure) {
-        super(pageStructure);
-        this.mainPage = mainPage;
+    public BTreeIndex(Table table, long mainPage, PageStructure pageStructure) {
+        super(table, mainPage, pageStructure);
     }
 
-    public void createIndex(Table elements, String[] indexNames,
-        Type[] indexTypes, Order[] orders) throws Exception {
+    public void init() throws Exception {
 
     }
 
-    public boolean canResolve(String[] names, Type[] types) {
+    public void create(String[] names, Order[] orders) throws Exception {
+
+    }
+
+    public void add(Object[] data) {
+
+    }
+
+
+    public boolean canResolve(String[] names) {
         return false;
     }
 
-    public Table find(String[] names, Type[] types) {
+    public Table find(String[] names) {
         return null;
     }
 }

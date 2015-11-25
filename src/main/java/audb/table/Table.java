@@ -3,6 +3,8 @@ package audb.table;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.LinkedList;
 
 import audb.page.Page;
 import audb.page.PageManager;
@@ -35,6 +37,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
     
     private PageStructure pageStructure;
+    private List<Index> indexList;
 
 	private String[] names;
 	private Type[] types;
@@ -51,6 +54,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
     public Table(PageStructure ps) {
         pageStructure = ps;
+        indexList = new LinkedList<Index>();
     }
 
     public PageStructure getPageStructure() {
@@ -81,6 +85,12 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 			this.types[i] = Type.makeType(type);
 		}
 
+        long indexCount = page.readLong(INDEX_COUNT);
+        for (long i = 0; i < indexCount; ++i) {
+            Index index = new BTreeIndex(this, page.readLong(INDEX_COUNT - (int)i), pageStructure);
+            indexList.add(index);
+        }
+
 		page.write();
         calculateRecordInfo();
 	}
@@ -103,7 +113,8 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		page.writeLong(CURRENT_PAGE, 0l);
 		page.writeLong(FIRST_FULL, FULL_END);
         page.writeLong(LAST_FULL, FULL_END);
-		page.write();
+        page.writeLong(INDEX_COUNT, 0l);
+        page.write();
 
         getEmptyPage();
 
@@ -111,6 +122,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
         this.types = new Type[types.length];
         System.arraycopy(names, 0, this.names, 0, names.length);
         System.arraycopy(types, 0, this.types, 0, types.length);
+
 
         calculateRecordInfo();
     }
@@ -181,6 +193,11 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
     }
 
     public void addRecord(Object[] data) throws Exception {
+        for(int i = 0; i < types.length; i++) {
+            if(!types[i].isValid(data[i]))
+                throw new Exception("Not valid data in addRecord.");
+        }
+
         Page page = pageStructure.getPage(INFO_PAGE);
         long currentPage = page.readLong(CURRENT_PAGE);
 
@@ -192,10 +209,13 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
         page.writeLong(COUNT_OF_RECORDS, countOfRecords);
         page.write();
         
-        if(countOfRecords >= maxRecords) {
-            
+        if (countOfRecords >= maxRecords) {
             addFullPage(currentPage);
             getEmptyPage();
+        }
+
+        for (Index index : indexList) {
+            index.add(data);
         }
     }
 
@@ -203,12 +223,17 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
         Order[] orders) throws Exception {
         long emptyPage = pageStructure.getEmptyPage();
         try {
-            Index index = new BTreeIndex(emptyPage, pageStructure);
-            index.createIndex(this, indexNames, indexTypes, orders);
+            Index index = new BTreeIndex(this, emptyPage, pageStructure);
+            index.create(indexNames, orders);
         } catch (Exception e) {
             pageStructure.releasePage(emptyPage);
-            throw new Exception("can't create index");
+            throw e;
         }
+        Page page = pageStructure.getPage(INFO_PAGE);
+        long indexCount = page.readLong(INDEX_COUNT);
+        page.writeLong(INDEX_COUNT, indexCount + 1);
+        page.writeLong(INDEX_COUNT - (int)indexCount, emptyPage);
+
     }
     
 	public Iterator<HashMap<String, TableElement>> iterator() {
