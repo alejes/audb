@@ -1,16 +1,18 @@
 package audb.table;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 
 import audb.page.Page;
 // import audb.page.PageCache;
 import audb.page.PageManager;
 import audb.page.PageStructure;
+import audb.result.FullScanResult;
 import audb.type.Type;
 import audb.type.MutableLong;
 
 
-public class Table {
+public class Table implements Iterable<Object[]> {
 
     public static final int TYPES_INFO       = 0;
     
@@ -136,6 +138,8 @@ public class Table {
 	public Type[] getTypes() {
 		return types;
 	}
+	
+	
 
     private Object[] read(long pageNum, int offset) {
 		Page page = pageStructure.getPage(pageNum);
@@ -191,5 +195,24 @@ public class Table {
             getEmptyPage();
         }
     }
+
+// ============================================================== //
+    
+    private Object[] read(Page page, int offset) {
+		int ptr = offset * recordSize;
+		Object[] objects = new Object[types.length];
+		for(int i = 0; i < types.length; i++) {
+			byte[] data = new byte[types[i].getSize()];
+			System.arraycopy(page.data, ptr, data, 0, types[i].getSize());
+			objects[i] = types[i].fromBytes(data);
+			ptr += types[i].getSize();
+		}
+        return objects;
+    }
+
+    
+	public Iterator<Object[]> iterator() {
+		return new FullScanResult(this);
+	}
 
 }

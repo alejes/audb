@@ -1,8 +1,6 @@
 package audb.command;
 
-import audb.result.Result;
 import audb.table.Table;
-import audb.table.TableManager;
 
 
 public class InsertCommand extends Command {
@@ -15,7 +13,7 @@ public class InsertCommand extends Command {
 		this.data = data;
 	}
 
-    public Result exec() throws Exception {
+    public Table exec() throws Exception {
 
     	if(!tableManager.hasTable(tableName))
 			throw new Exception("InsertCommand.java");
@@ -27,7 +25,7 @@ public class InsertCommand extends Command {
 		}
 		table.addRecord(data);
 
-    	return null;
+    	return table;
     }
 
 }

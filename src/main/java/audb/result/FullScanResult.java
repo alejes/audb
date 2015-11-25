@@ -1,5 +1,7 @@
 package audb.result;
 
+import java.util.Iterator;
+
 import audb.page.Page;
 import audb.page.PageStructure;
 import audb.table.Table;
@@ -7,7 +9,7 @@ import audb.table.PageFullScan;
 import audb.type.Type;
 
 
-public class FullScanResult implements Result {
+public class FullScanResult implements Iterator<Object[]> {
 
     private PageStructure pageStructure;
 	private Type[] types;
@@ -43,7 +45,7 @@ public class FullScanResult implements Result {
 
 	}
 
-    public Object[] getNext() {
+    public Object[] next() {
 
         Object[] tmp = next;
         if(offset >= countOfRecords) {
@@ -89,4 +91,5 @@ public class FullScanResult implements Result {
     public void close() {
         pfs.close();
     }
+
 }

@@ -1,10 +1,6 @@
 package audb.command;
 
-import audb.result.FullScanResult;
-import audb.result.Result;
-import audb.table.PageFullScan;
-import audb.table.TableManager;
-
+import audb.table.Table;
 
 public class SelectCommand extends Command {
 
@@ -14,10 +10,10 @@ public class SelectCommand extends Command {
 		this.tableName = tableName;
 	}
 
-    public Result exec() throws Exception {
+    public Table exec() throws Exception {
         if(!tableManager.hasTable(tableName))
             throw new Exception("InsertCommand.java");
-        return new FullScanResult(tableManager.getTable(tableName));
+        return tableManager.getTable(tableName);
     }
 
 }

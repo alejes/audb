@@ -40,6 +40,9 @@ public class AppTest
     public void testApp()
     {
         assertTrue( true );
+        String a = "aaa";
+        String b = "aab";
+        assertTrue(a.compareTo(b) < 0);
     }
 
     public void testHundreadNumbers() 
