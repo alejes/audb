@@ -1,8 +1,9 @@
 package audb.index;
 
+import audb.command.Constraint;
 import audb.page.PageStructure;
-import audb.type.Type;
 import audb.table.Table;
+import audb.table.TableElement;
 
 public class BTreeIndex extends Index {
 
@@ -18,16 +19,16 @@ public class BTreeIndex extends Index {
 
     }
 
-    public void add(Object[] data) {
-
+    public void add(TableElement[] data) {
+    	
     }
 
 
-    public boolean canResolve(String[] names) {
+    public boolean canResolve(String[] columnNames) {
         return false;
     }
 
-    public Table find(String[] names) {
+    public Table find(String columnNames[], Constraint[] constraints) {
         return null;
     }
 }
