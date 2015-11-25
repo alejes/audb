@@ -5,7 +5,7 @@ import java.util.Iterator;
 import audb.page.Page;
 import audb.page.PageStructure;
 import audb.table.Table;
-import audb.table.PageFullScan;
+import audb.table.TableIterator;
 import audb.type.Type;
 
 
@@ -16,7 +16,7 @@ public class FullScanResult implements Iterator<Object[]> {
 	private String[] names;
 	private int recordSize;
 
-    private PageFullScan pfs;
+    private TableIterator pfs;
 
 
 	private Object[] next;
@@ -30,7 +30,7 @@ public class FullScanResult implements Iterator<Object[]> {
 		names = table.getNames();
 		recordSize = table.getRecordSize();
 
-        pfs = new PageFullScan(table);
+        pfs = new TableIterator(table);
 		offset = 0;
         next = null;
         countOfRecords = 0;
