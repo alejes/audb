@@ -3,11 +3,12 @@ package audb.table;
 import java.nio.charset.StandardCharsets;
 
 import audb.page.Page;
-// import audb.page.PageCache;
 import audb.page.PageManager;
 import audb.page.PageStructure;
 import audb.type.Type;
 import audb.type.MutableLong;
+import audb.index.Index;
+import audb.index.BTreeIndex;
 
 
 public class Table {
@@ -26,6 +27,8 @@ public class Table {
     public static final int COUNT_OF_RECORDS = PageManager.PAGE_SIZE - 3 * Long.BYTES;
     public static final int INFO_SIZE        = 3 * Long.BYTES;
     
+    public static final int INDEX_COUNT      = PageManager.PAGE_SIZE - 4 * Long.BYTES;
+
     
     private PageStructure pageStructure;
 
@@ -189,6 +192,17 @@ public class Table {
             
             addFullPage(currentPage);
             getEmptyPage();
+        }
+    }
+
+    public void addBTreeIndex() throws Exception {
+        long emptyPage = pageStructure.getEmptyPage();
+        try {
+            Index index = new BTreeIndex(emptyPage, pageStructure);
+            index.createIndex();
+        } catch (Exception e) {
+            pageStructure.releasePage(emptyPage);
+            throw new Exception("can't create index");
         }
     }
 
