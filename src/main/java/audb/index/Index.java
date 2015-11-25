@@ -26,9 +26,7 @@ public abstract class Index {
 
     public abstract void create(String[] names, Order[] orders) throws Exception;
 
-    public abstract void add(TableElement[] data);
-
-    public abstract void add(Object[] data);
+    public abstract void add(TableElement[] data, long pageNumber);
     
     public abstract boolean canResolve(String[] names);
 

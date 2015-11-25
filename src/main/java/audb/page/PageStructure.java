@@ -25,14 +25,6 @@ public class PageStructure {
         pageManager = pm;
     }
 
-    public PageManager getPageManager() {
-        return pageManager;
-    }
-
-    public PageCache getPageCache() {
-        return pageCache;
-    }
-
     public void clear() {
         Page page = getPage(INFO_PAGE);
         page.writeLong(COUNT_OF_PAGES, 0l);

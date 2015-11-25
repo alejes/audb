@@ -30,4 +30,5 @@ public abstract class Type {
     }
     
     public abstract TableElement fromBytes(byte[] data);
+    public abstract TableElement fromObject(Object obj);
 }

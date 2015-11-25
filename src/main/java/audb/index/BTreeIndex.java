@@ -19,11 +19,7 @@ public class BTreeIndex extends Index {
 
     }
 
-    public void add(TableElement[] data) {
-    	
-    }
-
-    public void add(Object[] data) {
+    public void add(TableElement[] data, long pageNumber) {
     	
     }
 

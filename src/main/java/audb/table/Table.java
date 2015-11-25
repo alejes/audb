@@ -199,8 +199,13 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
             getEmptyPage();
         }
 
+        TableElement[] newElements = new TableElement[data.length];
+        for (int i = 0; i < data.length; i++) {
+        	newElements[i] = types[i].fromObject(data);
+        }
+        
         for (Index index : indexList) {
-            index.add(data);
+            index.add(newElements, currentPage);
         }
     }
 
