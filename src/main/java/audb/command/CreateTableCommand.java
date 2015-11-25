@@ -1,8 +1,7 @@
 package audb.command;
 
+import audb.table.Table;
 import audb.type.Type;
-import audb.result.Result;
-import audb.table.TableManager;
 
 
 public class CreateTableCommand extends Command {
@@ -17,7 +16,7 @@ public class CreateTableCommand extends Command {
 		this.types = types;
 	}
 
-    public Result exec() throws Exception {
+    public Table exec() throws Exception {
 		if(tableManager.hasTable(tableName))
 			throw new Exception("CreateTableCommand.java");
 		tableManager.createTable(tableName, types, names);				

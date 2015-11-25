@@ -1,8 +1,8 @@
 package audb.index;
 
 import audb.page.PageStructure;
-import audb.result.Result;
 import audb.type.Type;
+import audb.table.Table;
 
 public class BTreeIndex extends Index {
 
@@ -13,7 +13,7 @@ public class BTreeIndex extends Index {
         this.mainPage = mainPage;
     }
 
-    public void createIndex(Result elements, String[] indexNames,
+    public void createIndex(Table elements, String[] indexNames,
         Type[] indexTypes, Order[] orders) throws Exception {
 
     }
@@ -22,7 +22,7 @@ public class BTreeIndex extends Index {
         return false;
     }
 
-    public Result find(String[] names, Type[] types) {
+    public Table find(String[] names, Type[] types) {
         return null;
     }
 }

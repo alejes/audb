@@ -1,8 +1,8 @@
 package audb.index;
 
 import audb.page.PageStructure;
-import audb.result.Result;
 import audb.type.Type;
+import audb.table.Table;
 
 
 public abstract class Index {
@@ -17,10 +17,10 @@ public abstract class Index {
         this.pageStructure = pageStructure;
     }
 
-    public abstract void createIndex(Result elements, String[] indexNames,
+    public abstract void createIndex(Table elements, String[] indexNames,
         Type[] indexTypes, Order[] orders) throws Exception;
 
     public abstract boolean canResolve(String[] names, Type[] types);
 
-    public abstract Result find(String[] names, Type[] types);
+    public abstract Table find(String[] names, Type[] types);
 }

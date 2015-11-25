@@ -1,11 +1,10 @@
 *.jar
 *.class
-*/db/*
+db/
 target/*
 .classpath
 .project
 .settings
+/target/
 audb.sublime-project
 audb.sublime-workspace
-/target
-db*

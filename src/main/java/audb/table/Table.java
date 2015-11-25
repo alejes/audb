@@ -1,17 +1,20 @@
 package audb.table;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 
 import audb.page.Page;
 import audb.page.PageManager;
 import audb.page.PageStructure;
+import audb.result.FullScanResult;
 import audb.type.Type;
 import audb.type.MutableLong;
 import audb.index.Index;
+import audb.index.Index.Order;
 import audb.index.BTreeIndex;
 
 
-public class Table {
+public class Table implements Iterable<Object[]> {
 
     public static final int TYPES_INFO       = 0;
     
@@ -139,6 +142,8 @@ public class Table {
 	public Type[] getTypes() {
 		return types;
 	}
+	
+	
 
     private Object[] read(long pageNum, int offset) {
 		Page page = pageStructure.getPage(pageNum);
@@ -195,15 +200,33 @@ public class Table {
         }
     }
 
-    public void addBTreeIndex() throws Exception {
+    public void addBTreeIndex(String[] indexNames, Type[] indexTypes,
+        Order[] orders) throws Exception {
         long emptyPage = pageStructure.getEmptyPage();
         try {
             Index index = new BTreeIndex(emptyPage, pageStructure);
-            index.createIndex();
+            index.createIndex(this, indexNames, indexTypes, orders);
         } catch (Exception e) {
             pageStructure.releasePage(emptyPage);
             throw new Exception("can't create index");
         }
     }
+    
+    private Object[] read(Page page, int offset) {
+		int ptr = offset * recordSize;
+		Object[] objects = new Object[types.length];
+		for(int i = 0; i < types.length; i++) {
+			byte[] data = new byte[types[i].getSize()];
+			System.arraycopy(page.data, ptr, data, 0, types[i].getSize());
+			objects[i] = types[i].fromBytes(data);
+			ptr += types[i].getSize();
+		}
+        return objects;
+    }
+
+    
+	public Iterator<Object[]> iterator() {
+		return new FullScanResult(this);
+	}
 
 }

@@ -6,16 +6,12 @@ import java.io.InputStreamReader;
 import audb.command.Command;
 import audb.command.CreateTableCommand;
 import audb.command.InsertCommand;
-import audb.page.PageManager;
+import audb.page.PageStructure;
 import audb.parser.Parser;
-import audb.result.Result;
-import audb.table.TableManager;
 import audb.table.Table;
-import audb.table.PageFullScan;
+import audb.table.TableManager;
 import audb.type.Type;
 import audb.type.VarcharType;
-import audb.page.Page;
-import audb.page.PageStructure;
 
 public class Main {
 
@@ -45,13 +41,13 @@ public class Main {
             String s;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while ((s = in.readLine()) != null && s.length() != 0) {
-
-
                 command = parser.getCommand(s);
-                Result res = command.exec();
-
-                while(res != null && res.hasNext()) {
-                    Object[] arr = res.getNext();
+                Table res = command.exec();
+                
+                if (null == res)
+                	continue;
+                
+                for (Object[] arr : res) {
                     for(int i = 0; i < arr.length; i++) {
                         if(res.getTypes()[i] instanceof VarcharType) {
                             System.out.print(((String)arr[i]) + " ");
@@ -59,6 +55,8 @@ public class Main {
                     }
                     System.out.println();
                 }
+                
+                
             }
             PageStructure.flush();
         } catch(Exception e) {
