@@ -24,4 +24,7 @@ public class DoubleElement implements TableElement {
 		return value.compareTo(((IntegerElement)other).value.doubleValue());
 	}
 
+	public int getSizeInBytes() {
+		return Double.BYTES;
+	}
 }

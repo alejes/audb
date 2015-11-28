@@ -37,11 +37,11 @@ public class VarcharType extends Type {
     }
     
     public TableElement fromBytes(byte[] data) {
-		return new VarcharElement(new String(data, StandardCharsets.US_ASCII));
+		return new VarcharElement(new String(data, StandardCharsets.US_ASCII), this);
 	}
     
     public TableElement fromObject(Object obj) {
-    	return new VarcharElement((String)obj);
+    	return new VarcharElement((String)obj, this);
     }
 
 }

@@ -24,4 +24,8 @@ public class IntegerElement implements TableElement {
 		return 0;
 	}
 
+	public int getSizeInBytes() {
+		return Integer.BYTES;
+	}
+
 }

@@ -1,8 +1,6 @@
 package audb.page;
 
-import java.util.concurrent.atomic.AtomicLong;
 import audb.type.MutableLong;
-
 
 public class PageStructure {
 
@@ -65,7 +63,7 @@ public class PageStructure {
         return pageNum;
     }
 
-    private long getCountOfPages() {
+    public long getCountOfPages() {
         Page page = getPage(INFO_PAGE);
         return page.readLong(COUNT_OF_PAGES);
     }

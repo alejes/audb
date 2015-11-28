@@ -46,6 +46,10 @@ public class FullScanResult implements Iterator<HashMap<String, TableElement>> {
             next = read(page, offset);
 
 	}
+	
+	public long getCurrentPageNumber() {
+		return page.getPageNumber();
+	}
 
     public HashMap<String, TableElement> next() {
 

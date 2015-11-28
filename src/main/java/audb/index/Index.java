@@ -12,10 +12,10 @@ public abstract class Index {
         ASC, DESC
     }
 
-    private PageStructure pageStructure;
-    private long mainPage;
-    private String[] columnNames;
-    private Order[] orders;
+    protected PageStructure pageStructure;
+    protected long mainPage;
+    protected String[] columnNames;
+    protected Order[] orders;
     
     public Index(Table table, long mainPage, PageStructure pageStructure) {
         this.pageStructure = pageStructure;

@@ -37,16 +37,14 @@ public class AppTest
     /**
      * Rigourous Test :-)
      */
-    public void testApp()
-    {
+    public void testApp() {
         assertTrue( true );
         String a = "aaa";
         String b = "aab";
         assertTrue(a.compareTo(b) < 0);
     }
 
-    public void testHundreadNumbers() 
-    {
+    public void testHundreadNumbers() {
         try {
             TableManager tableManager = new TableManager();
             String tableName = "dummy_table";
