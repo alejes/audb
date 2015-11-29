@@ -1,6 +1,9 @@
 package audb;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 import audb.index.BTree;
 import junit.framework.Test;
@@ -72,5 +75,38 @@ public class BTreeTest extends TestCase {
         
         for (int i = 0; i < 100; i++)
         	assertEquals(0, t.find(i).size());
+    }
+    
+    public void mixedTest() {
+        BTree<Integer, String> t = new BTree<Integer, String>(5);
+        
+        HashMap<Integer, String> hm = new HashMap<Integer, String>();
+        for (int i = 0; i < 100; i++) {
+        	hm.put(i, Integer.toString(i));
+        }
+        
+        for (int j = 0; j < 10; j++) {
+        	for (int i = 0; i < 100; i++)
+            	t.insert(i, hm.get(i));
+            assertTrue(t.find(67).size() == 1);
+            t.remove(67);
+            assertTrue(t.find(67).size() == 0);
+            for (int i = 0; i < 100; i++)
+            	t.remove(i);
+            for (int i = 0; i < 100; i++)
+            	assertEquals(0, t.find(i).size());
+        }
+        
+        Random r = new Random(System.currentTimeMillis());
+        List<Integer> randomNumbers = new LinkedList<Integer>();
+        for (int i = 0; i < 100; i++) {
+        	int randNum = r.nextInt();
+        	t.insert(randNum, "string");
+        	randomNumbers.add(randNum);
+        }
+        
+        for (Integer i : randomNumbers) {
+        	assertTrue(t.find(i).size() >= 1);
+        }
     }
 }
