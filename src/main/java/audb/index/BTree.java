@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import audb.util.Pair;
+
 abstract class BTreeNode<K extends Comparable<K>, V> {
 	enum RemoveResult {
 		REMOVED_MERGED_LEFT,

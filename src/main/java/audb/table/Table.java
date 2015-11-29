@@ -3,18 +3,18 @@ package audb.table;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
+import audb.index.BTreeIndex;
+import audb.index.Index;
+import audb.index.Index.Order;
 import audb.page.Page;
 import audb.page.PageManager;
 import audb.page.PageStructure;
-import audb.result.FullScanResult;
-import audb.type.Type;
+import audb.result.FullScanIterator;
 import audb.type.MutableLong;
-import audb.index.Index;
-import audb.index.Index.Order;
-import audb.index.BTreeIndex;
+import audb.type.Type;
 
 
 public class Table implements Iterable<HashMap<String, TableElement>> {
@@ -205,7 +205,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
         }
         
         for (Index index : indexList) {
-            index.add(newElements, currentPage);
+            index.add(newElements, (int)currentPage, (int)countOfRecords);
         }
     }
 
@@ -227,7 +227,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
     }
     
 	public Iterator<HashMap<String, TableElement>> iterator() {
-		return new FullScanResult(this);
+		return new FullScanIterator(this);
 	}
 
 }

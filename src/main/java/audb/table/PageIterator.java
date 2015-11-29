@@ -8,7 +8,7 @@ import audb.table.Table;
 import audb.type.Type;
 
 
-public class TableIterator {
+public class PageIterator {
 
     private PageCache pageCache;
     private PageStructure pageStructure;
@@ -22,7 +22,7 @@ public class TableIterator {
     private boolean isPagePinned;
 
 
-    public TableIterator(Table table) {
+    public PageIterator(Table table) {
         this.pageStructure = table.getPageStructure();
         
         curPage = pageStructure.getPage(Table.INFO_PAGE);

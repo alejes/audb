@@ -12,44 +12,12 @@ import audb.command.Constraint.ConstraintType;
 import audb.index.Index.Order;
 import audb.page.PageManager;
 import audb.page.PageStructure;
-import audb.result.FullScanResult;
+import audb.result.FullScanIterator;
 import audb.table.Table;
 import audb.table.TableElement;
+import audb.util.ComparablePair;
+import audb.util.Pair;
 
-class Pair<F, S> {
-	Pair(F f, S s) {
-		first = f;
-		second = s;
-	}
-	
-	public static <F,S> Pair <F,S> newPair(F f, S s) {
-		return new Pair<F,S>(f, s);
-	}
-	
-    public F first;
-    public S second;
-}
-
-class ComparablePair<F extends Comparable<F>, S extends Comparable<S>> 
-	extends Pair<F, S> implements Comparable<ComparablePair<F, S>> {
-	ComparablePair(F f, S s) {
-		super(f, s);
-	}
-
-	public int compareTo(ComparablePair<F, S> other) {
-		int result = first.compareTo(other.first);
-		if (0 != result) {
-			return result;
-		}
-		
-		return second.compareTo(other.second);
-	}
-	
-	public static <F extends Comparable<F>, S extends Comparable<S>> 
-	ComparablePair <F,S> newPair(F f, S s) {
-		return new ComparablePair<F,S>(f, s);
-	}
-}
 
 class IndexKeyInstance implements Comparable<IndexKeyInstance> {
 	final Order[] orders;
@@ -112,7 +80,7 @@ public class BTreeIndex extends Index {
     }
 
     private ComparablePair<IndexKeyInstance, IndexValueInstance> buildIndexPair(
-    		FullScanResult iter, String[] names) {
+    		FullScanIterator iter, String[] names) {
 		HashMap<String, TableElement> row = iter.next();
 		int offset = iter.getCurrentOffset() - 1;
 		int pageNum = (int) iter.getCurrentPageNumber();
@@ -129,7 +97,7 @@ public class BTreeIndex extends Index {
     	
     	ArrayList<ComparablePair<IndexKeyInstance, IndexValueInstance>> data = 
     			new ArrayList<ComparablePair<IndexKeyInstance, IndexValueInstance>>();
-    	FullScanResult iter = (FullScanResult)table.iterator();
+    	FullScanIterator iter = (FullScanIterator)table.iterator();
     	
     	while (iter.hasNext()) {
     		ComparablePair<IndexKeyInstance, IndexValueInstance> newRecord = 
@@ -153,7 +121,7 @@ public class BTreeIndex extends Index {
     
     // in future, will probably use external merge sort
     private void buildExternal(final String[] names, final Order[] orders) { 
-    	FullScanResult iter = (FullScanResult)table.iterator();
+    	FullScanIterator iter = (FullScanIterator)table.iterator();
     	while (iter.hasNext()) {
     		ComparablePair<IndexKeyInstance, IndexValueInstance> newRecord = 
     				buildIndexPair(iter, names);
@@ -165,7 +133,7 @@ public class BTreeIndex extends Index {
     	long size = (pageStructure.getCountOfPages() * PageManager.PAGE_SIZE + 512) / 1024;
     	
     	int maxKeySize = 0;
-    	FullScanResult iter = (FullScanResult)table.iterator();
+    	FullScanIterator iter = (FullScanIterator)table.iterator();
     	HashMap<String, TableElement> row = iter.next();
     	for (String s : names) {
     		TableElement el = row.get(s);
