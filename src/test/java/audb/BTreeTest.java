@@ -77,7 +77,9 @@ public class BTreeTest extends TestCase {
         	assertEquals(0, t.find(i).size());
     }
     
-    public void mixedTest() {
+    public void testMixed() {
+    //	if (4 > 3)
+    //		return;
         BTree<Integer, String> t = new BTree<Integer, String>(5);
         
         HashMap<Integer, String> hm = new HashMap<Integer, String>();
@@ -108,5 +110,9 @@ public class BTreeTest extends TestCase {
         for (Integer i : randomNumbers) {
         	assertTrue(t.find(i).size() >= 1);
         }
+    }
+    
+    public void testFindAll() {
+    	
     }
 }

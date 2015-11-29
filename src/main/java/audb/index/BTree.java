@@ -1,6 +1,7 @@
 package audb.index;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -47,8 +48,8 @@ abstract class BTreeNode<K extends Comparable<K>, V> {
 	public abstract BTreeNode<K, V> remove(K key);
 	
 	protected void splitNode(BTreeNode<K, V> emptyNode) {
-		emptyNode.keys.addAll(keys.subList(fanout / 2, maxKeysNumber));
-		keys.subList(fanout / 2, maxKeysNumber).clear();
+		emptyNode.keys.addAll(keys.subList(minChildrenNumber, fanout));
+		keys.subList(minChildrenNumber - 1, keys.size()).clear();
 	}
 	
 	// TODO binary search is a must here
@@ -68,6 +69,7 @@ abstract class BTreeNode<K extends Comparable<K>, V> {
 	protected abstract int getChildrenNumber();
 	protected abstract K getMaxKey();
 	public abstract List<V> find(K key);
+	public abstract List<V> findAll(K bottomKey, K topKey, List<K> excludeKeys);
 }
 
 class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
@@ -91,50 +93,46 @@ class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 		super.splitNode(emptyNode);
 		BTreeInnerNode<K, V> node = (BTreeInnerNode<K, V>) emptyNode;
 		
-		node.childrenNodes.addAll(childrenNodes.subList(fanout / 2, fanout));
+		try {
+			node.childrenNodes.addAll(childrenNodes.subList(minChildrenNumber, fanout + 1));
+		} catch(Exception e) {
+			e.printStackTrace(System.out);
+			System.out.println("HERE!");
+			System.out.println(childrenNodes.size());
+		}
 		
-		childrenNodes.subList(fanout / 2, fanout).clear();
+		childrenNodes.subList(minChildrenNumber, childrenNodes.size()).clear();
 		
 	}
 	
 	@Override
 	BTreeNode<K, V> insert(Pair<K, V> p) {
-		int insertIndex = findChildIndex(p.first, keys.size());
+		int insertIndex = findChildIndex(p.first, childrenNodes.size() - 1);
 		BTreeNode<K, V> result = null;
 		
-		if (childrenNodes.size() > insertIndex) {
-			result = childrenNodes.get(insertIndex).insert(p);
-		} else {
-			BTreeLeaf<K, V> child = new BTreeLeaf<K, V>(fanout, parent, null);
-			childrenNodes.add(child);
-			result = childrenNodes.get(insertIndex).insert(p);
-		}
-		
+		result = childrenNodes.get(insertIndex).insert(p);
 		
 		if (null == result)
 			return null;
 		
 		BTreeNode<K, V> tmp = childrenNodes.get(insertIndex);
+		K newKey = tmp.getMaxKey();
 		childrenNodes.set(insertIndex, result);
-		
-		K newKey = tmp.keys.get(fanout / 2 - 1);
-		if (keys.size() < maxKeysNumber) {
+		if (insertIndex < keys.size()) {
+			keys.set(insertIndex, result.getMaxKey());
 			keys.add(insertIndex, newKey);
-			childrenNodes.add(insertIndex, tmp);
+		} else {
+			keys.add(newKey);
+		}
+		childrenNodes.add(insertIndex, tmp);
+		
+		if (keys.size() <= maxKeysNumber) {
 			return null;
 		}
 		
 		BTreeInnerNode<K, V> newNode = new BTreeInnerNode<K, V>(fanout, parent);
 		
 		splitNode(newNode);
-		if (insertIndex > fanout / 2 - 1) {
-			newNode.keys.add(insertIndex - fanout / 2, newKey);
-			newNode.childrenNodes.add(insertIndex - fanout / 2, tmp);
-		} else {
-			keys.add(insertIndex, newKey);
-			childrenNodes.add(insertIndex, tmp);
-		}
-		
 		return newNode;
 	}
 
@@ -253,6 +251,12 @@ class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 	protected int getChildrenNumber() {
 		return childrenNodes.size();
 	}
+
+	@Override
+	public List<V> findAll(K bottomKey, K topKey, List<K> excludeKeys) {
+		return childrenNodes.get(findChildIndex(bottomKey, keys.size())).findAll(
+				bottomKey, topKey, excludeKeys);
+	}
 }
 
 class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
@@ -267,31 +271,32 @@ class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 
 	@Override
 	protected void splitNode(audb.index.BTreeNode<K,V> emptyNode) {
-		super.splitNode(emptyNode);
+		emptyNode.keys.addAll(keys.subList(fanout / 2, fanout));
+		keys.subList(fanout / 2, keys.size()).clear();
+	
+		((BTreeLeaf<K, V>)emptyNode).data.addAll(data.subList(fanout / 2, fanout));
 		
-		((BTreeLeaf<K, V>)emptyNode).data.addAll(data.subList(fanout / 2, maxKeysNumber));
-		
-		data.subList(fanout / 2, maxKeysNumber).clear();
+		data.subList(fanout / 2, fanout).clear();
 	}
 	
 	@Override
 	BTreeNode<K, V> insert(Pair<K, V> p) {
-		if (data.size() < maxKeysNumber) {
-			int index = findChildIndex(p.first, data.size());
+		int index = findChildIndex(p.first, data.size());
+		if (index < data.size()) {
 			data.add(index, p.second);
 			keys.add(index, p.first);
+		} else {
+			data.add(p.second);
+			keys.add(p.first);
+		}
+
+		if (data.size() <= maxKeysNumber) {
 			return null;
 		}
 		
 		BTreeLeaf<K, V> newLeaf = new BTreeLeaf<K, V>(fanout, parent, next);
 		next = newLeaf;
 		splitNode(newLeaf);
-		
-		if (keys.get(keys.size() - 1).compareTo(p.first) >= 0) {
-			insert(p);
-		} else {
-			newLeaf.insert(p);
-		}
 		
 		return newLeaf;
 	}
@@ -403,6 +408,58 @@ class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 	protected int getChildrenNumber() {
 		return data.size();
 	}
+
+	@Override
+	public List<V> findAll(K bottomKey, K topKey, List<K> excludeKeys) {
+		int index = findChildIndex(bottomKey, data.size() - 1);
+		List<V> result = new LinkedList<V>();
+		
+		if (index == -1) {
+			return result;
+		}
+		
+		BTreeLeaf<K, V> cur = this;
+		Iterator<K> exIter = excludeKeys.iterator();
+		K exKey = (exIter.hasNext() ? null : exIter.next());
+		while (cur.keys.get(index).compareTo(topKey) <= 0) {
+			
+			boolean skipValue = false;
+			K currentKey = cur.keys.get(index);
+			boolean needCompare = true;
+
+			while (needCompare && null != exKey) {
+				needCompare = false;
+				switch (exKey.compareTo(currentKey)) {
+				case -1:
+					if (exIter.hasNext()) {
+						exKey = exIter.next();
+						needCompare = true;
+					}
+					else {
+						exKey = null;
+					}
+					break;
+				case 1:
+					break;
+				case 0:
+					skipValue = true;
+				}
+			}
+			if (skipValue)
+				continue;
+			
+			result.add(data.get(index));
+			
+			if (++index == data.size()) {
+				index = 0;
+				cur = cur.next;
+				if (null == cur) {
+					return result;
+				}
+			}
+		}
+		return result;
+	}
 	
 }
 
@@ -435,5 +492,9 @@ public class BTree<K extends Comparable<K>, V> {
 	
 	public List<V> find(K key) {
 		return root.find(key);
+	}
+	
+	public List<V> findAll(K bottomKey, K topKey, List<K> excludeKeys) {
+		return root.findAll(bottomKey, topKey, excludeKeys);
 	}
 }

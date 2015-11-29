@@ -1,13 +1,14 @@
 package audb.index;
 
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-
-import javax.print.attribute.standard.MediaSize.Other;
+import java.util.LinkedList;
+import java.util.List;
 
 import audb.command.Constraint;
+import audb.command.Constraint.ConstraintType;
 import audb.index.Index.Order;
 import audb.page.PageManager;
 import audb.page.PageStructure;
@@ -60,7 +61,10 @@ class IndexKeyInstance implements Comparable<IndexKeyInstance> {
 	}
 	
 	public int compareTo(IndexKeyInstance other) {
-		for (int i = 0; i < elements.length; i++) {			
+		for (int i = 0; i < elements.length; i++) {		
+			if (null == elements[i]) {
+				continue;
+			}
 			int result = elements[i].compareTo(other.elements[i]);
 			if (result == 0)
 				continue;
@@ -76,7 +80,9 @@ public class BTreeIndex extends Index {
 	private static final long MAX_RAM_SIZE_MB = 128;
 	private Table table;
 	private BTree<IndexKeyInstance, Integer> btree;
+	private String[] keyColumnsNames;
 	
+	// load from database
     public BTreeIndex(Table table, long mainPage, PageStructure pageStructure) {
         super(table, mainPage, pageStructure);
         this.table = table;
@@ -114,6 +120,8 @@ public class BTreeIndex extends Index {
     	for (Pair<IndexKeyInstance, Integer> p : data) {
     		btree.insert(p);
     	}
+    	
+    	keyColumnsNames = names.clone();
     }
     
     
@@ -155,14 +163,177 @@ public class BTreeIndex extends Index {
     }
 
     public void add(TableElement[] data, long pageNumber) {
-    	
+    	btree.insert(ComparablePair.newPair(new IndexKeyInstance(orders, data), (int)pageNumber));
     }
 
     public boolean canResolve(String[] columnNames) {
+        for (String s : columnNames) {
+        	if (s == keyColumnsNames[0]) {
+        		return true;
+        	}
+        }
+        
         return false;
     }
+    
+    boolean constraintsDefineEmptyset(HashMap<String, Constraint> upperBound, 
+    		HashMap<String, Constraint> bottomBound, HashMap<String, Constraint> exactBound,
+    		HashMap<String, ArrayList<Constraint>> exactNotBound, String columnNames[]) {
+    	// check that set is not evidently empty
+    	for (String s : columnNames) {
+    		if (upperBound.containsKey(s) && bottomBound.containsKey(s)) {
+    			if (!upperBound.get(s).elementSatisfies(bottomBound.get(s).reference)) {
+    				return true;
+    			}
+    			if (!bottomBound.get(s).elementSatisfies(upperBound.get(s).reference)) {
+    				return true;
+    			}
+    		}
+    		
+    		if (upperBound.containsKey(s) && exactBound.containsKey(s)) {
+    			if (!upperBound.get(s).elementSatisfies(exactBound.get(s).reference)) {
+    				return true;
+    			}
+    		}
+    		
+    		if (bottomBound.containsKey(s) && exactBound.containsKey(s)) {
+    			if (!bottomBound.get(s).elementSatisfies(exactBound.get(s).reference)) {
+    				return true;
+    			}
+    		}
+    		
+    		if (exactBound.containsKey(s) && exactNotBound.containsKey(s)) {
+    			TableElement exact = exactBound.get(s).reference;
+    			for (Constraint c : exactNotBound.get(s)) {
+    				if (!c.elementSatisfies(exact)) {
+    					return true;
+    				}
+    			}
+    		}
+    	}
+    	
+    	return false;
+    }
+    
+    private void reduceConstraints(HashMap<String, Constraint> upperBound, 
+    		HashMap<String, Constraint> bottomBound, HashMap<String, Constraint> exactBound,
+    		HashMap<String, ArrayList<Constraint>> exactNotBound, String columnNames[]) {
 
+    	for (String s : columnNames) {
+    		if (exactBound.containsKey(s)) {
+    			upperBound.put(s, new Constraint(ConstraintType.GREATER_OR_EQUAL, exactBound.get(s).reference));
+    			bottomBound.put(s, new Constraint(ConstraintType.GREATER_OR_EQUAL, exactBound.get(s).reference));
+    		} else {
+    			if (bottomBound.containsKey(s)) {
+    				Constraint tmp = bottomBound.get(s);
+    				if (tmp.constraintType == ConstraintType.GREATER) {
+    					exactNotBound.get(s).add(new Constraint(ConstraintType.NOT_EQUAL, tmp.reference));
+    					bottomBound.put(s, new Constraint(ConstraintType.GREATER_OR_EQUAL, tmp.reference));
+    				}
+    			} 
+    			if (upperBound.containsKey(s)) {
+    				Constraint tmp = upperBound.get(s);
+    				if (tmp.constraintType == ConstraintType.LESS) {
+    					exactNotBound.get(s).add(new Constraint(ConstraintType.NOT_EQUAL, tmp.reference));
+    					upperBound.put(s, new Constraint(ConstraintType.LESS_OR_EQUAL, tmp.reference));
+    				}
+    			}
+    		}
+    	}
+    }
+    
+    private IndexKeyInstance buildKeyInstanceByConstraints(HashMap<String, Constraint> bounds) {
+    	TableElement[] elements = new TableElement[keyColumnsNames.length];
+    	for (int i = 0; i < keyColumnsNames.length; i++) {
+    		if (bounds.containsKey(keyColumnsNames[i])) {
+    			elements[i] = bounds.get(keyColumnsNames[i]).reference;
+    		} else {
+    			elements[i] = null;
+    		}
+    	}
+    	
+    	return new IndexKeyInstance(orders, elements);
+    }
+    
+    private List<IndexKeyInstance> buildExcludedKeys(
+    		HashMap<String, ArrayList<Constraint>> exactNotBound) {
+    	List<IndexKeyInstance> excludedKeys = new LinkedList<IndexKeyInstance>();
+    	for (int i = 0; i < keyColumnsNames.length; i++) {
+    		String colName = keyColumnsNames[i];
+    		if (!exactNotBound.containsKey(colName))
+    			continue;
+    		List<Constraint> excludingConstraints = exactNotBound.get(keyColumnsNames[i]);
+    		for (Constraint c : excludingConstraints) {
+    			TableElement[] elements = new TableElement[keyColumnsNames.length];
+    			elements[i] = c.reference;
+    			excludedKeys.add(new IndexKeyInstance(orders, elements));
+    		}
+    	}
+    	
+    	return excludedKeys;
+    }
+    
     public Table find(String columnNames[], Constraint[] constraints) {
-        return null;
+        HashMap<String, Constraint> upperBound = new HashMap<String, Constraint>();
+        HashMap<String, Constraint> bottomBound = new HashMap<String, Constraint>();
+        HashMap<String, Constraint> exactBound = new HashMap<String, Constraint>();
+        HashMap<String, ArrayList<Constraint>> exactNotBound = new HashMap<String, ArrayList<Constraint>>();
+        
+        Table result = new Table(pageStructure);
+        for (String s : columnNames)
+        	exactNotBound.put(s,  new ArrayList<Constraint>());
+        
+    	for (int i = 0; i < columnNames.length; i++) {
+    		switch (constraints[i].constraintType) {
+    		case EQUAL:
+    			if (!exactBound.containsKey(columnNames[i])) {
+    				exactBound.put(columnNames[i], constraints[i]);
+    			} else {
+    				if (!exactBound.get(columnNames[i]).elementSatisfies(constraints[i].reference)) {
+    					return result; // no way
+    				}
+    			}
+    			
+    			break;
+			case GREATER:
+			case GREATER_OR_EQUAL:
+				if (!bottomBound.containsKey(columnNames[i])) {
+    				bottomBound.put(columnNames[i], constraints[i]);
+    			} else {
+    				if (!constraints[i].elementSatisfies(bottomBound.get(columnNames[i]).reference)) {
+    					bottomBound.put(columnNames[i], constraints[i]); // new constraint is stronger
+    				}
+    			}
+				break;
+			case LESS:
+			case LESS_OR_EQUAL:
+				if (!upperBound.containsKey(columnNames[i])) {
+					upperBound.put(columnNames[i], constraints[i]);
+    			} else {
+    				if (!constraints[i].elementSatisfies(upperBound.get(columnNames[i]).reference)) {
+    					upperBound.put(columnNames[i], constraints[i]); // new constraint is stronger
+    				}
+    			}
+			case NOT_EQUAL:
+				exactNotBound.get(columnNames[i]).add(constraints[i]);
+				break;
+    		}
+        }
+    	
+    	if (constraintsDefineEmptyset(upperBound, bottomBound, exactBound, exactNotBound, columnNames)) {
+    		return result;
+    	}
+    	
+    	// make all constraints are <=, >= and !=
+    	reduceConstraints(upperBound, bottomBound, exactBound, exactNotBound, columnNames);
+    	
+    	IndexKeyInstance bottomKey = buildKeyInstanceByConstraints(bottomBound);
+    	IndexKeyInstance upperKey = buildKeyInstanceByConstraints(upperBound);
+    	List<IndexKeyInstance> excludedKeys = buildExcludedKeys(exactNotBound);
+    	
+    	List<Integer> pagesAndOffsets = btree.findAll(bottomKey, upperKey, excludedKeys);
+    	
+    	// build temporary table
+    	return null;
     }
 }

@@ -3,10 +3,15 @@ package audb.command;
 import audb.table.TableElement;
 
 public class Constraint {
-	TableElement reference;
-	ConstraintType constraintType;
+	public final TableElement reference;
+	public final ConstraintType constraintType;
 	
-	enum ConstraintType {
+	public Constraint(ConstraintType c, TableElement ref) {
+		constraintType = c;
+		reference = ref;
+	}
+	
+	public enum ConstraintType {
 		EQUAL,
 		NOT_EQUAL,
 		LESS,
@@ -14,6 +19,7 @@ public class Constraint {
 		LESS_OR_EQUAL,
 		GREATER_OR_EQUAL
 	}
+	
 	
 	public boolean elementSatisfies(TableElement element) {
 		switch (constraintType) {
