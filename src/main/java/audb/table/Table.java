@@ -168,6 +168,18 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		page.write();
     }
 
+    public HashMap<String, TableElement> read(Page page, int offset) {
+        int ptr = offset * recordSize;
+        HashMap<String, TableElement> objects = new HashMap<String, TableElement>();
+        for(int i = 0; i < types.length; i++) {
+            byte[] data = new byte[types[i].getSize()];
+            System.arraycopy(page.data, ptr, data, 0, types[i].getSize());
+            objects.put(names[i], types[i].fromBytes(data));
+            ptr += types[i].getSize();
+        }
+        return objects;
+    }
+
     private void calculateRecordInfo() {
     	recordSize = 0;
     	for(int i = 0; i < types.length; i++) {
