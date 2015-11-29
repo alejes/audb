@@ -1,5 +1,6 @@
 package audb;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,8 +79,6 @@ public class BTreeTest extends TestCase {
     }
     
     public void testMixed() {
-    //	if (4 > 3)
-    //		return;
         BTree<Integer, String> t = new BTree<Integer, String>(5);
         
         HashMap<Integer, String> hm = new HashMap<Integer, String>();
@@ -113,6 +112,21 @@ public class BTreeTest extends TestCase {
     }
     
     public void testFindAll() {
-    	
+        BTree<Integer, String> t = new BTree<Integer, String>(5);
+        
+        HashMap<Integer, String> hm = new HashMap<Integer, String>();
+        for (int i = 0; i < 100; i++) {
+        	hm.put(i, Integer.toString(i));
+        }
+        
+        for (int i = 0; i < 100; i++)
+        	t.insert(i, hm.get(i));
+        
+        ArrayList<Integer> excludeList = new ArrayList<Integer>();
+        excludeList.add(12);
+        excludeList.add(13);
+        List<String> result = t.findAll(4, 15, excludeList);
+        
+        assertEquals(10, result.size());
     }
 }
