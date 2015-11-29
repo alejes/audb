@@ -430,7 +430,6 @@ public class BTree<K extends Comparable<K>, V> {
 	}
 	
 	public void remove(K key) {
-		//throw new UnsupportedOperationException("remove is not implemented yet");
 		root = root.remove(key);
 	}
 	
