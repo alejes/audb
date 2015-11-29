@@ -201,7 +201,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
         TableElement[] newElements = new TableElement[data.length];
         for (int i = 0; i < data.length; i++) {
-        	newElements[i] = types[i].fromObject(data);
+        	newElements[i] = types[i].fromObject(data[i]);
         }
         
         for (Index index : indexList) {
