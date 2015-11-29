@@ -44,11 +44,33 @@ public class BTreeTest extends TestCase {
         assertEquals(true, t.find(3).contains("3"));
         assertEquals(true, t.find(3).contains("test"));
         
-        for (int i = 13; i < 26; i++) {
+        for (int i = 13; i < 100; i++) {
         	t.insert(i, hm.get(i));
         }
         
         assertEquals(1, t.find(21).size());
         assertEquals("18", t.find(18).get(0));
+        assertEquals("67", t.find(67).get(0));
+    }
+    
+    public void testRemove() {
+        BTree<Integer, String> t = new BTree<Integer, String>(5);
+        
+        HashMap<Integer, String> hm = new HashMap<Integer, String>();
+        for (int i = 0; i < 100; i++) {
+        	hm.put(i, Integer.toString(i));
+        }
+        
+        for (int i = 0; i < 100; i++)
+        	t.insert(i, hm.get(i));
+        
+        assertTrue(t.find(67).size() == 1);
+        t.remove(67);
+        assertTrue(t.find(67).size() == 0);
+        for (int i = 0; i < 100; i++)
+        	t.remove(i);
+        
+        for (int i = 0; i < 100; i++)
+        	assertEquals(0, t.find(i).size());
     }
 }

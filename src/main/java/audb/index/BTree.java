@@ -4,10 +4,19 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import audb.index.BTreeNode.RemoveResult;
+
 abstract class BTreeNode<K extends Comparable<K>, V> {
+	enum RemoveResult {
+		REMOVED_MERGED_LEFT,
+		REMOVED_MERGED_RIGHT,
+		REMOVED_NO_MERGE,
+		ELEMENT_NOT_FOUND,
+	}
+	
 	final int fanout;
-	final int maxSize;
-	final int minSize;
+	final int maxKeysNumber;
+	final int minChildrenNumber;
 	
 	List<K> keys;
 	BTreeNode<K, V> parent;
@@ -15,17 +24,17 @@ abstract class BTreeNode<K extends Comparable<K>, V> {
 	public BTreeNode(int fanout, BTreeNode<K, V> parent) {
 		this.fanout = fanout;
 		this.parent = parent;
-		maxSize = fanout - 1;
-		keys = new ArrayList<K>(maxSize);
-		minSize = (fanout + 1) / 2;
+		maxKeysNumber = fanout - 1;
+		keys = new ArrayList<K>(maxKeysNumber);
+		minChildrenNumber = (fanout + 1) / 2;
 	}
 	
 	public BTreeNode(int fanout, BTreeNode<K, V> child1, BTreeNode<K, V> child2) {
-		maxSize = fanout - 1;
-		minSize = (fanout + 1) / 2;
+		maxKeysNumber = fanout - 1;
+		minChildrenNumber = (fanout + 1) / 2;
 		this.fanout = fanout;
 		parent = null;
-		keys = new ArrayList<K>(maxSize);
+		keys = new ArrayList<K>(maxKeysNumber);
 		keys.add(child1.getMaxKey());
 		
 		child1.parent = this;
@@ -34,20 +43,21 @@ abstract class BTreeNode<K extends Comparable<K>, V> {
 	
 	abstract BTreeNode<K, V> insert(Pair<K, V> p);
 
-	protected abstract int remove(K key, BTreeNode<K, V> leftSibling, 
+	protected abstract RemoveResult remove(K key, BTreeNode<K, V> leftSibling, 
 			BTreeNode<K, V> rightSibling);
 	
 	public abstract BTreeNode<K, V> remove(K key);
 	
 	protected void splitNode(BTreeNode<K, V> emptyNode) {
-		emptyNode.keys.addAll(keys.subList(fanout / 2, maxSize));
-		keys.subList(fanout / 2, maxSize).clear();
+		emptyNode.keys.addAll(keys.subList(fanout / 2, maxKeysNumber));
+		keys.subList(fanout / 2, maxKeysNumber).clear();
 	}
 	
-	protected int findChildIndex(K key) {
-		int result = keys.size();
+	// TODO binary search is a must here
+	protected int findChildIndex(K key, int maxIndex) {
+		int result = maxIndex;
 		
-		for (int i = 0; i < keys.size(); i++) {
+		for (int i = 0; i < maxIndex; i++) {
 			if (keys.get(i).compareTo(key) >= 0) {
 				result = i;
 				break;
@@ -57,6 +67,7 @@ abstract class BTreeNode<K extends Comparable<K>, V> {
 		return result;
 	}
 	
+	protected abstract int getChildrenNumber();
 	protected abstract K getMaxKey();
 	public abstract List<V> find(K key);
 }
@@ -90,7 +101,7 @@ class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 	
 	@Override
 	BTreeNode<K, V> insert(Pair<K, V> p) {
-		int insertIndex = findChildIndex(p.first);
+		int insertIndex = findChildIndex(p.first, keys.size());
 		BTreeNode<K, V> result = null;
 		
 		if (childrenNodes.size() > insertIndex) {
@@ -109,7 +120,7 @@ class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 		childrenNodes.set(insertIndex, result);
 		
 		K newKey = tmp.keys.get(fanout / 2 - 1);
-		if (keys.size() < maxSize) {
+		if (keys.size() < maxKeysNumber) {
 			keys.add(insertIndex, newKey);
 			childrenNodes.add(insertIndex, tmp);
 			return null;
@@ -129,14 +140,21 @@ class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 		return newNode;
 	}
 
-	public BTreeInnerNode<K, V> remove(K key) {
+	@Override
+	public BTreeNode<K, V> remove(K key) {
 		assert(parent == null);
-		remove(key, null, null);
 		
-		if (keys.size() == 0 && !(childrenNodes.get(0) instanceof BTreeLeaf)) {
-			return (BTreeInnerNode<K, V>)childrenNodes.get(0);
+		BTreeNode<K, V> cur = this;
+		boolean needRemove = true;
+		while (needRemove) {
+			needRemove = (RemoveResult.ELEMENT_NOT_FOUND != cur.remove(key, null, null));
+			if (keys.size() == 0 && !(childrenNodes.get(0) instanceof BTreeLeaf)) {
+				cur = childrenNodes.get(0);
+				cur.parent = null;
+			}
 		}
-		return this;
+		
+		return cur;
 	}
 
 	private void takeFirstChild(BTreeInnerNode<K, V> rightSibling) {
@@ -163,59 +181,65 @@ class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 	}
 	
 	@Override
-	protected int remove(K key, BTreeNode<K, V> leftSibling, BTreeNode<K, V> rightSibling) {
-		int insertIndex = findChildIndex(key);
+	protected RemoveResult remove(K key, BTreeNode<K, V> leftSibling, BTreeNode<K, V> rightSibling) {
+		int insertIndex = findChildIndex(key, keys.size());
+		
+		if (0 == childrenNodes.size() || insertIndex >= childrenNodes.size()) {
+			return RemoveResult.ELEMENT_NOT_FOUND;
+		}
 		
 		BTreeNode<K, V> left = insertIndex > 0 ? childrenNodes.get(insertIndex - 1) : null;
-		BTreeNode<K, V> right = insertIndex < keys.size() ? childrenNodes.get(insertIndex + 1) : null;
+		BTreeNode<K, V> right = (insertIndex < childrenNodes.size() - 1) ? childrenNodes.get(insertIndex + 1) : null;
 		BTreeNode<K, V> target = childrenNodes.get(insertIndex);
 		
-		int result = target.remove(key, left, right);
+		RemoveResult result = target.remove(key, left, right);
 		
 		switch (result) {
-		case 0:
+		case REMOVED_NO_MERGE:
 			if (null != left) {
 				keys.set(insertIndex - 1, left.getMaxKey());
 			}
 			if (null != right) {
 				keys.set(insertIndex, target.getMaxKey());
 			}
-			return 0;
-		case -1: // left now contains all the keys
+			return RemoveResult.REMOVED_NO_MERGE;
+		case ELEMENT_NOT_FOUND:
+			return RemoveResult.ELEMENT_NOT_FOUND;
+		case REMOVED_MERGED_LEFT: // left now contains all the keys
 			keys.remove(insertIndex - 1);
 			childrenNodes.remove(insertIndex - 1);
 			break;
-		case 1:
+		case REMOVED_MERGED_RIGHT:
 			keys.remove(insertIndex);
 			childrenNodes.remove(insertIndex);
 		}
 		
-		if (keys.size() >= minSize) {
-			return 0;
+		if (keys.size() >= minChildrenNumber) {
+			return RemoveResult.REMOVED_NO_MERGE;
 		}
 		
-		if (null != rightSibling && rightSibling.keys.size() >= minSize) {
+		if (null != rightSibling && rightSibling.keys.size() >= minChildrenNumber) {
 			takeFirstChild((BTreeInnerNode<K, V>)rightSibling);
-			return 0;
+			return RemoveResult.REMOVED_NO_MERGE;
 		} 
 		
-		if (null != leftSibling && leftSibling.keys.size() >= minSize) {
+		if (null != leftSibling && leftSibling.keys.size() >= minChildrenNumber) {
 			takeLastChild((BTreeInnerNode<K, V>)leftSibling);
-			return 0;
+			return RemoveResult.REMOVED_NO_MERGE;
 		}
 		
 		// merge them!
 		if (null != rightSibling) {
 			mergeWithRight((BTreeInnerNode<K, V>)rightSibling);
-			return 1;
+			return RemoveResult.REMOVED_MERGED_RIGHT;
 		}
 		
 		if (null != leftSibling) {
 			((BTreeInnerNode<K, V>)leftSibling).mergeWithRight(this);
-			return -1;
+			return RemoveResult.REMOVED_MERGED_LEFT;
 		}
 		
-		return 0;
+		return RemoveResult.REMOVED_NO_MERGE;
 	}
 	
 	protected K getMaxKey() {
@@ -224,7 +248,12 @@ class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 
 	@Override
 	public List<V> find(K key) {
-		return childrenNodes.get(findChildIndex(key)).find(key);
+		return childrenNodes.get(findChildIndex(key, keys.size())).find(key);
+	}
+
+	@Override
+	protected int getChildrenNumber() {
+		return childrenNodes.size();
 	}
 }
 
@@ -242,15 +271,15 @@ class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 	protected void splitNode(audb.index.BTreeNode<K,V> emptyNode) {
 		super.splitNode(emptyNode);
 		
-		((BTreeLeaf<K, V>)emptyNode).data.addAll(data.subList(fanout / 2, maxSize));
+		((BTreeLeaf<K, V>)emptyNode).data.addAll(data.subList(fanout / 2, maxKeysNumber));
 		
-		data.subList(fanout / 2, maxSize).clear();
+		data.subList(fanout / 2, maxKeysNumber).clear();
 	}
 	
 	@Override
 	BTreeNode<K, V> insert(Pair<K, V> p) {
-		if (data.size() < maxSize) {
-			int index = findChildIndex(p.first);
+		if (data.size() < maxKeysNumber) {
+			int index = findChildIndex(p.first, data.size());
 			data.add(index, p.second);
 			keys.add(index, p.first);
 			return null;
@@ -260,10 +289,10 @@ class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 		next = newLeaf;
 		splitNode(newLeaf);
 		
-		if (newLeaf.keys.get(0).compareTo(p.first) <= 0) {
-			newLeaf.insert(p);
-		} else {
+		if (keys.get(keys.size() - 1).compareTo(p.first) >= 0) {
 			insert(p);
+		} else {
+			newLeaf.insert(p);
 		}
 		
 		return newLeaf;
@@ -295,40 +324,44 @@ class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 	}
 	
 	@Override
-	protected int remove(K key, BTreeNode<K, V> leftSibling, BTreeNode<K, V> rightSibling) {
-		int idx = findChildIndex(key);
+	protected RemoveResult remove(K key, BTreeNode<K, V> leftSibling, BTreeNode<K, V> rightSibling) {
+		if (data.size() == 0) 
+			return RemoveResult.ELEMENT_NOT_FOUND;
+			
+		int idx = findChildIndex(key, data.size() - 1);
 		
 		if (keys.get(idx).compareTo(key) != 0) {
-			return 0;
+			return RemoveResult.ELEMENT_NOT_FOUND;
 		}
 		
 		keys.remove(idx);
 		data.remove(idx);
-		if (keys.size() >= minSize) {
-			return 0;
+		if (keys.size() >= minChildrenNumber) {
+			return RemoveResult.REMOVED_NO_MERGE;
 		}
 		
-		if (null != rightSibling && rightSibling.keys.size() >= minSize) {
+		if (null != rightSibling && rightSibling.keys.size() >= minChildrenNumber) {
 			takeFirstChild((BTreeLeaf<K, V>)rightSibling);
-			return 0;
+			return RemoveResult.REMOVED_NO_MERGE;
 		} 
 		
-		if (null != leftSibling && leftSibling.keys.size() >= minSize) {
+		if (null != leftSibling && leftSibling.keys.size() >= minChildrenNumber) {
 			takeLastChild((BTreeLeaf<K, V>)leftSibling);
-			return 0;
+			return RemoveResult.REMOVED_NO_MERGE;
 		}
 		
 		// merge them!
 		if (null != rightSibling) {
 			mergeWithRight((BTreeLeaf<K, V>)rightSibling);
-			return 1;
+			return RemoveResult.REMOVED_MERGED_RIGHT;
 		}
 		
 		if (null != leftSibling) {
 			((BTreeLeaf<K, V>)leftSibling).mergeWithRight(this);
-			return -1;
+			return RemoveResult.REMOVED_MERGED_LEFT;
 		}
-		return 0;
+		
+		return RemoveResult.REMOVED_NO_MERGE;
 	}
 
 	@Override
@@ -338,14 +371,15 @@ class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 
 	@Override
 	public List<V> find(K key) {
-		int index = findChildIndex(key);
-		if (keys.get(index).compareTo(key) != 0)
-			return null;
-		 
+		int index = findChildIndex(key, data.size() - 1);
 		List<V> result = new LinkedList<V>();
 		
+		if (index == -1) {
+			return result;
+		}
+		
 		BTreeLeaf<K, V> cur = this;
-		while (true) {
+		while (cur.keys.get(index).compareTo(key) == 0) {
 			result.add(data.get(index));
 			
 			if (++index == data.size()) {
@@ -355,17 +389,21 @@ class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 					return result;
 				}
 			}
-			
-			if (keys.get(index).compareTo(key) != 0)
-				return result;
 		}
+		
+		return result;
 	}
 
 	@Override
 	public BTreeNode<K, V> remove(K key) {
-		// TODO Auto-generated method stub
-		// TODO NOT IMPLEMENTED!
-		return null;
+		while (RemoveResult.ELEMENT_NOT_FOUND != remove(key, null, null));
+		
+		return this;
+	}
+
+	@Override
+	protected int getChildrenNumber() {
+		return data.size();
 	}
 	
 }
@@ -394,8 +432,8 @@ public class BTree<K extends Comparable<K>, V> {
 	}
 	
 	public void remove(K key) {
-		throw new UnsupportedOperationException("remove is not implemented yet");
-		//root = root.remove(key);
+		//throw new UnsupportedOperationException("remove is not implemented yet");
+		root = root.remove(key);
 	}
 	
 	public List<V> find(K key) {
