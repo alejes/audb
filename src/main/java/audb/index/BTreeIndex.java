@@ -73,13 +73,29 @@ class IndexKeyInstance implements Comparable<IndexKeyInstance> {
 		}
 		return 0;
 	}
+}
+
+class IndexValueInstance implements Comparable<IndexValueInstance> {
+	public final int page;
+	public final int offset;
+	
+	public IndexValueInstance(int page, int offset) {
+		this.page = page;
+		this.offset = offset;
+	}
+
+	// dummy method
+	public int compareTo(IndexValueInstance o) {
+		return Integer.compare(page, o.page);
+	}
+	
 	
 }
 
 public class BTreeIndex extends Index {
 	private static final long MAX_RAM_SIZE_MB = 128;
 	private Table table;
-	private BTree<IndexKeyInstance, Integer> btree;
+	private BTree<IndexKeyInstance, IndexValueInstance> btree;
 	private String[] keyColumnsNames;
 	
 	// load from database
@@ -95,21 +111,31 @@ public class BTreeIndex extends Index {
     	
     }
 
+    private ComparablePair<IndexKeyInstance, IndexValueInstance> buildIndexPair(
+    		FullScanResult iter, String[] names) {
+		HashMap<String, TableElement> row = iter.next();
+		int offset = iter.getCurrentOffset() - 1;
+		int pageNum = (int) iter.getCurrentPageNumber();
+		TableElement[] elements = new TableElement[names.length];
+		for (int i = 0; i < names.length; i++) {
+			elements[i] = row.get(names[i]);
+		}
+		
+		return ComparablePair.newPair(new IndexKeyInstance(orders, elements), 
+				new IndexValueInstance(pageNum, offset));
+    }
+    
     private void buildInternal(final String[] names, final Order[] orders) {    	
     	
-    	ArrayList<ComparablePair<IndexKeyInstance, Integer>> data = 
-    			new ArrayList<ComparablePair<IndexKeyInstance, Integer>>();
+    	ArrayList<ComparablePair<IndexKeyInstance, IndexValueInstance>> data = 
+    			new ArrayList<ComparablePair<IndexKeyInstance, IndexValueInstance>>();
     	FullScanResult iter = (FullScanResult)table.iterator();
     	
     	while (iter.hasNext()) {
-    		HashMap<String, TableElement> row = iter.next();
-    		int pageNum = (int) iter.getCurrentPageNumber();
-    		TableElement[] elements = new TableElement[names.length];
-    		for (int i = 0; i < names.length; i++) {
-    			elements[i] = row.get(names[i]);
-    		}
+    		ComparablePair<IndexKeyInstance, IndexValueInstance> newRecord = 
+    				buildIndexPair(iter, names);
     		
-    		data.add(ComparablePair.newPair(new IndexKeyInstance(orders, elements), pageNum));
+    		data.add(newRecord);
     	}
     	
     	if (data.size() == 0)
@@ -117,7 +143,7 @@ public class BTreeIndex extends Index {
     	
     	Collections.sort(data);
     	
-    	for (Pair<IndexKeyInstance, Integer> p : data) {
+    	for (Pair<IndexKeyInstance, IndexValueInstance> p : data) {
     		btree.insert(p);
     	}
     	
@@ -129,14 +155,9 @@ public class BTreeIndex extends Index {
     private void buildExternal(final String[] names, final Order[] orders) { 
     	FullScanResult iter = (FullScanResult)table.iterator();
     	while (iter.hasNext()) {
-    		HashMap<String, TableElement> row = iter.next();
-    		int pageNum = (int) iter.getCurrentPageNumber();
-    		TableElement[] elements = new TableElement[names.length];
-    		for (int i = 0; i < names.length; i++) {
-    			elements[i] = row.get(names[i]);
-    		}
-    		
-    		btree.insert(ComparablePair.newPair(new IndexKeyInstance(orders, elements), pageNum));
+    		ComparablePair<IndexKeyInstance, IndexValueInstance> newRecord = 
+    				buildIndexPair(iter, names);
+    		btree.insert(newRecord);
     	}
     }
     
@@ -152,7 +173,7 @@ public class BTreeIndex extends Index {
     	}
     	
     	int keysPerPage = PageManager.PAGE_SIZE / (maxKeySize + Integer.BYTES);
-    	btree = new BTree<IndexKeyInstance, Integer>(keysPerPage);
+    	btree = new BTree<IndexKeyInstance, IndexValueInstance>(keysPerPage);
     	
     	
     	if (size <= MAX_RAM_SIZE_MB) {
@@ -162,8 +183,10 @@ public class BTreeIndex extends Index {
     	}
     }
 
-    public void add(TableElement[] data, long pageNumber) {
-    	btree.insert(ComparablePair.newPair(new IndexKeyInstance(orders, data), (int)pageNumber));
+    @Override
+    public void add(TableElement[] data, int pageNumber, int offset) {
+    	btree.insert(ComparablePair.newPair(new IndexKeyInstance(orders, data), 
+    			new IndexValueInstance((int)pageNumber, offset)));
     }
 
     public boolean canResolve(String[] columnNames) {
@@ -331,7 +354,7 @@ public class BTreeIndex extends Index {
     	IndexKeyInstance upperKey = buildKeyInstanceByConstraints(upperBound);
     	List<IndexKeyInstance> excludedKeys = buildExcludedKeys(exactNotBound);
     	
-    	List<Integer> pagesAndOffsets = btree.findAll(bottomKey, upperKey, excludedKeys);
+    	List<IndexValueInstance> pagesAndOffsets = btree.findAll(bottomKey, upperKey, excludedKeys);
     	
     	// build temporary table
     	return null;

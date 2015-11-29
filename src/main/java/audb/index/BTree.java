@@ -18,11 +18,9 @@ abstract class BTreeNode<K extends Comparable<K>, V> {
 	final int minChildrenNumber;
 
 	List<K> keys;
-	BTreeNode<K, V> parent;
 
-	public BTreeNode(int fanout, BTreeNode<K, V> parent) {
+	public BTreeNode(int fanout) {
 		this.fanout = fanout;
-		this.parent = parent;
 		maxKeysNumber = fanout - 1;
 		keys = new ArrayList<K>(maxKeysNumber);
 		minChildrenNumber = (fanout + 1) / 2;
@@ -32,12 +30,8 @@ abstract class BTreeNode<K extends Comparable<K>, V> {
 		maxKeysNumber = fanout - 1;
 		minChildrenNumber = (fanout + 1) / 2;
 		this.fanout = fanout;
-		parent = null;
 		keys = new ArrayList<K>(maxKeysNumber);
 		keys.add(child1.getMaxKey());
-
-		child1.parent = this;
-		child2.parent = this;
 	}
 
 	abstract BTreeNode<K, V> insert(Pair<K, V> p);
@@ -75,8 +69,8 @@ abstract class BTreeNode<K extends Comparable<K>, V> {
 class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 	ArrayList<BTreeNode<K, V>> childrenNodes;
 
-	public BTreeInnerNode(int fanout, BTreeNode<K, V> parent) {
-		super(fanout, parent);
+	public BTreeInnerNode(int fanout) {
+		super(fanout);
 		childrenNodes = new ArrayList<BTreeNode<K,V>>(fanout);
 	}
 
@@ -130,7 +124,7 @@ class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 			return null;
 		}
 
-		BTreeInnerNode<K, V> newNode = new BTreeInnerNode<K, V>(fanout, parent);
+		BTreeInnerNode<K, V> newNode = new BTreeInnerNode<K, V>(fanout);
 
 		splitNode(newNode);
 		return newNode;
@@ -138,15 +132,12 @@ class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 
 	@Override
 	public BTreeNode<K, V> remove(K key) {
-		assert(parent == null);
-
 		BTreeNode<K, V> cur = this;
 		boolean needRemove = true;
 		while (needRemove) {
 			needRemove = (RemoveResult.ELEMENT_NOT_FOUND != cur.remove(key, null, null));
 			if (keys.size() == 0 && !(childrenNodes.get(0) instanceof BTreeLeaf)) {
 				cur = childrenNodes.get(0);
-				cur.parent = null;
 			}
 		}
 
@@ -263,8 +254,8 @@ class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 	List<V> data;
 	BTreeLeaf<K, V> next;
 
-	public BTreeLeaf(int fanout, BTreeNode<K, V> parent, BTreeLeaf<K, V> next) {
-		super(fanout, parent);
+	public BTreeLeaf(int fanout, BTreeLeaf<K, V> next) {
+		super(fanout);
 		data = new ArrayList<V>(fanout);
 		this.next = next;
 	}
@@ -294,7 +285,7 @@ class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 			return null;
 		}
 
-		BTreeLeaf<K, V> newLeaf = new BTreeLeaf<K, V>(fanout, parent, next);
+		BTreeLeaf<K, V> newLeaf = new BTreeLeaf<K, V>(fanout, next);
 		next = newLeaf;
 		splitNode(newLeaf);
 
@@ -469,7 +460,7 @@ public class BTree<K extends Comparable<K>, V> {
 	int fanout;
 
 	public BTree(int fanout) {
-		root = new BTreeLeaf<K, V>(fanout, null, null);
+		root = new BTreeLeaf<K, V>(fanout, null);
 		this.fanout = fanout;
 	}
 
