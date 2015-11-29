@@ -168,6 +168,11 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		page.write();
     }
 
+    public HashMap<String, TableElement> read(int pageNumber, int offset) {
+    	Page p = pageStructure.getPage(pageNumber);
+    	return read(p, offset);
+    }
+    
     public HashMap<String, TableElement> read(Page page, int offset) {
         int ptr = offset * recordSize;
         HashMap<String, TableElement> objects = new HashMap<String, TableElement>();

@@ -10,6 +10,7 @@ import audb.util.Pair;
 
 public class ConditionalTableIterator extends FullScanIterator {
 	private List<Pair<String, Constraint>> constraints;
+	HashMap<String, TableElement> nextRow = null;
 	
 	public ConditionalTableIterator(Table table, List<Pair<String, Constraint>> constraints) {
 		super(table);
@@ -18,6 +19,7 @@ public class ConditionalTableIterator extends FullScanIterator {
 	}
 	
 	private void rewindToNextSatisfying() {
+		nextRow = null;
 		while (super.hasNext()) {
 			HashMap<String, TableElement> row = super.next();
 			boolean needNext = false;
@@ -27,16 +29,23 @@ public class ConditionalTableIterator extends FullScanIterator {
 					break;
 				}
 			}
-			if (!needNext)
+			if (!needNext) {
+				nextRow = row;
 				break;
+			}
 		}
 	}
 
 	@Override
+	public boolean hasNext() {
+		return nextRow != null;
+	}
+	
+	@Override
 	public HashMap<String, TableElement> next() {
-		HashMap<String, TableElement> row = super.next();
+		HashMap<String, TableElement> retRow = nextRow;
 		rewindToNextSatisfying();
-		return row;
+		return retRow;
 	}
 
 }
