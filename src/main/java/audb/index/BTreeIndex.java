@@ -19,47 +19,6 @@ import audb.util.ComparablePair;
 import audb.util.Pair;
 
 
-class IndexKeyInstance implements Comparable<IndexKeyInstance> {
-	final Order[] orders;
-	final TableElement[] elements;
-	
-	IndexKeyInstance(Order[] orders, TableElement[] elements) {
-		this.orders = orders;
-		this.elements = elements;
-	}
-	
-	public int compareTo(IndexKeyInstance other) {
-		for (int i = 0; i < elements.length; i++) {		
-			if (null == elements[i]) {
-				continue;
-			}
-			int result = elements[i].compareTo(other.elements[i]);
-			if (result == 0)
-				continue;
-			
-			return ((orders[i] == Order.ASC) ?  result : -result);
-		}
-		return 0;
-	}
-}
-
-class IndexValueInstance implements Comparable<IndexValueInstance> {
-	public final int page;
-	public final int offset;
-	
-	public IndexValueInstance(int page, int offset) {
-		this.page = page;
-		this.offset = offset;
-	}
-
-	// dummy method
-	public int compareTo(IndexValueInstance o) {
-		return Integer.compare(page, o.page);
-	}
-	
-	
-}
-
 public class BTreeIndex extends Index {
 	private static final long MAX_RAM_SIZE_MB = 128;
 	private Table table;
