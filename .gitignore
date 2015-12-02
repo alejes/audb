@@ -1,7 +1,7 @@
 *.jar
 *.class
-db/*
-target/*
+db/
 .classpath
 .project
 .settings
+target/
