@@ -5,3 +5,6 @@ db/
 .project
 .settings
 target/
+.idea
+audb.sublime-project
+audb.sublime-workspace
