@@ -1,6 +1,7 @@
 package audb.type;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import audb.table.TableElement;
 import audb.table.VarcharElement;
@@ -25,11 +26,9 @@ public class VarcharType extends Type {
     	return length;
     }
 
-    // gets TableElement
     public byte[] toBytes(Object o) throws Exception {
         byte[] bytes = ((String)o).getBytes(StandardCharsets.US_ASCII);
-        if(bytes.length > length)
-            throw new Exception("VarcharType.java");
+        bytes = Arrays.copyOf(bytes, length);
         return bytes;
     }
 
