@@ -3,30 +3,35 @@ package audb.index.btree;
 import java.util.ArrayList;
 import java.util.List;
 
-import audb.index.btree.BTreeNode.RemoveResult;
-import audb.page.PageStructure;
+import audb.index.IndexKeyInstance;
+import audb.index.IndexValueInstance;
+import audb.page.PageWriter;
+import audb.page.Page;
 import audb.util.Pair;
 
-public class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> {
-	ArrayList<BTreeNodeReference<K, V>> childrenNodes;
-
-	public BTreeInnerNode(int fanout, PageStructure ps) {
-		super(fanout, ps);
-		childrenNodes = new ArrayList<BTreeNodeReference<K, V>>(fanout);
+public class BTreeInnerNode extends BTreeNode {
+	static final byte myType = 0;
+	
+	List<Integer> childrenNodes;
+	
+	public BTreeInnerNode(int fanout, NodeReader nr, int pageNumber,
+			List<IndexKeyInstance> keys, List<Integer> childrenPages) {
+		super(fanout, nr, pageNumber, keys);
+		childrenNodes = childrenPages == null ? new ArrayList<Integer>(fanout) : childrenPages;
 	}
 
-	public BTreeInnerNode(int fanout, PageStructure ps, BTreeNodeReference<K, V> child1, BTreeNodeReference<K, V> child2) {
-		super(fanout, ps, child1, child2);
-		childrenNodes = new ArrayList<BTreeNodeReference<K,V>>(fanout);
+	public BTreeInnerNode(int fanout, NodeReader nr, BTreeNode child1, BTreeNode child2) {
+		super(fanout, nr, child1, child2);
+		childrenNodes = new ArrayList<Integer>(fanout);
 
-		childrenNodes.add(child1);
-		childrenNodes.add(child2);
+		childrenNodes.add(child1.pageNumber);
+		childrenNodes.add(child2.pageNumber);
 	}
 
 	@Override
-	protected void splitNode(audb.index.btree.BTreeNode<K,V> emptyNode) {
+	protected void splitNode(BTreeNode emptyNode) {
 		super.splitNode(emptyNode);
-		BTreeInnerNode<K, V> node = (BTreeInnerNode<K, V>) emptyNode;
+		BTreeInnerNode node = (BTreeInnerNode) emptyNode;
 
 		try {
 			node.childrenNodes.addAll(childrenNodes.subList(minChildrenNumber, fanout + 1));
@@ -41,54 +46,55 @@ public class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> 
 	}
 
 	@Override
-	BTreeNodeReference<K, V> insert(Pair<K, V> p) {
+	BTreeNode insert(Pair<IndexKeyInstance, IndexValueInstance> p) {
 		int insertIndex = findChildIndex(p.first, childrenNodes.size() - 1);
-		BTreeNodeReference<K, V> result = null;
+		BTreeNode result = null;
 
-		result = childrenNodes.get(insertIndex).getValue().insert(p);
+		BTreeNode child = nodeReader.readNode(childrenNodes.get(insertIndex));
+		result = child.insert(p);
 
 		if (null == result)
 			return null;
 
-		BTreeNodeReference<K, V> tmp = childrenNodes.get(insertIndex);
-		K newKey = tmp.getValue().getMaxKey();
-		childrenNodes.set(insertIndex, result);
+		IndexKeyInstance newKey = child.getMaxKey();
+		childrenNodes.set(insertIndex, result.pageNumber);
 		if (insertIndex < keys.size()) {
-			keys.set(insertIndex, result.getValue().getMaxKey());
+			keys.set(insertIndex, result.getMaxKey());
 			keys.add(insertIndex, newKey);
 		} else {
 			keys.add(newKey);
 		}
-		childrenNodes.add(insertIndex, tmp);
+		childrenNodes.add(insertIndex, child.pageNumber);
 
 		if (keys.size() <= maxKeysNumber) {
 			return null;
 		}
 
-		BTreeInnerNode<K, V> newNode = new BTreeInnerNode<K, V>(fanout, pageStructure);
+		BTreeInnerNode newNode = new BTreeInnerNode(fanout, nodeReader, -1, null, null);
 		
 		splitNode(newNode);
 		writeDown();
-		return new BTreeNodeReference<K, V>(newNode);
+		return newNode;
 	}
 
 	@Override
-	public BTreeNodeReference<K, V> remove(K key) {
-		BTreeNode<K, V> cur = this;
+	public BTreeNode remove(IndexKeyInstance key) {
+		BTreeNode cur = this;
 		boolean needRemove = true;
 		while (needRemove) {
 			needRemove = (RemoveResult.ELEMENT_NOT_FOUND != cur.remove(key, null, null));
-			if (keys.size() == 0 && !(childrenNodes.get(0).getValue() instanceof BTreeLeaf)) {
-				cur = childrenNodes.get(0).getValue();
+			BTreeNode child = nodeReader.readNode(childrenNodes.get(0));
+			if (keys.size() == 0) {
+				cur = child;
 			}
 		}
 
-		return new BTreeNodeReference<K, V>(cur);
+		return cur;
 	}
 
-	private void takeFirstChild(BTreeNodeReference<K, V> rightSibling) {
-		BTreeInnerNode<K, V> rs = (BTreeInnerNode<K, V>)(rightSibling.getValue());
-		BTreeNodeReference<K, V> child = rs.childrenNodes.get(0);
+	private void takeFirstChild(BTreeNode rightSibling) {
+		BTreeInnerNode rs = (BTreeInnerNode)(rightSibling);
+		int child = rs.childrenNodes.get(0);
 		rs.keys.subList(0, 1).clear();
 		rs.childrenNodes.subList(0, 1).clear();
 		keys.add(getMaxKey());
@@ -96,48 +102,49 @@ public class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> 
 		rs.writeDown();
 	}
 
-	private void takeLastChild(BTreeNodeReference<K, V> leftSibling) {
-		BTreeInnerNode<K, V> ls = (BTreeInnerNode<K, V>)(leftSibling.getValue());
+	private void takeLastChild(BTreeNode leftSibling) {
+		BTreeInnerNode ls = (BTreeInnerNode)(leftSibling);
 		int leftSize = ls.childrenNodes.size();
-		BTreeNodeReference<K, V> child = ls.childrenNodes.get(leftSize - 1);
+		int child = ls.childrenNodes.get(leftSize - 1);
 		ls.keys.subList(leftSize - 1, leftSize).clear();
 		ls.childrenNodes.subList(leftSize - 1, leftSize).clear();
-		keys.add(0, child.getValue().getMaxKey());
+		keys.add(0, nodeReader.readNode(child).getMaxKey());
 		childrenNodes.add(0, child);
 		ls.writeDown();
 	}
 
-	private void mergeWithRight(BTreeNodeReference<K, V> rightSibling) {
-		mergeWithRight((BTreeInnerNode<K, V>)rightSibling.getValue());
+	private void mergeWithRight(BTreeNode rightSibling) {
+		mergeWithRight((BTreeInnerNode)rightSibling);
 	}
 	
-	private void mergeWithRight(BTreeInnerNode<K, V> rightSibling) {
+	private void mergeWithRight(BTreeInnerNode rightSibling) {
 		keys.addAll(rightSibling.keys);
 		childrenNodes.addAll(rightSibling.childrenNodes);
-		pageStructure.releasePage(rightSibling.pageNumber);
+		nodeReader.getPageStructure().releasePage(rightSibling.pageNumber);
 	}
 
 	@Override
-	protected RemoveResult remove(K key, BTreeNodeReference<K, V> leftSibling, BTreeNodeReference<K, V> rightSibling) {
+	protected RemoveResult remove(IndexKeyInstance key, BTreeNode leftSibling, BTreeNode rightSibling) {
 		int insertIndex = findChildIndex(key, keys.size());
 
 		if (0 == childrenNodes.size() || insertIndex >= childrenNodes.size()) {
 			return RemoveResult.ELEMENT_NOT_FOUND;
 		}
 
-		BTreeNodeReference<K, V> left = insertIndex > 0 ? childrenNodes.get(insertIndex - 1) : null;
-		BTreeNodeReference<K, V> right = (insertIndex < childrenNodes.size() - 1) ? childrenNodes.get(insertIndex + 1) : null;
-		BTreeNodeReference<K, V> target = childrenNodes.get(insertIndex);
+		BTreeNode left = insertIndex > 0 ? nodeReader.readNode(childrenNodes.get(insertIndex - 1)) : null;
+		BTreeNode right = insertIndex < childrenNodes.size() - 1 ? 
+				nodeReader.readNode(childrenNodes.get(insertIndex + 1)) : null;
+		BTreeNode target = nodeReader.readNode(childrenNodes.get(insertIndex));
 
-		RemoveResult result = target.getValue().remove(key, left, right);
+		RemoveResult result = target.remove(key, left, right);
 
 		switch (result) {
 		case REMOVED_NO_MERGE:
 			if (null != left) {
-				keys.set(insertIndex - 1, left.getValue().getMaxKey());
+				keys.set(insertIndex - 1, left.getMaxKey());
 			}
 			if (null != right) {
-				keys.set(insertIndex, target.getValue().getMaxKey());
+				keys.set(insertIndex, target.getMaxKey());
 			}
 			writeDown();
 			return RemoveResult.REMOVED_NO_MERGE;
@@ -157,13 +164,13 @@ public class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> 
 			return RemoveResult.REMOVED_NO_MERGE;
 		}
 
-		if (null != rightSibling && rightSibling.getValue().keys.size() >= minChildrenNumber) {
+		if (null != rightSibling && rightSibling.keys.size() >= minChildrenNumber) {
 			takeFirstChild(rightSibling);
 			writeDown();
 			return RemoveResult.REMOVED_NO_MERGE;
 		} 
 
-		if (null != leftSibling && leftSibling.getValue().keys.size() >= minChildrenNumber) {
+		if (null != leftSibling && leftSibling.keys.size() >= minChildrenNumber) {
 			takeLastChild(leftSibling);
 			writeDown();
 			return RemoveResult.REMOVED_NO_MERGE;
@@ -177,20 +184,29 @@ public class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> 
 		}
 
 		if (null != leftSibling) {
-			((BTreeInnerNode<K, V>)leftSibling.getValue()).mergeWithRight(this);
+			((BTreeInnerNode)leftSibling).mergeWithRight(this);
 			return RemoveResult.REMOVED_MERGED_LEFT;
 		}
 
 		return RemoveResult.REMOVED_NO_MERGE;
 	}
+	
+	@Override 
+	protected PageWriter writeDown() {
+		PageWriter pw = super.writeDown();
+		for (int child: childrenNodes) {
+			pw.writeData(Page.intToBytes(child));
+		}
+		return pw;
+	}
 
-	protected K getMaxKey() {
-		return childrenNodes.get(childrenNodes.size() - 1).getValue().getMaxKey();
+	protected IndexKeyInstance getMaxKey() {
+		return nodeReader.readNode(childrenNodes.get(childrenNodes.size() - 1)).getMaxKey();
 	}
 
 	@Override
-	public List<V> find(K key) {
-		return childrenNodes.get(findChildIndex(key, keys.size())).getValue().find(key);
+	public List<IndexValueInstance> find(IndexKeyInstance key) {
+		return nodeReader.readNode(childrenNodes.get(findChildIndex(key, keys.size()))).find(key);
 	}
 
 	@Override
@@ -199,8 +215,14 @@ public class BTreeInnerNode<K extends Comparable<K>, V> extends BTreeNode<K, V> 
 	}
 
 	@Override
-	public List<V> findAll(K bottomKey, K topKey, List<K> excludeKeys) {
-		return childrenNodes.get(findChildIndex(bottomKey, keys.size())).getValue().findAll(
+	public List<IndexValueInstance> findAll(IndexKeyInstance bottomKey, IndexKeyInstance topKey,
+			List<IndexKeyInstance> excludeKeys) {
+		return nodeReader.readNode(childrenNodes.get(findChildIndex(bottomKey, keys.size()))).findAll(
 				bottomKey, topKey, excludeKeys);
+	}
+	
+	@Override
+	protected byte getMyType() {
+		return myType;
 	}
 }

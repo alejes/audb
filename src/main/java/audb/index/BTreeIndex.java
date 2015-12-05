@@ -9,13 +9,13 @@ import java.util.List;
 
 import audb.command.Constraint;
 import audb.command.Constraint.ConstraintType;
-import audb.index.Index.Order;
 import audb.index.btree.BTree;
 import audb.page.PageManager;
 import audb.page.PageStructure;
 import audb.result.FullScanIterator;
 import audb.table.Table;
 import audb.table.TableElement;
+import audb.type.Type;
 import audb.util.ComparablePair;
 import audb.util.Pair;
 
@@ -23,7 +23,7 @@ import audb.util.Pair;
 public class BTreeIndex extends Index {
 	private static final long MAX_RAM_SIZE_MB = 128;
 	private Table table;
-	private BTree<IndexKeyInstance, IndexValueInstance> btree;
+	private BTree btree;
 	private String[] keyColumnsNames;
 	
 	// load from database
@@ -95,13 +95,15 @@ public class BTreeIndex extends Index {
     	int maxKeySize = 0;
     	FullScanIterator iter = (FullScanIterator)table.iterator();
     	HashMap<String, TableElement> row = iter.next();
+    	List<Type> keyElementsTypes = new ArrayList<Type>(names.length);
     	for (String s : names) {
     		TableElement el = row.get(s);
+    		keyElementsTypes.add(el.getType());
     		maxKeySize += el.getSizeInBytes();
     	}
     	
     	int keysPerPage = PageManager.PAGE_SIZE / (maxKeySize + Integer.BYTES);
-    	btree = new BTree<IndexKeyInstance, IndexValueInstance>(keysPerPage, pageStructure);
+    	btree = new BTree(keysPerPage, pageStructure, keyElementsTypes, orders);
     	
     	
     	if (size <= MAX_RAM_SIZE_MB) {

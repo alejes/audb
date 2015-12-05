@@ -6,8 +6,8 @@ import audb.type.Type;
 import audb.type.VarcharType;
 
 public class VarcharElement implements TableElement {
-	private final String value;
-	private final VarcharType type;
+	public final String value;
+	public final VarcharType type;
 	
 	public VarcharElement(String s, VarcharType t) {
 		value = s;
@@ -22,7 +22,8 @@ public class VarcharElement implements TableElement {
 		return type.getSize();
 	}
 	
-    public byte[] toBytes() throws Exception {
+    public byte[] toBytes() {
+    	// TODO
         return value.getBytes(StandardCharsets.US_ASCII);
     }
 	
@@ -33,6 +34,11 @@ public class VarcharElement implements TableElement {
 		
 		String tmp = ((VarcharElement)other).value;
 		return value.compareTo(tmp);
+	}
+
+	@Override
+	public Type getType() {
+		return type;
 	}
 	
 }

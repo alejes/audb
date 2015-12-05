@@ -5,32 +5,36 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import audb.page.PageStructure;
+import audb.index.IndexKeyInstance;
+import audb.index.IndexValueInstance;
+import audb.page.PageWriter;
 import audb.util.Pair;
 
-public class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
-	List<V> data;
-	BTreeNodeReference<K, V> next;
-
-	public BTreeLeaf(int fanout, PageStructure ps, BTreeNodeReference<K, V> next) {
-		super(fanout, ps);
-		data = new ArrayList<V>(fanout);
-		this.next = next;
+public class BTreeLeaf extends BTreeNode {
+	List<IndexValueInstance> data;
+	int nextNodePage;
+	static final byte myType = 1;
+	
+	public BTreeLeaf(int fanout, NodeReader nr, int pageNumber, int next, 
+			List<IndexKeyInstance> keys, List<IndexValueInstance> values) {
+		super(fanout, nr, pageNumber, keys);
+		this.nextNodePage = next;
+		this.data = values == null ? new ArrayList<IndexValueInstance>(maxKeysNumber) : values;
 	}
-
+	
 	@Override
-	protected void splitNode(audb.index.btree.BTreeNode<K,V> emptyNode) {
+	protected void splitNode(BTreeNode emptyNode) {
 		emptyNode.keys.addAll(keys.subList(fanout / 2, fanout));
 		keys.subList(fanout / 2, keys.size()).clear();
 
-		((BTreeLeaf<K, V>)emptyNode).data.addAll(data.subList(fanout / 2, fanout));
+		((BTreeLeaf)emptyNode).data.addAll(data.subList(fanout / 2, fanout));
 
 		data.subList(fanout / 2, fanout).clear();
 		emptyNode.writeDown();
 	}
 
 	@Override
-	BTreeNodeReference<K, V> insert(Pair<K, V> p) {
+	BTreeNode insert(Pair<IndexKeyInstance, IndexValueInstance> p) {
 		int index = findChildIndex(p.first, data.size());
 		if (index < data.size()) {
 			data.add(index, p.second);
@@ -44,17 +48,17 @@ public class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 			return null;
 		}
 
-		BTreeLeaf<K, V> newLeaf = new BTreeLeaf<K, V>(fanout, pageStructure, next);
-		next = new BTreeNodeReference<K, V>(newLeaf);
+		BTreeLeaf newLeaf = new BTreeLeaf(fanout, nodeReader, -1, nextNodePage, null, null);
+		nextNodePage = newLeaf.pageNumber;
 		splitNode(newLeaf);
 
 		writeDown();
-		return next;
+		return newLeaf;
 	}
 
-	private void takeFirstChild(BTreeLeaf<K, V> rightSibling) {
-		V child = rightSibling.data.get(0);
-		K key = rightSibling.keys.get(0);
+	private void takeFirstChild(BTreeLeaf rightSibling) {
+		IndexValueInstance child = rightSibling.data.get(0);
+		IndexKeyInstance key = rightSibling.keys.get(0);
 		rightSibling.keys.subList(0, 1).clear();
 		rightSibling.data.subList(0, 1).clear();
 		keys.add(key);
@@ -62,10 +66,10 @@ public class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 		rightSibling.writeDown();
 	}
 
-	private void takeLastChild(BTreeLeaf<K, V> leftSibling) {
+	private void takeLastChild(BTreeLeaf leftSibling) {
 		int leftSize = leftSibling.data.size();
-		V child = leftSibling.data.get(leftSize - 1);
-		K key = leftSibling.keys.get(leftSize - 1);
+		IndexValueInstance child = leftSibling.data.get(leftSize - 1);
+		IndexKeyInstance key = leftSibling.keys.get(leftSize - 1);
 		leftSibling.keys.subList(leftSize - 1, leftSize).clear();
 		leftSibling.data.subList(leftSize - 1, leftSize).clear();
 		keys.add(0, key);
@@ -73,14 +77,14 @@ public class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 		leftSibling.writeDown();
 	}
 
-	private void mergeWithRight(BTreeLeaf<K, V> rightSibling) {
+	private void mergeWithRight(BTreeLeaf rightSibling) {
 		keys.addAll(rightSibling.keys);
 		data.addAll(rightSibling.data);
-		next = rightSibling.next;
+		nextNodePage = rightSibling.nextNodePage;
 	}
 
 	@Override
-	protected RemoveResult remove(K key, BTreeNodeReference<K, V> leftSibling, BTreeNodeReference<K, V> rightSibling) {
+	protected RemoveResult remove(IndexKeyInstance key, BTreeNode leftSibling, BTreeNode rightSibling) {
 		if (data.size() == 0) 
 			return RemoveResult.ELEMENT_NOT_FOUND;
 
@@ -96,26 +100,26 @@ public class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 			return RemoveResult.REMOVED_NO_MERGE;
 		}
 
-		if (null != rightSibling && rightSibling.getValue().keys.size() >= minChildrenNumber) {
-			takeFirstChild((BTreeLeaf<K, V>)rightSibling.getValue());
+		if (null != rightSibling && rightSibling.keys.size() >= minChildrenNumber) {
+			takeFirstChild((BTreeLeaf)rightSibling);
 			writeDown();
 			return RemoveResult.REMOVED_NO_MERGE;
 		} 
 
-		if (null != leftSibling && leftSibling.getValue().keys.size() >= minChildrenNumber) {
-			takeLastChild((BTreeLeaf<K, V>)leftSibling.getValue());
+		if (null != leftSibling && leftSibling.keys.size() >= minChildrenNumber) {
+			takeLastChild((BTreeLeaf)leftSibling);
 			writeDown();
 			return RemoveResult.REMOVED_NO_MERGE;
 		}
 
 		// merge them!
 		if (null != rightSibling) {
-			mergeWithRight((BTreeLeaf<K, V>)rightSibling.getValue());
+			mergeWithRight((BTreeLeaf)rightSibling);
 			return RemoveResult.REMOVED_MERGED_RIGHT;
 		}
 
 		if (null != leftSibling) {
-			((BTreeLeaf<K, V>)leftSibling.getValue()).mergeWithRight(this);
+			((BTreeLeaf)leftSibling).mergeWithRight(this);
 			return RemoveResult.REMOVED_MERGED_LEFT;
 		}
 
@@ -123,30 +127,30 @@ public class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 	}
 
 	@Override
-	protected K getMaxKey() {
+	protected IndexKeyInstance getMaxKey() {
 		return keys.get(keys.size() - 1);
 	}
 
 	@Override
-	public List<V> find(K key) {
+	public List<IndexValueInstance> find(IndexKeyInstance key) {
 		int index = findChildIndex(key, data.size() - 1);
-		List<V> result = new LinkedList<V>();
+		List<IndexValueInstance> result = new LinkedList<IndexValueInstance>();
 
 		if (index == -1) {
 			return result;
 		}
 
-		BTreeLeaf<K, V> cur = this;
+		BTreeLeaf cur = this;
 		while (cur.keys.get(index).compareTo(key) == 0) {
 			result.add(data.get(index));
 
 			if (++index == data.size()) {
 				index = 0;
-				BTreeNodeReference<K, V> tmp = cur.next;
+				BTreeNode tmp = nodeReader.readNode(cur.nextNodePage);
 				if (null == tmp) {
 					return result;
 				}
-				cur = (BTreeLeaf<K, V>)tmp.getValue();
+				cur = (BTreeLeaf)tmp;
 			}
 		}
 
@@ -154,10 +158,10 @@ public class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 	}
 
 	@Override
-	public BTreeNodeReference<K, V> remove(K key) {
+	public BTreeNode remove(IndexKeyInstance key) {
 		while (RemoveResult.ELEMENT_NOT_FOUND != remove(key, null, null));
 
-		return new BTreeNodeReference<K, V>(this);
+		return this;
 	}
 
 	@Override
@@ -166,21 +170,21 @@ public class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 	}
 
 	@Override
-	public List<V> findAll(K bottomKey, K topKey, List<K> excludeKeys) {
+	public List<IndexValueInstance> findAll(IndexKeyInstance bottomKey, IndexKeyInstance topKey, List<IndexKeyInstance> excludeKeys) {
 		int index = findChildIndex(bottomKey, data.size() - 1);
-		List<V> result = new LinkedList<V>();
+		List<IndexValueInstance> result = new LinkedList<IndexValueInstance>();
 
 		if (index == -1) {
 			return result;
 		}
 
-		BTreeLeaf<K, V> cur = this;
-		Iterator<K> exIter = excludeKeys.iterator();
-		K exKey = exIter.hasNext() ? exIter.next() : null;
+		BTreeLeaf cur = this;
+		Iterator<IndexKeyInstance> exIter = excludeKeys.iterator();
+		IndexKeyInstance exKey = exIter.hasNext() ? exIter.next() : null;
 		while (cur.keys.get(index).compareTo(topKey) <= 0) {
 
 			boolean skipValue = false;
-			K currentKey = cur.keys.get(index);
+			IndexKeyInstance currentKey = cur.keys.get(index);
 			boolean needCompare = true;
 
 			while (needCompare && null != exKey) {
@@ -208,14 +212,29 @@ public class BTreeLeaf<K extends Comparable<K>, V> extends BTreeNode<K, V> {
 			
 			if (++index == data.size()) {
 				index = 0;
-				BTreeNodeReference<K, V> tmp = cur.next;
+				BTreeNode tmp = nodeReader.readNode(cur.nextNodePage);
 				if (null == tmp) {
 					return result;
 				}
-				cur = (BTreeLeaf<K, V>)tmp.getValue();
+				cur = (BTreeLeaf)tmp;
 			}
 		}
 		return result;
+	}
+	
+	@Override 
+	protected PageWriter writeDown() {
+		PageWriter pw = super.writeDown();
+		for (IndexValueInstance value: data) {
+			pw.writeInteger(value.page);
+			pw.writeInteger(value.offset);
+		}
+		return pw;
+	}
+	
+	@Override
+	protected byte getMyType() {
+		return myType;
 	}
 
 }

@@ -1,11 +1,15 @@
 package audb.table;
 
+import audb.page.Page;
+import audb.type.Type;
 
 public class DoubleElement implements TableElement {
-	final Double value;
+	public final Double value;
+	public final Type type;
 	
-	public DoubleElement(double v) {
+	public DoubleElement(double v, Type type) {
 		value = v;
+		this.type = type;
 	}
 	
 	public String toString() {
@@ -26,5 +30,15 @@ public class DoubleElement implements TableElement {
 
 	public int getSizeInBytes() {
 		return Double.BYTES;
+	}
+
+	@Override
+	public byte[] toBytes() {
+		return Page.doubleToBytes(value);
+	}
+
+	@Override
+	public Type getType() {
+		return type;
 	}
 }

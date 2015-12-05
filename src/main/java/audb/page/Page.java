@@ -58,25 +58,66 @@ public class Page {
         return bytesToLong(bytes);
     }
 
+    public void writeInteger(int offset, int value) {
+    	byte[] bytes = intToBytes(value);
+    	System.arraycopy(bytes, 0, data, offset, bytes.length);
+    }
+    
     public void writeLong(int offset, long value) {
         byte[] bytes = longToBytes(value);
         System.arraycopy(bytes, 0, data, offset, bytes.length);
     }
+    
+    public void writeByte(int offset, byte value) {
+    	data[offset] = value;
+    }
+    
+    public void writeData(byte[] dataBytes, int offset) {
+    	System.arraycopy(dataBytes, 0, data, offset, dataBytes.length);
+    }
 
 
     private static ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-
+    private static ByteBuffer intBuffer = ByteBuffer.allocate(Integer.BYTES);
+    private static ByteBuffer doubleBuffer = ByteBuffer.allocate(Double.BYTES);
+    
     public static byte[] longToBytes(long x) {
         buffer.clear();
         buffer.putLong(0, x);
         return buffer.array();
     }
-
+    
+    public static byte[] intToBytes(int x) {
+    	intBuffer.clear();
+    	intBuffer.putInt(0, x);
+        return intBuffer.array();
+    }
+    
+    public static byte[] doubleToBytes(double x) {
+    	doubleBuffer.clear();
+    	doubleBuffer.putDouble(0, x);
+        return doubleBuffer.array();
+    }
+    
     public static long bytesToLong(byte[] bytes) {
         buffer.clear();
         buffer.put(bytes, 0, bytes.length);
         buffer.flip(); 
         return buffer.getLong();
+    }
+    
+    public static int bytesToInt(byte[] bytes) {
+    	intBuffer.clear();
+    	intBuffer.put(bytes, 0, bytes.length);
+    	intBuffer.flip(); 
+        return intBuffer.getInt();
+    }
+    
+    public static double bytesToDouble(byte[] bytes) {
+    	doubleBuffer.clear();
+    	doubleBuffer.put(bytes, 0, bytes.length);
+    	doubleBuffer.flip(); 
+        return doubleBuffer.getDouble();
     }
 
 	public long getLastAccessTime() {

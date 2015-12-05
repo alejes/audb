@@ -25,15 +25,16 @@ public class VarcharType extends Type {
     	return length;
     }
 
+    // gets TableElement
     public byte[] toBytes(Object o) throws Exception {
         byte[] bytes = ((String)o).getBytes(StandardCharsets.US_ASCII);
-        if(bytes.length != length)
+        if(bytes.length > length)
             throw new Exception("VarcharType.java");
         return bytes;
     }
 
     public boolean isValid(Object o) {
-        return (o instanceof String && ((String)o).length() == length);
+        return (o instanceof String && ((String)o).length() <= length);
     }
     
     public TableElement fromBytes(byte[] data) {

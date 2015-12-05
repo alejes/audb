@@ -1,7 +1,11 @@
 package audb.table;
 
-public interface TableElement {
+import audb.type.Type;
+
+public interface TableElement extends Comparable<TableElement> {
 	public String toString();
 	public int compareTo(TableElement other);
 	public int getSizeInBytes();
+	public byte[] toBytes();
+	Type getType();
 }

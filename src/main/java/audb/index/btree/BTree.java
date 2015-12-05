@@ -2,46 +2,51 @@ package audb.index.btree;
 
 import java.util.List;
 
+import audb.index.IndexKeyInstance;
+import audb.index.IndexValueInstance;
+import audb.index.Index.Order;
 import audb.page.PageStructure;
+import audb.type.Type;
 import audb.util.Pair;
 
 
 
-public class BTree<K extends Comparable<K>, V> {
-	BTreeNodeReference<K, V> root;
+public class BTree {
+	BTreeNode root;
 	PageStructure pageStructure;
+	NodeReader nr;
 	int fanout;
 
-	public BTree(int fanout, PageStructure ps) {
-		BTreeLeaf<K, V> leaf = new BTreeLeaf<K, V>(fanout, pageStructure, null);
-		root = new BTreeNodeReference<K, V>(leaf);
+	public BTree(int fanout, PageStructure ps, List<Type> keyTypes, Order[] orders) {
+		nr = new NodeReader(keyTypes, orders, ps, fanout);
+		root = new BTreeLeaf(fanout, nr, -1, -1, null, null);
 		this.fanout = fanout;
 		pageStructure = ps;
 	}
 
-	public void insert(K k, V v) {
+	public void insert(IndexKeyInstance k, IndexValueInstance v) {
 		insert(Pair.newPair(k, v));
 	}
 
-	public void insert(Pair<K, V> p) {
-		BTreeNodeReference<K, V> tmp = root.getValue().insert(p);
+	public void insert(Pair<IndexKeyInstance, IndexValueInstance> p) {
+		BTreeNode tmp = root.insert(p);
 		if (null == tmp) {
 			return;
 		}
 
-		BTreeInnerNode<K,V> node = new BTreeInnerNode<K, V>(fanout, pageStructure, root, tmp);
-		root = new BTreeNodeReference<K, V>(node);
+		root = new BTreeInnerNode(fanout, nr, root, tmp);
 	}
 
-	public void remove(K key) {
-		root = root.getValue().remove(key);
+	public void remove(IndexKeyInstance key) {
+		root = root.remove(key);
 	}
 
-	public List<V> find(K key) {
-		return root.getValue().find(key);
+	public List<IndexValueInstance> find(IndexKeyInstance key) {
+		return root.find(key);
 	}
 
-	public List<V> findAll(K bottomKey, K topKey, List<K> excludeKeys) {
-		return root.getValue().findAll(bottomKey, topKey, excludeKeys);
+	public List<IndexValueInstance> findAll(IndexKeyInstance bottomKey, 
+			IndexKeyInstance topKey, List<IndexKeyInstance> excludeKeys) {
+		return root.findAll(bottomKey, topKey, excludeKeys);
 	}
 }
