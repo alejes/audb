@@ -79,7 +79,7 @@ public class BTreeTest extends TestCase {
     }
     
     public void testMixed() {
-        BTree<Integer, String> t = new BTree<Integer, String>(5);
+        BTree<Integer, String> t = new BTree<Integer, String>(10);
         
         HashMap<Integer, String> hm = new HashMap<Integer, String>();
         for (int i = 0; i < 100; i++) {
@@ -112,7 +112,7 @@ public class BTreeTest extends TestCase {
     }
     
     public void testFindAll() {
-        BTree<Integer, String> t = new BTree<Integer, String>(5);
+        BTree<Integer, String> t = new BTree<Integer, String>(6);
         
         HashMap<Integer, String> hm = new HashMap<Integer, String>();
         for (int i = 0; i < 100; i++) {
