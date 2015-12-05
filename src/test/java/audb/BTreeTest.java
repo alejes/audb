@@ -1,14 +1,20 @@
 package audb;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import audb.command.Command;
+import audb.command.Constraint;
 import audb.command.CreateTableCommand;
 import audb.command.InsertCommand;
+import audb.command.SelectCommand;
 import audb.index.Index.Order;
 import audb.parser.Parser;
 import audb.table.Table;
 import audb.table.TableManager;
 import audb.type.Type;
 import audb.type.VarcharType;
+import audb.util.Pair;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -54,6 +60,40 @@ public class BTreeTest extends TestCase {
         indexNames[0] = names[0];
         orders[0] = Order.ASC;
         t.addBTreeIndex(indexNames, orders);
+    }
+    
+    public void testfindIndex() throws Exception {
+        Parser parser = new Parser();
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+        Command command;
+        Type[] types = new Type[]{new VarcharType((byte)3), new VarcharType((byte)9)};
+        String[] names = new String[]{"number", "text"};
+
+        String tableName = "table1";
+        command = new CreateTableCommand(tableName, types, names);
+        command.exec();
+
+        for(int i = 0; i < 15; i++) {
+            String s1 = String.format("%03d", i);;
+            String s2 = "some_text";
+            Object arr[] = new Object[]{s1, s2};
+
+            command = new InsertCommand("table1", arr);
+            command.exec();
+        }
+        
+        Table t = tableManager.getTable(tableName);
+        Order[] orders = new Order[1];
+        String[] indexNames = new String[1];
+        indexNames[0] = names[0];
+        orders[0] = Order.ASC;
+        t.addBTreeIndex(indexNames, orders);
+        
+        List<Pair<String, Constraint>> constrs = new ArrayList<Pair<String, Constraint>>();
+        SelectCommand sc = new SelectCommand(tableName, constrs);
+        sc.exec();
     }
     
     /*

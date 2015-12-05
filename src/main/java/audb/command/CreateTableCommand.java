@@ -1,7 +1,12 @@
 package audb.command;
 
+import java.util.HashMap;
+import java.util.Iterator;
+
 import audb.table.Table;
+import audb.table.TableElement;
 import audb.type.Type;
+import audb.util.Pair;
 
 
 public class CreateTableCommand extends Command {
@@ -16,11 +21,11 @@ public class CreateTableCommand extends Command {
 		this.types = types;
 	}
 
-    public Table exec() throws Exception {
+    public Pair<Table, Iterator<HashMap<String, TableElement>>> exec() throws Exception {
 		if(tableManager.hasTable(tableName))
 			throw new Exception("CreateTableCommand.java");
 		tableManager.createTable(tableName, types, names);				
-
+		
     	return null;
     }
 

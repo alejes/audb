@@ -1,17 +1,19 @@
 package audb.parser;
 
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
 import audb.command.Command;
+import audb.command.Constraint;
 import audb.command.SelectCommand;
+import audb.util.Pair;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
-
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class Parser {
@@ -71,8 +73,7 @@ public class Parser {
         else
             System.out.println("Limits: " + limits.toString());
 
-
-        return new SelectCommand(from);
+        return new SelectCommand(from, new ArrayList<Pair<String, Constraint>>());
     }
 
     public Command getCommand(String str) throws Exception {

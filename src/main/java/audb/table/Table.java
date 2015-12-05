@@ -6,15 +6,20 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import audb.command.Constraint;
 import audb.index.BTreeIndex;
 import audb.index.Index;
 import audb.index.Index.Order;
+import audb.index.IndexValueInstance;
 import audb.page.Page;
 import audb.page.PageManager;
 import audb.page.PageStructure;
+import audb.result.ConditionalTableIterator;
 import audb.result.FullScanIterator;
+import audb.result.IndexedConditionalTableIterator;
 import audb.type.MutableLong;
 import audb.type.Type;
+import audb.util.Pair;
 
 
 public class Table implements Iterable<HashMap<String, TableElement>> {
@@ -240,6 +245,25 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
     
 	public Iterator<HashMap<String, TableElement>> iterator() {
 		return new FullScanIterator(this);
+	}
+	
+	public Iterator<HashMap<String, TableElement>> select(List<Pair<String, Constraint>> constrs) {
+		Index goodIndex = null;
+		for (Index idx : indexList) {
+			if (idx.canResolve(names)) {
+				goodIndex = idx;
+				break;
+			}
+		}
+		
+		if (null != goodIndex) {
+			List<Pair<String, Constraint>> nonIndexedConstraints = 
+					goodIndex.filterNonIndexedConstraints(constrs);
+			List<IndexValueInstance> pagesAndOffsets = goodIndex.find(constrs);
+			return new IndexedConditionalTableIterator(this, pagesAndOffsets, nonIndexedConstraints);
+		} else {
+			return new ConditionalTableIterator(this, constrs);
+		}
 	}
 
 }
