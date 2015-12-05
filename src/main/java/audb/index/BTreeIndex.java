@@ -89,9 +89,9 @@ public class BTreeIndex extends Index {
     	}
     }
     
-    public void create(String[] names, Order[] orders) throws Exception {
+    public void create(String[] names, Order[] orders) {
+    	super.create(names, orders);
     	long size = (pageStructure.getCountOfPages() * PageManager.PAGE_SIZE + 512) / 1024;
-    	
     	int maxKeySize = 0;
     	FullScanIterator iter = (FullScanIterator)table.iterator();
     	HashMap<String, TableElement> row = iter.next();
@@ -102,8 +102,13 @@ public class BTreeIndex extends Index {
     		maxKeySize += el.getSizeInBytes();
     	}
     	
-    	int keysPerPage = PageManager.PAGE_SIZE / (maxKeySize + Integer.BYTES);
-    	btree = new BTree(keysPerPage, pageStructure, keyElementsTypes, orders);
+    	int innerBound = (PageManager.PAGE_SIZE - Byte.BYTES - Integer.BYTES +
+    			maxKeySize) / (maxKeySize + Integer.BYTES);
+    	int leafBound = (PageManager.PAGE_SIZE - Byte.BYTES - Integer.BYTES +
+    			maxKeySize + IndexValueInstance.getSizeInBytes()) / (maxKeySize + 
+    					IndexValueInstance.getSizeInBytes());
+    	int fanout = Math.min(innerBound, leafBound);
+    	btree = new BTree(fanout, pageStructure, keyElementsTypes, orders);
     	
     	
     	if (size <= MAX_RAM_SIZE_MB) {

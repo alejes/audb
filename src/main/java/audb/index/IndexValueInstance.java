@@ -13,4 +13,8 @@ public class IndexValueInstance implements Comparable<IndexValueInstance> {
 	public int compareTo(IndexValueInstance o) {
 		return Integer.compare(page, o.page);
 	}
+	
+	public static int getSizeInBytes() {
+		return 2 * Integer.BYTES;
+	}
 }

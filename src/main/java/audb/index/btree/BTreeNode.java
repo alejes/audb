@@ -25,25 +25,26 @@ public abstract class BTreeNode {
 	NodeReader nodeReader;
 	List<IndexKeyInstance> keys;
 	
-	public BTreeNode(int fanout, NodeReader nr, int pageNumber, List<IndexKeyInstance> keys) {
-		this.fanout = fanout;
-		maxKeysNumber = fanout - 1;
-		minChildrenNumber = (fanout + 1) / 2;
-		this.nodeReader = nr;
-		this.pageNumber = pageNumber == -1 ? (int)nr.getPageStructure().getEmptyPage() : pageNumber;
+	protected BTreeNode(int fanout, NodeReader nr, int pageNumber, List<IndexKeyInstance> keys) {
+		this(fanout, nr, pageNumber);
 	/*	if (pageNumber != -1) {
 			readUp();
 		}*/
 		this.keys = keys == null ? new ArrayList<IndexKeyInstance>(maxKeysNumber) : keys;
 	}
-
-	public BTreeNode(int fanout, NodeReader nr, BTreeNode child1, BTreeNode child2) {
+	
+	private BTreeNode(int fanout, NodeReader nr, int pageNumber) {
+		this.fanout = fanout;
 		maxKeysNumber = fanout - 1;
 		minChildrenNumber = (fanout + 1) / 2;
-		this.fanout = fanout;
+		this.nodeReader = nr;
+		this.pageNumber = pageNumber == -1 ? (int)nr.getPageStructure().getEmptyPage() : pageNumber;
+	}
+
+	public BTreeNode(int fanout, NodeReader nr, BTreeNode child1, BTreeNode child2) {
+		this(fanout, nr, -1);
 		keys = new ArrayList<IndexKeyInstance>(maxKeysNumber);
 		keys.add(child1.getMaxKey());
-		this.pageNumber = (int)nr.getPageStructure().getEmptyPage();
 	}
 
 	abstract BTreeNode insert(Pair<IndexKeyInstance, IndexValueInstance> p);

@@ -23,7 +23,8 @@ public class FullScanIterator implements TableIterator {
 
 
 	protected HashMap<String, TableElement> next;
-	protected Page page;
+	protected Page currentElementPage;
+	protected Page nextElementPage;
     int offset;
     long countOfRecords;
 
@@ -40,16 +41,16 @@ public class FullScanIterator implements TableIterator {
         countOfRecords = 0;
 
         if(pfs.hasNext()) {
-            page = pfs.getNext();
-            countOfRecords = page.readLong(Table.COUNT_OF_RECORDS);
+            nextElementPage = currentElementPage = pfs.getNext();
+            countOfRecords = currentElementPage.readLong(Table.COUNT_OF_RECORDS);
         }
 
         if (countOfRecords > 0)
-            next = this.table.get().read(page, offset);
+            next = this.table.get().read(currentElementPage, offset);
 	}
 	
 	public long getCurrentPageNumber() {
-		return page.getPageNumber();
+		return currentElementPage.getPageNumber();
 	}
 	
 	public int getCurrentOffset() {
@@ -79,19 +80,20 @@ public class FullScanIterator implements TableIterator {
 	public HashMap<String, TableElement> next() {
 
     	HashMap<String, TableElement> tmp = next;
+    	currentElementPage = nextElementPage;
         if(offset >= countOfRecords) {
             offset = 0;
             if(pfs.hasNext()) {
-                page = pfs.getNext();
-                countOfRecords = page.readLong(Table.COUNT_OF_RECORDS);
+                nextElementPage = pfs.getNext();
+                countOfRecords = nextElementPage.readLong(Table.COUNT_OF_RECORDS);
             } else {
-                page = null;
+                nextElementPage = null;
                 countOfRecords = 0;
             }
         }
 
         if(countOfRecords > offset) {
-            next = table.get().read(page, offset);
+            next = table.get().read(nextElementPage, offset);
             offset += 1;
         } else 
             next = null;

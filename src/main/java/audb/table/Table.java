@@ -226,16 +226,11 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
         }
     }
 
-    public void addBTreeIndex(String[] indexNames, Type[] indexTypes,
-        Order[] orders) throws Exception {
+    public void addBTreeIndex(String[] indexNames, Order[] orders) {
         long emptyPage = pageStructure.getEmptyPage();
-        try {
-            Index index = new BTreeIndex(this, emptyPage, pageStructure);
+           Index index = new BTreeIndex(this, emptyPage, pageStructure);
             index.create(indexNames, orders);
-        } catch (Exception e) {
-            pageStructure.releasePage(emptyPage);
-            throw e;
-        }
+     
         Page page = pageStructure.getPage(INFO_PAGE);
         long indexCount = page.readLong(INDEX_COUNT);
         page.writeLong(INDEX_COUNT, indexCount + 1);

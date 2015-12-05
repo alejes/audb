@@ -24,7 +24,10 @@ public abstract class Index {
 
     public abstract void init() throws Exception;
 
-    public abstract void create(String[] names, Order[] orders) throws Exception;
+    public void create(String[] names, Order[] orders) {
+    	columnNames = names;
+    	this.orders = orders;
+    }
 
     public abstract void add(TableElement[] data, int pageNumber, int offset);
     
