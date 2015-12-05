@@ -6,15 +6,20 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import audb.command.Constraint;
 import audb.index.BTreeIndex;
 import audb.index.Index;
 import audb.index.Index.Order;
+import audb.index.IndexValueInstance;
 import audb.page.Page;
 import audb.page.PageManager;
 import audb.page.PageStructure;
+import audb.result.ConditionalTableIterator;
 import audb.result.FullScanIterator;
+import audb.result.IndexedConditionalTableIterator;
 import audb.type.MutableLong;
 import audb.type.Type;
+import audb.util.Pair;
 
 
 public class Table implements Iterable<HashMap<String, TableElement>> {
@@ -226,16 +231,11 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
         }
     }
 
-    public void addBTreeIndex(String[] indexNames, Type[] indexTypes,
-        Order[] orders) throws Exception {
+    public void addBTreeIndex(String[] indexNames, Order[] orders) {
         long emptyPage = pageStructure.getEmptyPage();
-        try {
-            Index index = new BTreeIndex(this, emptyPage, pageStructure);
+           Index index = new BTreeIndex(this, emptyPage, pageStructure);
             index.create(indexNames, orders);
-        } catch (Exception e) {
-            pageStructure.releasePage(emptyPage);
-            throw e;
-        }
+     
         Page page = pageStructure.getPage(INFO_PAGE);
         long indexCount = page.readLong(INDEX_COUNT);
         page.writeLong(INDEX_COUNT, indexCount + 1);
@@ -245,6 +245,25 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
     
 	public Iterator<HashMap<String, TableElement>> iterator() {
 		return new FullScanIterator(this);
+	}
+	
+	public Iterator<HashMap<String, TableElement>> select(List<Pair<String, Constraint>> constrs) {
+		Index goodIndex = null;
+		for (Index idx : indexList) {
+			if (idx.canResolve(names)) {
+				goodIndex = idx;
+				break;
+			}
+		}
+		
+		if (null != goodIndex) {
+			List<Pair<String, Constraint>> nonIndexedConstraints = 
+					goodIndex.filterNonIndexedConstraints(constrs);
+			List<IndexValueInstance> pagesAndOffsets = goodIndex.find(constrs);
+			return new IndexedConditionalTableIterator(this, pagesAndOffsets, nonIndexedConstraints);
+		} else {
+			return new ConditionalTableIterator(this, constrs);
+		}
 	}
 
 }

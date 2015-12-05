@@ -4,10 +4,10 @@ import audb.index.Index.Order;
 import audb.table.TableElement;
 
 public class IndexKeyInstance implements Comparable<IndexKeyInstance> {
-	final Order[] orders;
-	final TableElement[] elements;
+	public final Order[] orders;
+	public final TableElement[] elements;
 	
-	IndexKeyInstance(Order[] orders, TableElement[] elements) {
+	public IndexKeyInstance(Order[] orders, TableElement[] elements) {
 		this.orders = orders;
 		this.elements = elements;
 	}

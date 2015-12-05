@@ -3,6 +3,7 @@ package audb;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import audb.command.Command;
 import audb.command.CreateTableCommand;
@@ -45,13 +46,14 @@ public class Main {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while ((s = in.readLine()) != null && s.length() != 0) {
                 command = parser.getCommand(s);
-                Table res = command.exec();
+                Iterator<HashMap<String, TableElement>> res = command.exec().second;
                 
                 if (null == res)
                 	continue;
                 
-                for (HashMap<String, TableElement> arr : res) {
-                    for (String name : res.getNames()) {
+                while (res.hasNext()) {
+                	HashMap<String, TableElement> arr = res.next();
+                    for (String name : arr.keySet()) {
                         if (arr.get(name) instanceof VarcharElement) {
                             System.out.print(arr.get(name).toString() + " ");
                         }

@@ -1,6 +1,7 @@
 package audb.type;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import audb.table.TableElement;
 import audb.table.VarcharElement;
@@ -27,13 +28,12 @@ public class VarcharType extends Type {
 
     public byte[] toBytes(Object o) throws Exception {
         byte[] bytes = ((String)o).getBytes(StandardCharsets.US_ASCII);
-        if(bytes.length != length)
-            throw new Exception("VarcharType.java");
+        bytes = Arrays.copyOf(bytes, length);
         return bytes;
     }
 
     public boolean isValid(Object o) {
-        return (o instanceof String && ((String)o).length() == length);
+        return (o instanceof String && ((String)o).length() <= length);
     }
     
     public TableElement fromBytes(byte[] data) {
