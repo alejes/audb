@@ -10,6 +10,7 @@ import java.util.List;
 import audb.command.Constraint;
 import audb.command.Constraint.ConstraintType;
 import audb.index.Index.Order;
+import audb.index.btree.BTree;
 import audb.page.PageManager;
 import audb.page.PageStructure;
 import audb.result.FullScanIterator;
@@ -100,7 +101,7 @@ public class BTreeIndex extends Index {
     	}
     	
     	int keysPerPage = PageManager.PAGE_SIZE / (maxKeySize + Integer.BYTES);
-    	btree = new BTree<IndexKeyInstance, IndexValueInstance>(keysPerPage);
+    	btree = new BTree<IndexKeyInstance, IndexValueInstance>(keysPerPage, pageStructure);
     	
     	
     	if (size <= MAX_RAM_SIZE_MB) {

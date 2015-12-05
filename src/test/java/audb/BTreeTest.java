@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import audb.index.BTree;
+import audb.index.btree.BTree;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
