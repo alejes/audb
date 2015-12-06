@@ -1,6 +1,8 @@
 package audb;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import audb.command.Command;
@@ -11,6 +13,7 @@ import audb.command.SelectCommand;
 import audb.index.Index.Order;
 import audb.parser.Parser;
 import audb.table.Table;
+import audb.table.TableElement;
 import audb.table.TableManager;
 import audb.type.Type;
 import audb.type.VarcharType;
@@ -93,7 +96,16 @@ public class BTreeTest extends TestCase {
         
         List<Pair<String, Constraint>> constrs = new ArrayList<Pair<String, Constraint>>();
         SelectCommand sc = new SelectCommand(tableName, constrs);
-        sc.exec();
+        Pair<Table, Iterator<HashMap<String, TableElement>>> result = sc.exec();
+        Iterator<HashMap<String, TableElement>> iter = result.second;
+        
+        int size = 0;
+        while (iter.hasNext()) {
+        	size++;
+        	iter.next();
+        }
+        
+        //assertEquals(15, size);
     }
     
     /*

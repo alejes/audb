@@ -22,9 +22,9 @@ public class SelectCommand extends Command {
         if(!tableManager.hasTable(tableName))
             throw new Exception("InsertCommand.java");
         if (constraints.size() == 0)
-        	return Pair.newPair(null, tableManager.getTable(tableName).iterator());
+        	return Pair.newPair(tableManager.getTable(tableName), tableManager.getTable(tableName).iterator());
         
-        return Pair.newPair(null, tableManager.getTable(tableName).select(constraints));
+        return Pair.newPair(tableManager.getTable(tableName), tableManager.getTable(tableName).select(constraints));
         
     }
 
