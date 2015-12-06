@@ -38,7 +38,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 	public static final int COUNT_OF_RECORDS = PageManager.PAGE_SIZE - 3 * Long.BYTES;
 	public static final int INFO_SIZE        = 3 * Long.BYTES;
 
-	public static final int INDEX_COUNT      = PageManager.PAGE_SIZE - 4 * Long.BYTES;
+	public static final int INDEX_COUNT      = PageManager.PAGE_SIZE - 7 * Long.BYTES;
 
 
 	private PageStructure pageStructure;
