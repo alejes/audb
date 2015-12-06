@@ -8,6 +8,7 @@ import java.util.Iterator;
 import audb.command.Command;
 import audb.command.CreateTableCommand;
 import audb.command.InsertCommand;
+import audb.index.Index.Order;
 import audb.page.PageStructure;
 import audb.parser.Parser;
 import audb.table.Table;
@@ -41,6 +42,13 @@ public class Main {
                 command = new InsertCommand("table1", arr);
                 command.exec();
             }
+            
+            Table t = tableManager.getTable("table1");
+            Order[] orders = new Order[1];
+            String[] indexNames = new String[1];
+            indexNames[0] = names[0];
+            orders[0] = Order.ASC;
+            t.addBTreeIndex(indexNames, orders);
             
             String s;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
