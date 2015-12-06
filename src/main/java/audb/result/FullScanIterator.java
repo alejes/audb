@@ -80,6 +80,7 @@ public class FullScanIterator implements TableIterator {
 	public HashMap<String, TableElement> next() {
 
     	HashMap<String, TableElement> tmp = next;
+        offset++;
     	currentElementPage = nextElementPage;
         if(offset >= countOfRecords) {
             offset = 0;
@@ -94,7 +95,6 @@ public class FullScanIterator implements TableIterator {
 
         if(countOfRecords > offset) {
             next = table.get().read(nextElementPage, offset);
-            offset += 1;
         } else 
             next = null;
 

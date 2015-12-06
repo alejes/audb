@@ -102,10 +102,11 @@ public class BTreeTest extends TestCase {
         int size = 0;
         while (iter.hasNext()) {
         	size++;
-        	iter.next();
+        	HashMap<String, TableElement> row = iter.next();
+        	System.out.println(row.get("number"));
         }
         
-        //assertEquals(15, size);
+        assertEquals(15, size);
     }
     
     /*
