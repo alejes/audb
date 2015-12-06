@@ -26,6 +26,7 @@ public class FullScanIterator implements TableIterator {
 	protected Page currentElementPage;
 	protected Page nextElementPage;
     int offset;
+    int currentOffset = -1;
     int countOfRecords;
 
 	public FullScanIterator(Table table) {
@@ -54,7 +55,7 @@ public class FullScanIterator implements TableIterator {
 	}
 	
 	public int getCurrentOffset() {
-		return offset;
+		return currentOffset;
 	}
 	
     public Type[] getTypes() {
@@ -80,7 +81,7 @@ public class FullScanIterator implements TableIterator {
 	public HashMap<String, TableElement> next() {
 
     	HashMap<String, TableElement> tmp = next;
-        offset++;
+        currentOffset = offset++;
     	currentElementPage = nextElementPage;
         if(offset >= countOfRecords) {
             offset = 0;

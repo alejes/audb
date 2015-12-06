@@ -109,7 +109,7 @@ public class BTreeTest extends TestCase {
 		}
 		assertEquals(15, size);
 	
-		/*
+		System.out.println(" ");
 		constrs.add(Pair.newPair("number", new Constraint(ConstraintType.GREATER, 
 				new VarcharElement("002", (VarcharType)types[0]))));
 		sc = new SelectCommand(tableName, constrs);
@@ -120,7 +120,23 @@ public class BTreeTest extends TestCase {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
 			System.out.println(row.get("number"));
-		}*/
+		}
+		assertEquals(size, 12);
+		
+		System.out.println(" ");
+		constrs.add(Pair.newPair("number", new Constraint(ConstraintType.GREATER, 
+				new VarcharElement("001", (VarcharType)types[0]))));
+		sc = new SelectCommand(tableName, constrs);
+		result = sc.exec();
+		iter = result.second;
+		size = 0;
+		while (iter.hasNext()) {
+			size++;
+			HashMap<String, TableElement> row = iter.next();
+			System.out.println(row.get("number"));
+		}
+		assertEquals(12, size);
+		
 		
 	}
 

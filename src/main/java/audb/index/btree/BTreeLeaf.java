@@ -45,6 +45,7 @@ public class BTreeLeaf extends BTreeNode {
 		}
 
 		if (data.size() <= maxKeysNumber) {
+			writeDown();
 			return null;
 		}
 
@@ -115,11 +116,13 @@ public class BTreeLeaf extends BTreeNode {
 		// merge them!
 		if (null != rightSibling) {
 			mergeWithRight((BTreeLeaf)rightSibling);
+			writeDown();
 			return RemoveResult.REMOVED_MERGED_RIGHT;
 		}
 
 		if (null != leftSibling) {
 			((BTreeLeaf)leftSibling).mergeWithRight(this);
+			leftSibling.writeDown();
 			return RemoveResult.REMOVED_MERGED_LEFT;
 		}
 
@@ -170,7 +173,8 @@ public class BTreeLeaf extends BTreeNode {
 	}
 
 	@Override
-	public List<IndexValueInstance> findAll(IndexKeyInstance bottomKey, IndexKeyInstance topKey, List<IndexKeyInstance> excludeKeys) {	
+	public List<IndexValueInstance> findAll(IndexKeyInstance bottomKey, 
+			IndexKeyInstance topKey, List<IndexKeyInstance> excludeKeys) {	
 		int index = findChildIndex(bottomKey, data.size() - 1);
 		List<IndexValueInstance> result = new LinkedList<IndexValueInstance>();
 
@@ -210,10 +214,10 @@ public class BTreeLeaf extends BTreeNode {
 			}
 			
 			if (!skipValue) {
-				result.add(data.get(index));
+				result.add(cur.data.get(index));
 			}
 			
-			if (++index == data.size()) {
+			if (++index == cur.data.size()) {
 				index = 0;
 				BTreeNode tmp = nodeReader.readNode(cur.nextNodePage);
 				if (null == tmp) {
@@ -232,6 +236,7 @@ public class BTreeLeaf extends BTreeNode {
 			pw.writeInteger(value.page);
 			pw.writeInteger(value.offset);
 		}
+		pw.writeInteger(nextNodePage);
 		return pw;
 	}
 	

@@ -28,9 +28,9 @@ public class Constraint {
 		case NOT_EQUAL:
 			return (0 != element.compareTo(reference));
 		case LESS:
-			return (element.compareTo(reference) == -1);
+			return (element.compareTo(reference) < 0);
 		case GREATER:
-			return (element.compareTo(reference) == 1);
+			return (element.compareTo(reference) > 0);
 		case LESS_OR_EQUAL:
 			return (element.compareTo(reference) <= 0);
 		case GREATER_OR_EQUAL:

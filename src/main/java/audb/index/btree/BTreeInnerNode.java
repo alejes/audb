@@ -67,6 +67,7 @@ public class BTreeInnerNode extends BTreeNode {
 		childrenNodes.add(insertIndex, child.pageNumber);
 
 		if (keys.size() <= maxKeysNumber) {
+			writeDown();
 			return null;
 		}
 

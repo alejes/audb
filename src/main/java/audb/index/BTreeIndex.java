@@ -42,7 +42,7 @@ public class BTreeIndex extends Index {
 	private ComparablePair<IndexKeyInstance, IndexValueInstance> buildIndexPair(
 			FullScanIterator iter, String[] names) {
 		HashMap<String, TableElement> row = iter.next();
-		int offset = iter.getCurrentOffset() - 1;
+		int offset = iter.getCurrentOffset();
 		int pageNum = (int) iter.getCurrentPageNumber();
 		TableElement[] elements = new TableElement[names.length];
 		for (int i = 0; i < names.length; i++) {
@@ -102,7 +102,7 @@ public class BTreeIndex extends Index {
 
 		int innerBound = (PageManager.PAGE_SIZE - Byte.BYTES - Integer.BYTES +
 				maxKeySize) / (maxKeySize + Integer.BYTES);
-		int leafBound = (PageManager.PAGE_SIZE - Byte.BYTES - Integer.BYTES +
+		int leafBound = (PageManager.PAGE_SIZE - Byte.BYTES - 2*Integer.BYTES +
 				maxKeySize + IndexValueInstance.getSizeInBytes()) / (maxKeySize + 
 						IndexValueInstance.getSizeInBytes());
 		int fanout = Math.min(innerBound, leafBound);
