@@ -17,11 +17,11 @@ public abstract class Index {
     }
 
     protected PageStructure pageStructure;
-    protected long mainPage;
+    protected int mainPage;
     protected List<String> keyColumnsNames;
     protected Order[] orders;
     
-    public Index(Table table, long mainPage, PageStructure pageStructure) {
+    public Index(Table table, int mainPage, PageStructure pageStructure) {
         this.pageStructure = pageStructure;
         this.mainPage = mainPage;
     }

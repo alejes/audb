@@ -22,7 +22,7 @@ public class PageCache {
     	return instance;
     }
 
-    public Page getPage(PageManager pm, long number) {
+    public Page getPage(PageManager pm, int number) {
         Page page = null;
         String key = pm.getFileName() + "/" + number;
         if(hashMap.containsKey(key)) {

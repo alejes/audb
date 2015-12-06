@@ -6,14 +6,14 @@ import java.nio.ByteBuffer;
 public class Page {
 
     private int pinCount;
-    private long pageNumber;
+    private int pageNumber;
     private boolean isDirty;
 
     public byte[] data;
     private PageManager pageManager;
     private long lastAccessTime = -1;
 
-    public Page(PageManager pm, byte[] arr, long number) {
+    public Page(PageManager pm, byte[] arr, int number) {
         data = arr;
         pageNumber = number;
         pinCount = 0;
@@ -47,7 +47,7 @@ public class Page {
         return isDirty;
     }
 
-    public long getPageNumber() {
+    public int getPageNumber() {
         return pageNumber;
     }
 
@@ -58,6 +58,12 @@ public class Page {
         return bytesToLong(bytes);
     }
 
+    public int readInteger(int offset) {
+        byte[] bytes = new byte[Integer.BYTES];
+        System.arraycopy(data, offset, bytes, 0, bytes.length);
+        return bytesToInt(bytes);
+    }
+    
     public void writeInteger(int offset, int value) {
     	byte[] bytes = intToBytes(value);
     	System.arraycopy(bytes, 0, data, offset, bytes.length);

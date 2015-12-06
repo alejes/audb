@@ -14,7 +14,7 @@ public class IndexKeyInstance implements Comparable<IndexKeyInstance> {
 	
 	public int compareTo(IndexKeyInstance other) {
 		for (int i = 0; i < elements.length; i++) {		
-			if (null == elements[i]) {
+			if (null == other.elements[i] || null == elements[i]) {
 				continue;
 			}
 			int result = elements[i].compareTo(other.elements[i]);

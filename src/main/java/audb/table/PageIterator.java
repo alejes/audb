@@ -13,11 +13,11 @@ public class PageIterator {
     private PageCache pageCache;
     private PageStructure pageStructure;
 
-    long firstFullPageNumber;
-    long currentPageNumber;
+    int firstFullPageNumber;
+    int currentPageNumber;
 
     private Page curPage = null;
-    private long nextPageNumber;
+    private int nextPageNumber;
 
     private boolean isPagePinned;
 
@@ -29,8 +29,8 @@ public class PageIterator {
         curPage.pin();
         isPagePinned = true;
 
-        firstFullPageNumber = curPage.readLong(Table.FIRST_FULL);
-        currentPageNumber = curPage.readLong(Table.CURRENT_PAGE);
+        firstFullPageNumber = curPage.readInteger(Table.FIRST_FULL);
+        currentPageNumber = curPage.readInteger(Table.CURRENT_PAGE);
 
         nextPageNumber = currentPageNumber;
         if(firstFullPageNumber != Table.FULL_END)
@@ -50,7 +50,7 @@ public class PageIterator {
         if(nextPageNumber == currentPageNumber)
             nextPageNumber = Table.INFO_PAGE;
         else
-            nextPageNumber = curPage.readLong(Table.NEXT_PAGE);
+            nextPageNumber = curPage.readInteger(Table.NEXT_PAGE);
 
         if(nextPageNumber == Table.FULL_END)
             nextPageNumber = currentPageNumber;

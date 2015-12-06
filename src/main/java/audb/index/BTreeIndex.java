@@ -27,7 +27,7 @@ public class BTreeIndex extends Index {
 	private BTree btree;
 
 	// load from database
-	public BTreeIndex(Table table, long mainPage, PageStructure pageStructure) {
+	public BTreeIndex(Table table, int mainPage, PageStructure pageStructure) {
 		super(table, mainPage, pageStructure);
 		this.table = table;
 

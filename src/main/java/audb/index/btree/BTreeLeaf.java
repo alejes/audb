@@ -170,19 +170,22 @@ public class BTreeLeaf extends BTreeNode {
 	}
 
 	@Override
-	public List<IndexValueInstance> findAll(IndexKeyInstance bottomKey, IndexKeyInstance topKey, List<IndexKeyInstance> excludeKeys) {
+	public List<IndexValueInstance> findAll(IndexKeyInstance bottomKey, IndexKeyInstance topKey, List<IndexKeyInstance> excludeKeys) {	
 		int index = findChildIndex(bottomKey, data.size() - 1);
 		List<IndexValueInstance> result = new LinkedList<IndexValueInstance>();
 
-		if (index == -1) {
+		if (data.size() == 0) {
 			return result;
 		}
 
 		BTreeLeaf cur = this;
 		Iterator<IndexKeyInstance> exIter = excludeKeys.iterator();
 		IndexKeyInstance exKey = exIter.hasNext() ? exIter.next() : null;
-		while (cur.keys.get(index).compareTo(topKey) <= 0) {
-
+		
+		while (true) {
+			if (null != topKey && cur.keys.get(index).compareTo(topKey) > 0)
+				break;
+			
 			boolean skipValue = false;
 			IndexKeyInstance currentKey = cur.keys.get(index);
 			boolean needCompare = true;

@@ -62,7 +62,10 @@ public abstract class BTreeNode {
 	// TODO binary search is a must here
 	protected int findChildIndex(IndexKeyInstance key, int maxIndex) {
 		int result = maxIndex;
-
+		
+		if (null == key) {
+			return 0;
+		}
 		for (int i = 0; i < maxIndex; i++) {
 			if (keys.get(i).compareTo(key) >= 0) {
 				result = i;
@@ -82,7 +85,7 @@ public abstract class BTreeNode {
 		Page p = nodeReader.getPageStructure().getPage(pageNumber);
 		PageWriter pw = new PageWriter(p);
 		pw.writeByte(getMyType());
-		pw.writeLong(keys.size());
+		pw.writeInteger(keys.size());
 		int elementsInKey = keys.get(0).elements.length; // TODO check
 		for (int i = 0; i < keys.size(); i++) {
 			for (int j = 0; j < elementsInKey; j++) {

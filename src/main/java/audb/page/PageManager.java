@@ -7,12 +7,12 @@ import java.io.RandomAccessFile;
 public class PageManager {
     
     public static final int PAGE_SIZE   = 128;
-    public static final long START_SIZE = 512;
+    public static final int START_SIZE = 512;
 
     private File file;
     private RandomAccessFile raf;
     private String fileName;
-    private long pageCount;
+    private int pageCount;
 
 
     public PageManager(String fileName) throws Exception {
@@ -23,11 +23,11 @@ public class PageManager {
             file.createNewFile();
         }
         raf = new RandomAccessFile(file, "rw");
-        pageCount = file.length() / PAGE_SIZE + 1;
-        for(long i = pageCount; i < START_SIZE; i++) addPage();
+        pageCount = (int) (file.length() / PAGE_SIZE + 1);
+        for(int i = pageCount; i < START_SIZE; i++) addPage();
     }
 
-    public Page readPage(long number) {
+    public Page readPage(int number) {
         if(number >= pageCount)
             return null;
         byte[] arr = new byte[PAGE_SIZE];

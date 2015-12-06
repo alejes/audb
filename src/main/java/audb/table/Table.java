@@ -17,7 +17,7 @@ import audb.page.PageStructure;
 import audb.result.ConditionalTableIterator;
 import audb.result.FullScanIterator;
 import audb.result.IndexedConditionalTableIterator;
-import audb.type.MutableLong;
+import audb.type.MutableInt;
 import audb.type.Type;
 import audb.util.Pair;
 
@@ -26,19 +26,19 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
 	public static final int TYPES_INFO       = 0;
 
-	public static final long INFO_PAGE       = PageStructure.INFO_PAGE;
+	public static final int INFO_PAGE       = PageStructure.INFO_PAGE;
 
-	public static final int CURRENT_PAGE     = PageManager.PAGE_SIZE - 4 * Long.BYTES;
-	public static final int FIRST_FULL       = PageManager.PAGE_SIZE - 5 * Long.BYTES;
-	public static final int LAST_FULL        = PageManager.PAGE_SIZE - 6 * Long.BYTES;
-	public static final long FULL_END        = -2;    
+	public static final int CURRENT_PAGE     = PageManager.PAGE_SIZE - 4 * Integer.BYTES;
+	public static final int FIRST_FULL       = PageManager.PAGE_SIZE - 5 * Integer.BYTES;
+	public static final int LAST_FULL        = PageManager.PAGE_SIZE - 6 * Integer.BYTES;
+	public static final int FULL_END        = -2;    
 
 	public static final int NEXT_PAGE        = PageStructure.NEXT_PAGE;
 	public static final int PREV_PAGE        = PageStructure.PREV_PAGE;
-	public static final int COUNT_OF_RECORDS = PageManager.PAGE_SIZE - 3 * Long.BYTES;
-	public static final int INFO_SIZE        = 3 * Long.BYTES;
+	public static final int COUNT_OF_RECORDS = PageManager.PAGE_SIZE - 3 * Integer.BYTES;
+	public static final int INFO_SIZE        = 3 * Integer.BYTES;
 
-	public static final int INDEX_COUNT      = PageManager.PAGE_SIZE - 7 * Long.BYTES;
+	public static final int INDEX_COUNT      = PageManager.PAGE_SIZE - 7 * Integer.BYTES;
 
 
 	private PageStructure pageStructure;
@@ -50,11 +50,11 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 	private int recordSize;
 	private int maxRecords;
 
-	private long nextEmptyPage;
-	private long nextFullPage;
-	private long lastEmptyPage;
-	private long lastFullPage;
-	private long countOfPages;
+	private int nextEmptyPage;
+	private int nextFullPage;
+	private int lastEmptyPage;
+	private int lastFullPage;
+	private int countOfPages;
 
 
 	public Table(PageStructure ps) {
@@ -90,9 +90,9 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 			this.types[i] = Type.makeType(type);
 		}
 
-		long indexCount = page.readLong(INDEX_COUNT);
-		for (long i = 1; i <= indexCount; ++i) {
-			Index index = new BTreeIndex(this, page.readLong(INDEX_COUNT - (int)i), pageStructure);
+		int indexCount = page.readInteger(INDEX_COUNT);
+		for (int i = 1; i <= indexCount; ++i) {
+			Index index = new BTreeIndex(this, page.readInteger(INDEX_COUNT - (int)i), pageStructure);
 			indexList.add(index);
 		}
 
@@ -115,10 +115,10 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 			ptr += name.length;
 		}
 
-		page.writeLong(CURRENT_PAGE, 0l);
-		page.writeLong(FIRST_FULL, FULL_END);
-		page.writeLong(LAST_FULL, FULL_END);
-		page.writeLong(INDEX_COUNT, 0l);
+		page.writeInteger(CURRENT_PAGE, 0);
+		page.writeInteger(FIRST_FULL, FULL_END);
+		page.writeInteger(LAST_FULL, FULL_END);
+		page.writeInteger(INDEX_COUNT, 0);
 		page.write();
 
 		getEmptyPage();
@@ -133,23 +133,23 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 	}
 
 	private void getEmptyPage() {
-		long emptyPage = pageStructure.getEmptyPage();
+		int emptyPage = pageStructure.getEmptyPage();
 		Page page = pageStructure.getPage(INFO_PAGE);
-		page.writeLong(CURRENT_PAGE, emptyPage);
+		page.writeInteger(CURRENT_PAGE, emptyPage);
 		page.write();
 
 		page = pageStructure.getPage(emptyPage);
-		page.writeLong(COUNT_OF_RECORDS, 0l);
+		page.writeInteger(COUNT_OF_RECORDS, 0);
 		page.write();
 	}
 
-	private void addFullPage(long pageNum) {
+	private void addFullPage(int pageNum) {
 		Page page = pageStructure.getPage(INFO_PAGE);
-		MutableLong firstPage = new MutableLong(page.readLong(FIRST_FULL));
-		MutableLong lastPage = new MutableLong(page.readLong(LAST_FULL));
+		MutableInt firstPage = new MutableInt(page.readInteger(FIRST_FULL));
+		MutableInt lastPage = new MutableInt(page.readInteger(LAST_FULL));
 		pageStructure.pushBack(pageNum, firstPage, lastPage, FULL_END);
-		page.writeLong(FIRST_FULL, firstPage.get());
-		page.writeLong(LAST_FULL, lastPage.get());
+		page.writeInteger(FIRST_FULL, firstPage.get());
+		page.writeInteger(LAST_FULL, lastPage.get());
 		page.write();
 	}
 
@@ -161,7 +161,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		return types;
 	}
 
-	private void write(long pageNum, int offset, Object[] objects) throws Exception {
+	private void write(int pageNum, int offset, Object[] objects) throws Exception {
 		Page page = pageStructure.getPage(pageNum);
 		int ptr = offset * recordSize;
 		for(int i = 0; i < types.length; i++) {
@@ -206,14 +206,14 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		}
 
 		Page page = pageStructure.getPage(INFO_PAGE);
-		long currentPage = page.readLong(CURRENT_PAGE);
+		int currentPage = page.readInteger(CURRENT_PAGE);
 
 		page = pageStructure.getPage(currentPage);
-		long countOfRecords = page.readLong(COUNT_OF_RECORDS);
-		write(currentPage, (int)countOfRecords, data);
+		int countOfRecords = page.readInteger(COUNT_OF_RECORDS);
+		write(currentPage, countOfRecords, data);
 
 		countOfRecords += 1;
-		page.writeLong(COUNT_OF_RECORDS, countOfRecords);
+		page.writeInteger(COUNT_OF_RECORDS, countOfRecords);
 		page.write();
 
 		if (countOfRecords >= maxRecords) {
@@ -232,14 +232,14 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 	}
 
 	public void addBTreeIndex(String[] indexNames, Order[] orders) {
-		long emptyPage = pageStructure.getEmptyPage();
+		int emptyPage = pageStructure.getEmptyPage();
 		Index index = new BTreeIndex(this, emptyPage, pageStructure);
 		index.create(indexNames, orders);
 
 		Page page = pageStructure.getPage(INFO_PAGE);
-		long indexCount = page.readLong(INDEX_COUNT) + 1;
-		page.writeLong(INDEX_COUNT, indexCount);
-		page.writeLong(INDEX_COUNT - (int)indexCount, emptyPage);
+		int indexCount = page.readInteger(INDEX_COUNT) + 1;
+		page.writeInteger(INDEX_COUNT, indexCount);
+		page.writeInteger(INDEX_COUNT - (int)indexCount, emptyPage);
 		indexList.add(index);
 	}
 

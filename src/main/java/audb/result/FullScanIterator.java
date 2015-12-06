@@ -26,7 +26,7 @@ public class FullScanIterator implements TableIterator {
 	protected Page currentElementPage;
 	protected Page nextElementPage;
     int offset;
-    long countOfRecords;
+    int countOfRecords;
 
 	public FullScanIterator(Table table) {
         this.table = new WeakReference<Table>(table);
@@ -42,14 +42,14 @@ public class FullScanIterator implements TableIterator {
 
         if(pfs.hasNext()) {
             nextElementPage = currentElementPage = pfs.getNext();
-            countOfRecords = currentElementPage.readLong(Table.COUNT_OF_RECORDS);
+            countOfRecords = currentElementPage.readInteger(Table.COUNT_OF_RECORDS);
         }
 
         if (countOfRecords > 0)
             next = this.table.get().read(currentElementPage, offset);
 	}
 	
-	public long getCurrentPageNumber() {
+	public int getCurrentPageNumber() {
 		return currentElementPage.getPageNumber();
 	}
 	
@@ -86,7 +86,7 @@ public class FullScanIterator implements TableIterator {
             offset = 0;
             if(pfs.hasNext()) {
                 nextElementPage = pfs.getNext();
-                countOfRecords = nextElementPage.readLong(Table.COUNT_OF_RECORDS);
+                countOfRecords = nextElementPage.readInteger(Table.COUNT_OF_RECORDS);
             } else {
                 nextElementPage = null;
                 countOfRecords = 0;

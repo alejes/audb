@@ -3,9 +3,9 @@ package audb.index.btree;
 import java.util.ArrayList;
 import java.util.List;
 
+import audb.index.Index.Order;
 import audb.index.IndexKeyInstance;
 import audb.index.IndexValueInstance;
-import audb.index.Index.Order;
 import audb.page.Page;
 import audb.page.PageReader;
 import audb.page.PageStructure;
@@ -43,7 +43,7 @@ public class NodeReader {
 		
 		byte type = p.data[0];
 		
-		int keysNumber = (int)Page.bytesToLong(pr.read(Long.BYTES));
+		int keysNumber = Page.bytesToInt(pr.read(Integer.BYTES));
 		if (type == BTreeInnerNode.myType)
 			return readInnerNode(pr, keysNumber);
 		return readLeafNode(pr, keysNumber);
@@ -70,7 +70,7 @@ public class NodeReader {
 		ArrayList<IndexValueInstance> values  = new ArrayList<IndexValueInstance>(fanout - 1);
 		
 		for (int i = 0; i < keysNumber; i++) {
-			int page = (int)Page.bytesToLong(pr.read(Long.BYTES));
+			int page = Page.bytesToInt(pr.read(Integer.BYTES));
 			int offset = Page.bytesToInt(pr.read(Integer.BYTES));
 			
 			values.add(new IndexValueInstance(page, offset));
@@ -86,7 +86,7 @@ public class NodeReader {
 		ArrayList<IndexKeyInstance> keys = readNodeKeys(pr, keysNumber);
 		ArrayList<Integer> children = new ArrayList<Integer>(fanout);
 		for (int i = 0; i <= keysNumber; i++) {
-			int page = (int)Page.bytesToLong(pr.read(Long.BYTES));
+			int page = Page.bytesToInt(pr.read(Integer.BYTES));
 			children.add(page);
 		}
 		return new BTreeInnerNode(keysNumber, this, pr.getCurrentPageNumber(), 
