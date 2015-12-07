@@ -134,7 +134,7 @@ public class BTreeIndex extends Index {
 
 	boolean constraintsDefineEmptyset(HashMap<String, Constraint> upperBound, 
 			HashMap<String, Constraint> bottomBound, HashMap<String, Constraint> exactBound,
-			HashMap<String, ArrayList<Constraint>> exactNotBound, String columnNames[]) {
+			HashMap<String, List<Constraint>> exactNotBound, String columnNames[]) {
 		// check that set is not evidently empty
 		for (String s : columnNames) {
 			if (upperBound.containsKey(s) && bottomBound.containsKey(s)) {
@@ -173,7 +173,7 @@ public class BTreeIndex extends Index {
 
 	private void reduceConstraints(HashMap<String, Constraint> upperBound, 
 			HashMap<String, Constraint> bottomBound, HashMap<String, Constraint> exactBound,
-			HashMap<String, ArrayList<Constraint>> exactNotBound, String columnNames[]) {
+			HashMap<String, List<Constraint>> exactNotBound, String columnNames[]) {
 
 		for (String s : columnNames) {
 			if (exactBound.containsKey(s)) {
@@ -212,8 +212,8 @@ public class BTreeIndex extends Index {
 	}
 
 	private List<IndexKeyInstance> buildExcludedKeys(
-			HashMap<String, ArrayList<Constraint>> exactNotBound) {
-		List<IndexKeyInstance> excludedKeys = new LinkedList<IndexKeyInstance>();
+			HashMap<String, List<Constraint>> exactNotBound) {
+		List<IndexKeyInstance> excludedKeys = new ArrayList<IndexKeyInstance>();
 		for (int i = 0; i < keyColumnsNames.size(); i++) {
 			String colName = keyColumnsNames.get(i);
 			if (!exactNotBound.containsKey(colName))
@@ -226,15 +226,21 @@ public class BTreeIndex extends Index {
 			}
 		}
 
+		Collections.sort(excludedKeys);
+		// TODO add sort here
+		//excludedKeys.sort(c);
 		return excludedKeys;
 	}
-
-	public List<IndexValueInstance> find(String columnNames[], Constraint[] constraints) {
+	
+	public IndexFindResults find(String columnNames[], Constraint[] constraints) {
 		HashMap<String, Constraint> upperBound = new HashMap<String, Constraint>();
 		HashMap<String, Constraint> bottomBound = new HashMap<String, Constraint>();
 		HashMap<String, Constraint> exactBound = new HashMap<String, Constraint>();
-		HashMap<String, ArrayList<Constraint>> exactNotBound = new HashMap<String, ArrayList<Constraint>>();
+		HashMap<String, List<Constraint>> exactNotBound = new HashMap<String, List<Constraint>>();
 
+		IndexFindResults result = new IndexFindResults(bottomBound, upperBound, exactBound, 
+				exactNotBound, new ArrayList<IndexValueInstance>());
+		
 		for (String s : columnNames)
 			exactNotBound.put(s,  new ArrayList<Constraint>());
 
@@ -245,7 +251,7 @@ public class BTreeIndex extends Index {
 					exactBound.put(columnNames[i], constraints[i]);
 				} else {
 					if (!exactBound.get(columnNames[i]).elementSatisfies(constraints[i].reference)) {
-						return new ArrayList<IndexValueInstance>(); // no way
+						return result; // no way
 					}
 				}
 
@@ -276,7 +282,7 @@ public class BTreeIndex extends Index {
 		}
 
 		if (constraintsDefineEmptyset(upperBound, bottomBound, exactBound, exactNotBound, columnNames)) {
-			return new ArrayList<IndexValueInstance>();
+			return result;
 		}
 
 		// make all constraints are <=, >= and !=
@@ -288,8 +294,14 @@ public class BTreeIndex extends Index {
 
 		List<IndexValueInstance> pagesAndOffsets = btree.findAll(bottomKey, upperKey, excludedKeys);
 
+		List<HashMap<String, Constraint>> bounds = new ArrayList<HashMap<String,Constraint>>(4);
+		bounds.add(bottomBound);
+		bounds.add(upperBound);
+		bounds.add(exactBound);
 		// build temporary table
-		return pagesAndOffsets;
+		
+		result.pagesAndOffstes = pagesAndOffsets;
+		return result;
 	}
 
 	@Override
@@ -304,18 +316,31 @@ public class BTreeIndex extends Index {
 	}
 
 	@Override
-	public List<Pair<String, Constraint>> filterNonIndexedConstraints(List<Pair<String, Constraint>> constrs) {
+	public List<Pair<String, Constraint>> filterNonIndexedConstraints(IndexFindResults ifr) {
 		Iterator<String> keyColumnIter = keyColumnsNames.iterator();
 		
 		HashMap<Pair<String, Constraint>, Boolean> isIndexedConstraint =
 				new HashMap<Pair<String,Constraint>, Boolean>();
-		for (Pair<String, Constraint> p : constrs) {
-			isIndexedConstraint.put(p, false);
+		for (String s : table.getNames()) {
+			if (ifr.bottomBounds.containsKey(s))
+				isIndexedConstraint.put(Pair.newPair(s, ifr.bottomBounds.get(s)), false);
+			if (ifr.upperBounds.containsKey(s))
+				isIndexedConstraint.put(Pair.newPair(s, ifr.upperBounds.get(s)), false);
+			if (ifr.exactBounds.containsKey(s))
+				isIndexedConstraint.put(Pair.newPair(s, ifr.exactBounds.get(s)), false);
+			if (ifr.exactNotBounds.containsKey(s)) {
+				for (Constraint con : ifr.exactNotBounds.get(s)) {
+					boolean putValue = false;
+					if (keyColumnsNames.contains(s))
+						putValue = true;
+					isIndexedConstraint.put(Pair.newPair(s, con), putValue);
+				}
+			}
 		}
 		
 		while (keyColumnIter.hasNext()) {
 			String keyColumnName = keyColumnIter.next();
-			Iterator<Pair<String, Constraint>> consIter = constrs.iterator();
+			Iterator<Pair<String, Constraint>> consIter = isIndexedConstraint.keySet().iterator();
 			boolean found = false;
 			while (consIter.hasNext()) {
 				Pair<String, Constraint> tmp = consIter.next();
@@ -332,7 +357,7 @@ public class BTreeIndex extends Index {
 		}
 		
 		List<Pair<String, Constraint>> result = new LinkedList<Pair<String,Constraint>>();
-		for (Pair<String, Constraint> p : constrs) {
+		for (Pair<String, Constraint> p : isIndexedConstraint.keySet()) {
 			if (!isIndexedConstraint.get(p)) {
 				result.add(p);
 			}
@@ -341,7 +366,7 @@ public class BTreeIndex extends Index {
 	}
 
 	@Override
-	public List<IndexValueInstance> find(List<Pair<String, Constraint>> constraints) {
+	public IndexFindResults find(List<Pair<String, Constraint>> constraints) {
 		String[] names = new String[constraints.size()];
 		Constraint[] cons = new Constraint[constraints.size()];
 		

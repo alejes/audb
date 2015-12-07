@@ -172,6 +172,7 @@ public class BTreeLeaf extends BTreeNode {
 		return data.size();
 	}
 
+	// TODO make sure excluded keys are sorted up to here
 	@Override
 	public List<IndexValueInstance> findAll(IndexKeyInstance bottomKey, 
 			IndexKeyInstance topKey, List<IndexKeyInstance> excludeKeys) {	

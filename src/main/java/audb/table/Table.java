@@ -9,6 +9,7 @@ import java.util.List;
 import audb.command.Constraint;
 import audb.index.BTreeIndex;
 import audb.index.Index;
+import audb.index.Index.IndexFindResults;
 import audb.index.Index.Order;
 import audb.index.IndexValueInstance;
 import audb.page.Page;
@@ -257,9 +258,11 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		}
 
 		if (null != goodIndex) {
+			IndexFindResults ifr =  goodIndex.find(constrs);
 			List<Pair<String, Constraint>> nonIndexedConstraints = 
-					goodIndex.filterNonIndexedConstraints(constrs);
-			List<IndexValueInstance> pagesAndOffsets = goodIndex.find(constrs);
+					goodIndex.filterNonIndexedConstraints(ifr);
+			
+			List<IndexValueInstance> pagesAndOffsets = ifr.pagesAndOffstes;
 			return new IndexedConditionalTableIterator(this, pagesAndOffsets, nonIndexedConstraints);
 		} else {
 			return new ConditionalTableIterator(this, constrs);

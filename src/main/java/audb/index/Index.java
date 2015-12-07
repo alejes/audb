@@ -1,6 +1,7 @@
 package audb.index;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import audb.command.Constraint;
@@ -16,6 +17,26 @@ public abstract class Index {
         ASC, DESC
     }
 
+	public static class IndexFindResults {
+		public HashMap<String, Constraint> bottomBounds;
+		public HashMap<String, Constraint> upperBounds;
+		public HashMap<String, Constraint> exactBounds;
+		public HashMap<String, List<Constraint>> exactNotBounds;
+		public List<IndexValueInstance> pagesAndOffstes;
+		
+		IndexFindResults(HashMap<String, Constraint> bottomBounds,
+		HashMap<String, Constraint> upperBounds,
+		HashMap<String, Constraint> exactBounds,
+		HashMap<String, List<Constraint>> exactNotBounds,
+		List<IndexValueInstance> pagesAndOffsets) {
+			this.bottomBounds = bottomBounds;
+			this.upperBounds = upperBounds;
+			this.exactBounds = exactBounds;
+			this.exactNotBounds = exactNotBounds;
+			this.pagesAndOffstes = pagesAndOffsets;
+		}
+	}
+    
     protected PageStructure pageStructure;
     protected int mainPage;
     protected List<String> keyColumnsNames;
@@ -35,10 +56,10 @@ public abstract class Index {
 
     public abstract void add(TableElement[] data, int pageNumber, int offset);
     public abstract List<Pair<String, Constraint>> filterNonIndexedConstraints(
-    		List<Pair<String, Constraint>> constrs);
+    		IndexFindResults ifr);
     
     public abstract boolean canResolve(String[] names);
     public abstract boolean canResolve(List<Pair<String, Constraint>> constrs);
-    public abstract List<IndexValueInstance> find(List<Pair<String, Constraint>> constraints);
-    public abstract List<IndexValueInstance> find(String columnNames[], Constraint[] constraints);
+    public abstract IndexFindResults find(List<Pair<String, Constraint>> constraints);
+    public abstract IndexFindResults find(String columnNames[], Constraint[] constraints);
 }
