@@ -37,6 +37,33 @@ public class BTreeTest extends TestCase {
 		assertTrue(true);
 	}
 
+	public void testIndexOnEmpty() throws Exception {
+		Parser parser = new Parser();
+		TableManager tableManager = new TableManager();
+		Command.setTableManager(tableManager);
+
+		Command command;
+		Type[] types = new Type[]{new VarcharType((byte)3), new VarcharType((byte)9)};
+		String[] names = new String[]{"number", "text"};
+
+		String tableName = "table1";
+		command = new CreateTableCommand(tableName, types, names);
+		command.exec();
+		
+		try {
+		Table t = tableManager.getTable(tableName);
+		Order[] orders = new Order[1];
+		String[] indexNames = new String[1];
+		indexNames[0] = names[0];
+		orders[0] = Order.ASC;
+		t.addBTreeIndex(indexNames, orders);
+		} catch (Exception e) {
+			e.printStackTrace(System.out);
+			assertTrue(false);
+		}
+		
+	}
+	
 	public void testCreateIndex() throws Exception {
 		Parser parser = new Parser();
 		TableManager tableManager = new TableManager();

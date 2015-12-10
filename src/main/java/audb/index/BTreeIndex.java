@@ -91,13 +91,16 @@ public class BTreeIndex extends Index {
 		super.create(names, orders);
 		long size = (pageStructure.getCountOfPages() * PageManager.PAGE_SIZE + 512) / 1024;
 		int maxKeySize = 0;
-		FullScanIterator iter = (FullScanIterator)table.iterator();
-		HashMap<String, TableElement> row = iter.next();
+
+		String[] tableNames = table.getNames();
+		Type[] tableTypes = table.getTypes();
 		List<Type> keyElementsTypes = new ArrayList<Type>(names.length);
 		for (String s : names) {
-			TableElement el = row.get(s);
-			keyElementsTypes.add(el.getType());
-			maxKeySize += el.getSizeInBytes();
+			int index = 0;
+			while (tableNames[index] != s)
+				index++;
+			keyElementsTypes.add(tableTypes[index]);
+			maxKeySize += tableTypes[index].getSize();
 		}
 
 		int innerBound = (PageManager.PAGE_SIZE - Byte.BYTES - Integer.BYTES +
