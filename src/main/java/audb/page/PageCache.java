@@ -41,7 +41,7 @@ public class PageCache {
                 }
                 if(minTime == Long.MAX_VALUE)
                     minPage = somePage;
-                removePage(minPage);
+                removePage(pm, minPage);
             }
             page = pm.readPage(number);
             hashMap.put(key, page);
@@ -69,10 +69,11 @@ public class PageCache {
         System.err.println("Cache flushed.");
     }
 
-    private void removePage(Page page) { 
+    private void removePage(PageManager pm, Page page) { 
         if(DEBUG) System.out.println("Page closed: " + page.getPageNumber());
         page.flush();
-        hashMap.remove(page.getPageNumber());
+        String key = pm.getFileName() + "/" + page.getPageNumber();
+        hashMap.remove(key);
     }
 
 }

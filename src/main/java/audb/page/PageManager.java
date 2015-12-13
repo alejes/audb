@@ -6,7 +6,7 @@ import java.io.RandomAccessFile;
 
 public class PageManager {
     
-    public static final int PAGE_SIZE   = 128;
+    public static final int PAGE_SIZE   = 4096;
     public static final int START_SIZE = 512;
 
     private File file;
@@ -24,12 +24,21 @@ public class PageManager {
         }
         raf = new RandomAccessFile(file, "rw");
         pageCount = (int) (file.length() / PAGE_SIZE + 1);
-        for(int i = pageCount; i < START_SIZE; i++) addPage();
+        // for(int i = pageCount; i < START_SIZE; i++) 
+        if (pageCount < START_SIZE)
+            addPage();
     }
 
     public Page readPage(int number) {
-        if(number >= pageCount)
-            return null;
+        if(number >= pageCount) {
+            try {
+                addPage();
+            } catch(Exception e) {
+                System.out.println("Can't add pages");
+                return null;
+            }
+        }
+
         byte[] arr = new byte[PAGE_SIZE];
         try{
             raf.seek(number * PAGE_SIZE);
@@ -53,9 +62,9 @@ public class PageManager {
 
     private void addPage() throws Exception {
         raf.seek(pageCount * PAGE_SIZE);
-        byte[] arr = new byte[PAGE_SIZE];
+        byte[] arr = new byte[PAGE_SIZE * START_SIZE];
         raf.write(arr);
-        pageCount += 1;
+        pageCount += START_SIZE;
         // return new Page(arr, pageCount - 1);
     }
 
