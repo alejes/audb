@@ -6,7 +6,7 @@ import audb.table.TableElement;
 
 public class IntegerType extends Type {
 
-	IntegerType(byte id) {
+	public IntegerType(byte id) {
 		super(id);
 		// TODO Auto-generated constructor stub
 	}
@@ -18,7 +18,7 @@ public class IntegerType extends Type {
 
 	@Override
 	public byte[] toBytes(Object o) throws Exception {
-		return Page.intToBytes(((IntegerElement)o).value);
+		return Page.intToBytes((Integer)o);
 	}
 
 	@Override

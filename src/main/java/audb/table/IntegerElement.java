@@ -17,8 +17,7 @@ public class IntegerElement implements TableElement {
 	}
 	
 	public int compareTo(TableElement other) {
-		// TODO Auto-generated method stub
-		return 0;
+		return value.compareTo(((IntegerElement)other).value);
 	}
 
 	public int getSizeInBytes() {

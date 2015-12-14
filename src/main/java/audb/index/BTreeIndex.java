@@ -25,12 +25,13 @@ public class BTreeIndex extends Index {
 	private static final long MAX_RAM_SIZE_MB = 128;
 	private Table table;
 	private BTree btree;
-
+	private List<Integer> keyColumnIndexes;
+	
 	// load from database
 	public BTreeIndex(Table table, int mainPage, PageStructure pageStructure) {
 		super(table, mainPage, pageStructure);
 		this.table = table;
-
+		keyColumnIndexes = new LinkedList<Integer>();
 		// read index here
 		//btree = new BTree<IndexKeyInstance, Long>(fanout);
 	}
@@ -93,6 +94,13 @@ public class BTreeIndex extends Index {
 		int maxKeySize = 0;
 
 		String[] tableNames = table.getNames();
+		
+		for (String s : names) {
+			for (int i = 0; i < tableNames.length; i++) {
+				if (s == tableNames[i])
+					keyColumnIndexes.add(i);
+			}
+		}
 		Type[] tableTypes = table.getTypes();
 		List<Type> keyElementsTypes = new ArrayList<Type>(names.length);
 		for (String s : names) {
@@ -121,7 +129,13 @@ public class BTreeIndex extends Index {
 
 	@Override
 	public void add(TableElement[] data, int pageNumber, int offset) {
-		btree.insert(ComparablePair.newPair(new IndexKeyInstance(orders, data), 
+		TableElement[] keys = new TableElement[keyColumnIndexes.size()];
+		int index = 0;
+		for (Integer i : keyColumnIndexes) {
+			keys[index++] = data[i];
+		}
+			
+		btree.insert(ComparablePair.newPair(new IndexKeyInstance(orders, keys), 
 				new IndexValueInstance((int)pageNumber, offset)));
 	}
 
@@ -278,6 +292,7 @@ public class BTreeIndex extends Index {
 						upperBound.put(columnNames[i], constraints[i]); // new constraint is stronger
 					}
 				}
+				break;
 			case NOT_EQUAL:
 				exactNotBound.get(columnNames[i]).add(constraints[i]);
 				break;
@@ -334,8 +349,8 @@ public class BTreeIndex extends Index {
 			if (ifr.exactNotBounds.containsKey(s)) {
 				for (Constraint con : ifr.exactNotBounds.get(s)) {
 					boolean putValue = false;
-					if (keyColumnsNames.contains(s))
-						putValue = true;
+					if (keyColumnsNames.contains(s)) // TODO probably, not equality should not be solved ny index
+						putValue = (0 == keyColumnsNames.indexOf(s));
 					isIndexedConstraint.put(Pair.newPair(s, con), putValue);
 				}
 			}

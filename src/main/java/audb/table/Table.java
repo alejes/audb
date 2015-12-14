@@ -228,7 +228,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		}
 
 		for (Index index : indexList) {
-			index.add(newElements, (int)currentPage, (int)countOfRecords);
+			index.add(newElements, currentPage, countOfRecords - 1);
 		}
 	}
 
@@ -251,7 +251,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 	public Iterator<HashMap<String, TableElement>> select(List<Pair<String, Constraint>> constrs) {
 		Index goodIndex = null;
 		for (Index idx : indexList) {
-			if (idx.canResolve(names)) {
+			if (idx.canResolve(constrs)) {
 				goodIndex = idx;
 				break;
 			}
