@@ -33,13 +33,7 @@ public class BTreeInnerNode extends BTreeNode {
 		super.splitNode(emptyNode);
 		BTreeInnerNode node = (BTreeInnerNode) emptyNode;
 
-		try {
-			node.childrenNodes.addAll(childrenNodes.subList(minChildrenNumber, fanout + 1));
-		} catch(Exception e) {
-			e.printStackTrace(System.out);
-			System.out.println("HERE!");
-			System.out.println(childrenNodes.size());
-		}
+		node.childrenNodes.addAll(childrenNodes.subList(minChildrenNumber, fanout + 1));
 
 		childrenNodes.subList(minChildrenNumber, childrenNodes.size()).clear();
 		emptyNode.writeDown();
@@ -51,8 +45,19 @@ public class BTreeInnerNode extends BTreeNode {
 		BTreeNode result = null;
 
 		BTreeNode child = nodeReader.readNode(childrenNodes.get(insertIndex));
+		
+		// TODO remove this after FIXME
+		if (child.pageNumber == pageNumber) {
+			System.out.println("fail with");
+			System.out.println(pageNumber);
+			for (int i : childrenNodes) {
+				System.out.print(i);
+				System.out.print(" ");
+			}
+			System.exit(1);
+		}
 		result = child.insert(p);
-
+		
 		if (null == result)
 			return null;
 
@@ -64,6 +69,8 @@ public class BTreeInnerNode extends BTreeNode {
 		} else {
 			keys.add(newKey);
 		}
+		
+		
 		childrenNodes.add(insertIndex, child.pageNumber);
 
 		if (keys.size() <= maxKeysNumber) {
@@ -202,7 +209,12 @@ public class BTreeInnerNode extends BTreeNode {
 	}
 
 	protected IndexKeyInstance getMaxKey() {
-		return nodeReader.readNode(childrenNodes.get(childrenNodes.size() - 1)).getMaxKey();
+		int pageNum = childrenNodes.get(childrenNodes.size() - 1);
+		if (pageNum == 0)
+		{
+			System.out.println("SHIT");
+		}
+		return nodeReader.readNode(pageNum).getMaxKey();
 	}
 
 	@Override

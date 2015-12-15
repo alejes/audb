@@ -205,14 +205,18 @@ public class BTreeTest extends TestCase {
 		t.addBTreeIndex(indexNames, orders);
 		
 		// insert values
-		for(int i = 0; i < 15; i++) {
+		for(int i = 0; i < 150000; i++) {
 			Integer id = i;
-			String s1 = String.format("%03d", i);;
+			String s1 = String.format("%03d", i % 100);;
 			String s2 = "some_text";
 			Object arr[] = new Object[]{id, s1, s2};
 
 			command = new InsertCommand("table1", arr);
 			command.exec();
+			
+			
+				System.out.println(i);
+			
 		}
 		
 		List<Pair<String, Constraint>> constrs = new ArrayList<Pair<String, Constraint>>();
@@ -229,7 +233,7 @@ public class BTreeTest extends TestCase {
 			System.out.println(row.get("number"));
 		}
 		
-		assertEquals(12, size);
+		assertEquals(145500, size);
 		constrs.add(Pair.newPair("id", new Constraint(ConstraintType.LESS, 
 				new IntegerElement(10, (IntegerType)types[0]))));
 		
@@ -241,7 +245,7 @@ public class BTreeTest extends TestCase {
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
-			System.out.println(row.get("number"));
+			//System.out.println(row.get("number"));
 		}
 		
 		assertEquals(7,size);

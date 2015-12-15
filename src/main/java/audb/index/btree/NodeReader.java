@@ -7,6 +7,7 @@ import audb.index.Index.Order;
 import audb.index.IndexKeyInstance;
 import audb.index.IndexValueInstance;
 import audb.page.Page;
+import audb.page.PageManager;
 import audb.page.PageReader;
 import audb.page.PageStructure;
 import audb.table.TableElement;
@@ -89,7 +90,7 @@ public class NodeReader {
 			int page = Page.bytesToInt(pr.read(Integer.BYTES));
 			children.add(page);
 		}
-		return new BTreeInnerNode(keysNumber, this, pr.getCurrentPageNumber(), 
+		return new BTreeInnerNode(fanout, this, pr.getCurrentPageNumber(), 
 				keys, children);
 	}
 }

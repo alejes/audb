@@ -27,18 +27,24 @@ public abstract class BTreeNode {
 	
 	protected BTreeNode(int fanout, NodeReader nr, int pageNumber, List<IndexKeyInstance> keys) {
 		this(fanout, nr, pageNumber);
-	/*	if (pageNumber != -1) {
-			readUp();
-		}*/
 		this.keys = keys == null ? new ArrayList<IndexKeyInstance>(maxKeysNumber) : keys;
 	}
 	
+	static int counter = 0;
 	private BTreeNode(int fanout, NodeReader nr, int pageNumber) {
 		this.fanout = fanout;
 		maxKeysNumber = fanout - 1;
 		minChildrenNumber = (fanout + 1) / 2;
 		this.nodeReader = nr;
 		this.pageNumber = pageNumber == -1 ? (int)nr.getPageStructure().getEmptyPage() : pageNumber;
+		
+		if (6 == this.pageNumber && pageNumber == -1)
+		{
+			// THIS COUNTER MUST NOT EXCEED 1!!
+			counter++;
+			//new Exception().printStackTrace(System.out);
+			assert(counter < 2);
+		}
 	}
 
 	public BTreeNode(int fanout, NodeReader nr, BTreeNode child1, BTreeNode child2) {
@@ -83,9 +89,11 @@ public abstract class BTreeNode {
 
 	protected PageWriter writeDown() {
 		Page p = nodeReader.getPageStructure().getPage(pageNumber);
+		p.write();
 		PageWriter pw = new PageWriter(p);
 		pw.writeByte(getMyType());
 		pw.writeInteger(keys.size());
+
 		int elementsInKey = keys.get(0).elements.length; // TODO check
 		for (int i = 0; i < keys.size(); i++) {
 			for (int j = 0; j < elementsInKey; j++) {

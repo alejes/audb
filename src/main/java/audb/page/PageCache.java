@@ -63,6 +63,7 @@ public class PageCache {
     public void flush() {
         for(Page page: hashMap.values()) {
             if(DEBUG) System.out.println("Page closed: " + page.getPageNumber());
+            
             page.flush();
         }
         hashMap.clear();

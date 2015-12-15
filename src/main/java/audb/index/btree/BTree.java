@@ -33,8 +33,9 @@ public class BTree {
 		if (null == tmp) {
 			return;
 		}
-
+		
 		root = new BTreeInnerNode(fanout, nr, root, tmp);
+		System.out.println("now root is " + Integer.toString(root.pageNumber));
 	}
 
 	public void remove(IndexKeyInstance key) {
