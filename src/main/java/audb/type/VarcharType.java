@@ -1,10 +1,10 @@
 package audb.type;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-
 import audb.table.TableElement;
 import audb.table.VarcharElement;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 
 public class VarcharType extends Type {
@@ -44,4 +44,9 @@ public class VarcharType extends Type {
     	return new VarcharElement((String)obj, this);
     }
 
+
+    @Override
+    public String toString() {
+        return "VARCHAR " + this.length;
+    }
 }

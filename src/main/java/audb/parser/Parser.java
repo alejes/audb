@@ -3,8 +3,6 @@ package audb.parser;
 import audb.command.*;
 import audb.table.Table;
 import audb.table.TableManager;
-import audb.type.DoubleType;
-import audb.type.IntegerType;
 import audb.type.Type;
 import audb.type.VarcharType;
 import audb.util.Pair;
@@ -13,7 +11,6 @@ import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.Limit;
@@ -125,9 +122,7 @@ public class Parser {
         String table = createTable.getTable().toString();
 
         System.out.println(table);
-
-        //List<Type> typesColumn = new ArrayList<Type>();
-        //List<String> nameColumn =new ArrayList<String>();
+/*
         Type[] typesColumn = new Type[columsCount];
         String[] nameColumn = new String[columsCount];
 
@@ -155,17 +150,23 @@ public class Parser {
                 typesColumn[i] = (new VarcharType(bytesBuf));
             }
         }
-//        Type[] typeArr = new Type[typesColumn.size()];
-//        for (int i =0; i < typesColumn.size(); ++i){
-//            typeArr[i] = typesColumn.get(i);
-        //}
-        //String[] stringArr = new String[nameColumn.size()];
 
-        //Type[] typeArr = (Type[]) typesColumn.toArray();
-        //Type[] types = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
-        //String[] names = new String[]{"number", "text"};
+        System.out.print("table:");
+        System.out.println(table);
 
-        return new CreateTableCommand(table, typesColumn, nameColumn);
+        /*
+        for (String x : nameColumn){
+            System.out.println(x);
+        }
+        for (Type x : typesColumn){
+            System.out.println(x.toString());
+        }*/
+
+        Type[] types2 = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
+        String[] names2 = new String[]{"number", "text"};
+
+        //return new CreateTableCommand(table, typesColumn, nameColumn);
+        return new CreateTableCommand("eeee", types2, names2);
     }
 
     public Command createManager(String str) throws Exception {
@@ -184,10 +185,10 @@ public class Parser {
 
         String cmd = str.substring(0, Math.min(str.length(), 6)).toLowerCase();
 
-//        if (cmd.compareTo("insert") != 0){
-//            str = "CREATE TABLE mytab (number VARCHAR (10), text VARCHAR (9))";
-//            cmd = "create";
-        //}
+        if (cmd.compareTo("insert") != 0) {
+            str = "CREATE TABLE mytab2 (number VARCHAR (10), text VARCHAR (9))";
+            cmd = "create";
+        }
 
         if (cmd.compareTo("select") == 0) {
             return selectParse(str);

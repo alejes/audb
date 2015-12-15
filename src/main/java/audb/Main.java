@@ -11,6 +11,7 @@ import audb.table.TableManager;
 import audb.table.VarcharElement;
 import audb.type.Type;
 import audb.type.VarcharType;
+import audb.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -33,6 +34,7 @@ public class Main {
             command = new CreateTableCommand("table1", types, names);
             command.exec();
 
+
             for (int i = 0; i < 5; i++) {
                 String q = String.format("INSERT INTO table1 (text, number) VALUES ('%03d', 'sadfsd')", i);
                 command = parser.getCommand(q);
@@ -43,7 +45,7 @@ public class Main {
             //shutdown
             //join
 
-            
+
             Table t = tableManager.getTable("table1");
             Order[] orders = new Order[1];
             String[] indexNames = new String[1];
@@ -55,8 +57,12 @@ public class Main {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while ((s = in.readLine()) != null && s.length() != 0) {
                 command = parser.getCommand(s);
-                Iterator<HashMap<String, TableElement>> res = command.exec().second;
-                
+                Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
+                if (null == exRes) {
+                    continue;
+                }
+                Iterator<HashMap<String, TableElement>> res = exRes.second;
+
                 if (null == res)
                 	continue;
                 
