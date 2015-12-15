@@ -6,6 +6,7 @@ import audb.command.InsertCommand;
 import audb.command.SelectCommand;
 import audb.table.Table;
 import audb.table.TableManager;
+import audb.type.Type;
 import audb.util.Pair;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;
@@ -101,6 +102,7 @@ public class Parser {
             throw new IllegalArgumentException("unknown table");
         }
         String[] tableNames = tableStruct.getNames();
+        Type[] tableTypes = tableStruct.getTypes();
 
         //Object arr[] = new Object[]{s1, s2};
         ArrayList<Object> args = new ArrayList<Object>();
@@ -109,13 +111,26 @@ public class Parser {
             boolean find = false;
             for (int columnId = 0; columnId < tableNames.length; ++columnId) {
                 if (((Column) insert.getColumns().get(columnId)).getColumnName().compareTo(tableNames[i]) == 0) {
-                    args.add(((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(i)).getValue());
-                    find = true;
+                    String insertValue = ((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(i)).getValue();
+                    switch (tableTypes[i].getId()) {
+                        case 100:
+                            throw new IllegalArgumentException("Integer insert not supported by parser");
+                        case 101:
+                            throw new IllegalArgumentException("Double insert not supported by parser");
+                        default:
+                            //Varchar
+                            if (tableTypes[i].getSize() < insertValue.length()) {
+                                throw new IllegalArgumentException("To long argument for field");
+                            } else {
+                                args.add(insertValue);
+                                find = true;
+                                break;
+                            }
+                    }
                 }
             }
             if (!find) {
                 throw new IllegalArgumentException("unknown row name");
-                //args.add("d"
             }
         }
 

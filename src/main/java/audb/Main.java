@@ -34,22 +34,9 @@ public class Main {
             command.exec();
 
             for (int i = 0; i < 5; i++) {
-
-                //String s1 = String.format("%03d", i);
-                //String s2 = "some_text";
-
-                String q = String.format("INSERT INTO table1 (number, text) VALUES ('%03d', 'sadfsd')", i);
+                String q = String.format("INSERT INTO table1 (text, number) VALUES ('%03d', 'sadfsd')", i);
                 command = parser.getCommand(q);
                 command.exec();
-                /*
-                Object arr[] = new Object[]{s1, s2};
-
-                command = new InsertCommand("table1", arr);
-                command.exec();
-                if (i % 1000 == 0) {
-                    System.out.println(String.format("Inserted [%d] records.", i));
-                }
-                */
             }
             //вставлять 10кк с 8 мб heap
             //select no fullscan where and etc.
