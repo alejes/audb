@@ -25,4 +25,10 @@ public class PageReader {
 		return b;
 	}
 	
+	public int readInteger() {
+		int ret = page.readInteger(offset);
+		offset += Integer.BYTES;
+		return ret;
+	}
+	
 }

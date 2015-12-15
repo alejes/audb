@@ -6,6 +6,7 @@ public class PageWriter {
 	
 	public PageWriter(Page page) {
 		this.page = page;
+		page.write(); // TODO this is starnge, but it's so now to make page dirty once we start writing
 	}
 	
 	void rewind(int newOffset) {

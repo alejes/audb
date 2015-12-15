@@ -134,7 +134,6 @@ public class BTreeTest extends TestCase {
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
-			System.out.println(row.get("number"));
 		}
 		assertEquals(15, size);
 	
@@ -148,7 +147,6 @@ public class BTreeTest extends TestCase {
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
-			System.out.println(row.get("number"));
 		}
 		assertEquals(size, 12);
 		
@@ -162,7 +160,6 @@ public class BTreeTest extends TestCase {
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
-			System.out.println(row.get("number"));
 		}
 		assertEquals(12, size);
 		
@@ -176,7 +173,6 @@ public class BTreeTest extends TestCase {
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
-			System.out.println(row.get("number"));
 		}
 		assertEquals(2, size);
 	}
@@ -214,9 +210,6 @@ public class BTreeTest extends TestCase {
 			command = new InsertCommand("table1", arr);
 			command.exec();
 			
-			
-				System.out.println(i);
-			
 		}
 		
 		List<Pair<String, Constraint>> constrs = new ArrayList<Pair<String, Constraint>>();
@@ -230,7 +223,7 @@ public class BTreeTest extends TestCase {
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
-			System.out.println(row.get("number"));
+			//System.out.println(row.get("number"));
 		}
 		
 		assertEquals(145500, size);
@@ -245,7 +238,7 @@ public class BTreeTest extends TestCase {
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
-			//System.out.println(row.get("number"));
+			System.out.println(row.get("number"));
 		}
 		
 		assertEquals(7,size);
