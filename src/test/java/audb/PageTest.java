@@ -40,6 +40,56 @@ public class PageTest extends TestCase {
         return new TestSuite(PageTest.class);
     }
 
+    public void testLoading() {
+        if (true)
+            return;
+        
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+        try {
+            Command command;
+            Type[] types = new Type[]{new VarcharType((byte)7), new VarcharType((byte)9)};
+            String[] names = new String[]{"number", "text"};
+
+            // command = new CreateTableCommand("table2", types, names);
+            // command.exec();
+            Table t = tableManager.getTable("table2");
+
+            for(int i = 0; i < 100; i++) {
+                System.out.println("elements inserted " + i);
+                String s1 = String.format("%07d", i);
+                String s2 = "some_text";
+                Object arr[] = new Object[]{s1, s2};
+
+                command = new InsertCommand("table2", arr);
+                command.exec();
+            }
+
+            
+
+            Iterator<HashMap<String, TableElement>> it = new FullScanIterator(t);
+            int counter = 0;
+            while (it.hasNext()) {
+                HashMap<String, TableElement> arr = it.next();
+                
+                for (String name : arr.keySet()) {
+                    if (arr.get(name) instanceof VarcharElement) {
+                        System.out.print(arr.get(name).toString() + " ");
+                    }
+
+                }
+                System.out.println();
+    
+                ++counter;
+            }
+
+            PageStructure.flush();
+        } catch(Exception e) {
+             e.printStackTrace();
+        }    
+    }
+
     public void testMillionsNumbers() {
         if (true)
             return;
