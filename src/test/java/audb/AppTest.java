@@ -1,14 +1,14 @@
 package audb;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import audb.page.Page;
+import audb.command.Command;
 import audb.page.PageCache;
-import audb.table.Table;
+import audb.parser.Parser;
 import audb.table.TableManager;
 import audb.type.Type;
 import audb.type.VarcharType;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * Unit test for simple App.
@@ -42,6 +42,32 @@ public class AppTest
         String a = "aaa";
         String b = "aab";
         assertTrue(a.compareTo(b) < 0);
+    }
+
+    public void testLoadTable() throws Exception {
+        assertTrue(true);
+        Parser parser = new Parser();
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+        String q = "insert into parsertab (number, text) VALUES ('34343','434343')";
+        Command command = parser.getCommand(q);
+        command.exec();
+
+        q = "select * from parsertab";
+        command = parser.getCommand(q);
+        command.exec();
+        q = "CREATE TABLE parsertab (number VARCHAR (15), text VARCHAR (9))";
+        command = parser.getCommand(q);
+        command.exec();
+        q = "insert into parsertab (number, text) VALUES ('34343','434343')";
+        command = parser.getCommand(q);
+        command.exec();
+
+        q = "select * from parsertab";
+        command = parser.getCommand(q);
+        command.exec();
+
+        assertTrue(true);
     }
 
     public void testHundreadNumbers() {
