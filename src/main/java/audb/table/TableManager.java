@@ -21,7 +21,6 @@ public class TableManager {
                 str = str.substring(0, str.lastIndexOf('.'));
                 try {
                     PageStructure ps = new PageStructure(new PageManager("db/" + str + ".db"));
-                    ps.clear();
                     Table table = new Table(ps);
                     table.init();
                     hashMap.put(str, table);
