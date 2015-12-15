@@ -23,19 +23,40 @@ public class BTree {
 		this.fanout = fanout;
 		pageStructure = ps;
 	}
-
-	public void insert(IndexKeyInstance k, IndexValueInstance v) {
-		insert(Pair.newPair(k, v));
+	
+	public BTree(int fanout, PageStructure ps, List<Type> keyTypes, Order[] orders, int rootPage) {
+		nr = new NodeReader(keyTypes, orders, ps, fanout);
+		root = nr.readNode(rootPage);
+		this.fanout = fanout;
+		pageStructure = ps;
+	}
+	
+	public int getRootPage() {
+		return root.getMyPage();
+	}
+	
+	public int getFanout() {
+		return fanout;
 	}
 
-	public void insert(Pair<IndexKeyInstance, IndexValueInstance> p) {
+	public boolean insert(IndexKeyInstance k, IndexValueInstance v) {
+		return insert(Pair.newPair(k, v));
+	}
+
+	/**
+	 * 
+	 * @param p
+	 * @return true if root has changed (so we need to update rootPage in index main page)
+	 */
+	public boolean insert(Pair<IndexKeyInstance, IndexValueInstance> p) {
 		BTreeNode tmp = root.insert(p);
 		if (null == tmp) {
-			return;
+			return false;
 		}
 		
 		root = new BTreeInnerNode(fanout, nr, root, tmp);
-		System.out.println("now root is " + Integer.toString(root.pageNumber));
+		return true;
+		//System.out.println("now root is " + Integer.toString(root.pageNumber));
 	}
 
 	public void remove(IndexKeyInstance key) {

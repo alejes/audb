@@ -1,6 +1,5 @@
 package audb.index;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,8 +10,11 @@ import java.util.List;
 import audb.command.Constraint;
 import audb.command.Constraint.ConstraintType;
 import audb.index.btree.BTree;
+import audb.page.Page;
 import audb.page.PageManager;
+import audb.page.PageReader;
 import audb.page.PageStructure;
+import audb.page.PageWriter;
 import audb.result.FullScanIterator;
 import audb.table.Table;
 import audb.table.TableElement;
@@ -37,7 +39,20 @@ public class BTreeIndex extends Index {
 	}
 
 	public void init() throws Exception {
-
+		Page p = pageStructure.getPage(mainPage);
+		PageReader pr = new PageReader(p);
+		int keyColumnsNumber = pr.readInteger();
+		
+		for (int i = 0; i < keyColumnsNumber; i++) {
+			keyColumnIndexes.add(pr.readInteger());
+		}
+		int fanout = pr.readInteger();
+		int rootPage = pr.readInteger();
+		
+		List<Type> keyTypes = new LinkedList<Type>();
+		for (int idx : keyColumnIndexes)
+			keyTypes.add(table.getTypes()[idx]);
+		btree = new BTree(fanout, pageStructure, keyTypes, orders, rootPage);
 	}
 
 	private ComparablePair<IndexKeyInstance, IndexValueInstance> buildIndexPair(
@@ -88,27 +103,38 @@ public class BTreeIndex extends Index {
 		}
 	}
 
+	private void fillMainPage() {
+		Page p = pageStructure.getPage(mainPage);
+		PageWriter pw = new PageWriter(p);
+		
+		int keyColumnsNumber = keyColumnIndexes.size();
+		pw.writeInteger(keyColumnsNumber);
+		
+		for (int i : keyColumnIndexes) {
+			pw.writeInteger(i);
+		}
+		
+		pw.writeInteger(btree.getFanout());
+		pw.writeInteger(btree.getRootPage());
+	}
+	
 	public void create(String[] names, Order[] orders) {
 		super.create(names, orders);
 		long size = (pageStructure.getCountOfPages() * PageManager.PAGE_SIZE + 512) / 1024;
 		int maxKeySize = 0;
 
 		String[] tableNames = table.getNames();
+		Type[] tableTypes = table.getTypes();
+		List<Type> keyElementsTypes = new ArrayList<Type>(names.length);
 		
 		for (String s : names) {
 			for (int i = 0; i < tableNames.length; i++) {
-				if (s == tableNames[i])
+				if (s == tableNames[i]) {
 					keyColumnIndexes.add(i);
+					keyElementsTypes.add(tableTypes[i]);
+					maxKeySize += tableTypes[i].getSize();
+				}
 			}
-		}
-		Type[] tableTypes = table.getTypes();
-		List<Type> keyElementsTypes = new ArrayList<Type>(names.length);
-		for (String s : names) {
-			int index = 0;
-			while (tableNames[index] != s)
-				index++;
-			keyElementsTypes.add(tableTypes[index]);
-			maxKeySize += tableTypes[index].getSize();
 		}
 
 		int innerBound = (PageManager.PAGE_SIZE - Byte.BYTES - Integer.BYTES +
@@ -119,12 +145,13 @@ public class BTreeIndex extends Index {
 		int fanout = Math.min(innerBound, leafBound);
 		btree = new BTree(fanout, pageStructure, keyElementsTypes, orders);
 
-
 		if (size <= MAX_RAM_SIZE_MB) {
 			buildInternal(names, orders);
 		} else {
 			buildExternal(names, orders);
 		}
+		
+		fillMainPage();
 	}
 
 	@Override
@@ -135,8 +162,11 @@ public class BTreeIndex extends Index {
 			keys[index++] = data[i];
 		}
 			
-		btree.insert(ComparablePair.newPair(new IndexKeyInstance(orders, keys), 
+		boolean rootChanged = btree.insert(ComparablePair.newPair(new IndexKeyInstance(orders, keys), 
 				new IndexValueInstance((int)pageNumber, offset)));
+		if (rootChanged) {
+			fillMainPage();
+		}
 	}
 
 	public boolean canResolve(String[] columnNames) {

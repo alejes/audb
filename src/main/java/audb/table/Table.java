@@ -96,6 +96,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 			Index index = new BTreeIndex(this, page.readInteger(INDEX_COUNT - (int)i), pageStructure);
 			index.init();
 			indexList.add(index);
+			index.init();
 		}
 
 		page.write();
