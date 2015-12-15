@@ -2,12 +2,16 @@ package audb.parser;
 
 import audb.command.Command;
 import audb.command.Constraint;
+import audb.command.InsertCommand;
 import audb.command.SelectCommand;
 import audb.table.Table;
 import audb.table.TableManager;
 import audb.util.Pair;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -55,6 +59,11 @@ public class Parser {
         from = from.replace('`', ' ');
         from = from.trim();
 
+        TableManager tableManager = Command.getTableManager();
+        Table tableStruct = tableManager.getTable(from);
+        if (tableStruct == null) {
+            throw new IllegalArgumentException("unknown table");
+        }
 
         System.out.println("");
         System.out.print("Select please: ");
@@ -80,33 +89,47 @@ public class Parser {
     }
 
     public Command insertParse(String str) throws Exception {
-        System.out.println(str);
+        //System.out.println(str);
         CCJSqlParserManager parserManager = new CCJSqlParserManager();
         Insert insert = (Insert) parserManager.parse(new StringReader(str));
 
         String table = insert.getTable().getName();
 
         TableManager tableManager = Command.getTableManager();
-        Table tableStruct = tableManager.getTable("table1");
+        Table tableStruct = tableManager.getTable(table);
+        if (tableStruct == null) {
+            throw new IllegalArgumentException("unknown table");
+        }
         String[] tableNames = tableStruct.getNames();
 
-        System.out.println(tableStruct.getNames().length);
-        for (int i = 0; i < tableNames.length; ++i) {
-            System.out.println(tableNames[i]);
+        //Object arr[] = new Object[]{s1, s2};
+        ArrayList<Object> args = new ArrayList<Object>();
+
+        for (int i = 0; i < tableNames.length; i++) {
+            boolean find = false;
+            for (int columnId = 0; columnId < tableNames.length; ++columnId) {
+                if (((Column) insert.getColumns().get(columnId)).getColumnName().compareTo(tableNames[i]) == 0) {
+                    args.add(((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(i)).getValue());
+                    find = true;
+                }
+            }
+            if (!find) {
+                throw new IllegalArgumentException("unknown row name");
+                //args.add("d"
+            }
         }
-        //System.out.println(tableStruct.getNames());
+
+        //System.out.print("Table:");
+        //System.out.println(table);
 
 
-        System.out.print("Table:");
-        System.out.println(table);
-
-        return new SelectCommand(table, new ArrayList<Pair<String, Constraint>>());
+        return new InsertCommand(table, args.toArray());
     }
     public Command getCommand(String str) throws Exception {
         //str = "SELECT `id`, `password` FROM `table1` WHERE (`id` = '3' and `hyj`='dz')";
-        str = "INSERT INTO table1 (col1, col2, col3) VALUES (?, 'sadfsd', 234)";
-        System.out.println("Parser had \"" + str + "\" on input and ignored it.");
-        System.out.println("FullScan for table1 returned instead.");
+        //str = "INSERT INTO table1 (number, text) VALUES ('33', 'sadfsd')";
+        //System.out.println("Parser had \"" + str + "\" on input and ignored it.");
+        //System.out.println("FullScan for table1 returned instead.");
 
         String cmd = str.substring(0, Math.min(str.length(), 6)).toLowerCase();
 
