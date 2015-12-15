@@ -11,7 +11,7 @@ public class PageCache {
     private int MAX_SIZE = 100;
 
     private long timer;
-    private HashMap<String, Page> hashMap;
+    public HashMap<String, Page> hashMap;
 
     private PageCache() {
         timer = 0;
@@ -41,7 +41,7 @@ public class PageCache {
                 }
                 if(minTime == Long.MAX_VALUE)
                     minPage = somePage;
-                removePage(pm, minPage);
+                removePage(minPage);
             }
             page = pm.readPage(number);
             hashMap.put(key, page);
@@ -70,10 +70,10 @@ public class PageCache {
         System.err.println("Cache flushed.");
     }
 
-    private void removePage(PageManager pm, Page page) { 
+    private void removePage(Page page) { 
         if(DEBUG) System.out.println("Page closed: " + page.getPageNumber());
         page.flush();
-        String key = pm.getFileName() + "/" + page.getPageNumber();
+        String key = page.getFileName() + "/" + page.getPageNumber();
         hashMap.remove(key);
     }
 

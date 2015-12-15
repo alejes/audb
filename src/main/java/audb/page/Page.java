@@ -51,6 +51,10 @@ public class Page {
         return pageNumber;
     }
 
+    public String getFileName() {
+        return pageManager.getFileName();
+    }
+
 
     public long readLong(int offset) {
         byte[] bytes = new byte[Long.BYTES];
