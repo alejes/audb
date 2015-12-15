@@ -90,8 +90,9 @@ public class Parser {
         for (int i = 0; i < tableNames.length; i++) {
             boolean find = false;
             for (int columnId = 0; columnId < tableNames.length; ++columnId) {
+
                 if (((Column) insert.getColumns().get(columnId)).getColumnName().compareTo(tableNames[i]) == 0) {
-                    String insertValue = ((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(i)).getValue();
+                    String insertValue = ((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(columnId)).getValue();
                     switch (tableTypes[i].getId()) {
                         case Type.INT:
                             throw new IllegalArgumentException("Integer insert not supported by parser");
@@ -117,13 +118,10 @@ public class Parser {
     }
 
     public Command createTable(String str) throws Exception {
-        System.out.println("create table");
         System.out.println(str);
         CreateTable createTable = (CreateTable) parserManager.parse(new StringReader(str));
         int columsCount = createTable.getColumnDefinitions().size();
         String table = createTable.getTable().toString();
-
-        System.out.println(table);
 
         Type[] typesColumn = new Type[columsCount];
         String[] nameColumn = new String[columsCount];
