@@ -6,7 +6,7 @@ import audb.table.TableElement;
 
 public class DoubleType extends Type {
 
-	DoubleType(byte id) {
+	public DoubleType(byte id) {
 		super(id);
 		// TODO Auto-generated constructor stub
 	}

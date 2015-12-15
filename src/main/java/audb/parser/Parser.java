@@ -1,18 +1,20 @@
 package audb.parser;
 
-import audb.command.Command;
-import audb.command.Constraint;
-import audb.command.InsertCommand;
-import audb.command.SelectCommand;
+import audb.command.*;
 import audb.table.Table;
 import audb.table.TableManager;
+import audb.type.DoubleType;
+import audb.type.IntegerType;
 import audb.type.Type;
+import audb.type.VarcharType;
 import audb.util.Pair;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
+import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -25,33 +27,14 @@ import java.util.List;
 
 
 public class Parser {
+    private static CCJSqlParserManager parserManager = new CCJSqlParserManager();
     public Command selectParse(String str) throws Exception {
-        //System.out.println(str);
-        //      String[] from = str.split("(?i)from");
-//        if (from.length != 2){
-//            throw new Exception("Unsupported count of word from");
-//        }
-//        System.out.println("parse starts");
-//        String statement = "SELECT COUNT(*) FROM db.table1";
-//        CCJSqlParserManager parserManager = new CCJSqlParserManager();
-//        PlainSelect plainSelect = (PlainSelect) ((Select) parserManager.parse(new StringReader(statement))).getSelectBody();
-//        System.out.format("%s is function call? %s",
-        //              plainSelect.getSelectItems().get(0),
-//                ((Function)((SelectExpressionItem) plainSelect.getSelectItems().get(0)).getExpression()).isAllColumns());
-//        System.out.println("parse starts");
-        //System.out.println(from[0]);
-        //System.out.println(from[1]);
-        //
-
-        CCJSqlParserManager parserManager = new CCJSqlParserManager();
         final List exprList = new ArrayList();
         Select select = (Select) parserManager.parse(new StringReader(str));
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
         Expression where = plainSelect.getWhere();
         Limit limits = plainSelect.getLimit();
         List<SelectItem> selectItems = plainSelect.getSelectItems();
-        //TablesNamesFinder tablesNamesFinder = new TablesNamesFinder();
-        //List<String> tables = tablesNamesFinder.getTableList(select);
 
         //Гениальный парсинг FROM
         String from = str.split("(?i)from")[1];
@@ -90,8 +73,6 @@ public class Parser {
     }
 
     public Command insertParse(String str) throws Exception {
-        //System.out.println(str);
-        CCJSqlParserManager parserManager = new CCJSqlParserManager();
         Insert insert = (Insert) parserManager.parse(new StringReader(str));
 
         String table = insert.getTable().getName();
@@ -113,9 +94,9 @@ public class Parser {
                 if (((Column) insert.getColumns().get(columnId)).getColumnName().compareTo(tableNames[i]) == 0) {
                     String insertValue = ((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(i)).getValue();
                     switch (tableTypes[i].getId()) {
-                        case 100:
+                        case Type.INT:
                             throw new IllegalArgumentException("Integer insert not supported by parser");
-                        case 101:
+                        case Type.DOUBLE:
                             throw new IllegalArgumentException("Double insert not supported by parser");
                         default:
                             //Varchar
@@ -133,12 +114,67 @@ public class Parser {
                 throw new IllegalArgumentException("unknown row name");
             }
         }
-
-        //System.out.print("Table:");
-        //System.out.println(table);
-
-
         return new InsertCommand(table, args.toArray());
+    }
+
+    public Command createTable(String str) throws Exception {
+        System.out.println("create table");
+        System.out.println(str);
+        CreateTable createTable = (CreateTable) parserManager.parse(new StringReader(str));
+        int columsCount = createTable.getColumnDefinitions().size();
+        String table = createTable.getTable().toString();
+
+        System.out.println(table);
+
+        //List<Type> typesColumn = new ArrayList<Type>();
+        //List<String> nameColumn =new ArrayList<String>();
+        Type[] typesColumn = new Type[columsCount];
+        String[] nameColumn = new String[columsCount];
+
+        for (int i = 0; i < columsCount; ++i) {
+            ColumnDefinition column = (ColumnDefinition) createTable.getColumnDefinitions().get(i);
+            nameColumn[i] = (column.getColumnName());
+            String currentType = column.getColDataType().toString().toLowerCase();
+            if (currentType.compareTo("int") == 0) {
+                typesColumn[i] = (new IntegerType(Type.INT));
+            } else if (currentType.compareTo("double") == 0) {
+                typesColumn[i] = (new DoubleType(Type.DOUBLE));
+            } else {
+                String[] lenArr = currentType.split("([()])");
+                System.out.println(lenArr.length);
+                if (lenArr.length != 2) {
+                    throw new IllegalArgumentException("error in VARCHAR len");
+                }
+                int val;
+                try {
+                    val = Integer.parseInt(lenArr[1]);
+                } catch (NumberFormatException nfe) {
+                    throw new IllegalArgumentException("illegal int in VARCHAR len");
+                }
+                byte bytesBuf = (byte) val;
+                typesColumn[i] = (new VarcharType(bytesBuf));
+            }
+        }
+//        Type[] typeArr = new Type[typesColumn.size()];
+//        for (int i =0; i < typesColumn.size(); ++i){
+//            typeArr[i] = typesColumn.get(i);
+        //}
+        //String[] stringArr = new String[nameColumn.size()];
+
+        //Type[] typeArr = (Type[]) typesColumn.toArray();
+        //Type[] types = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
+        //String[] names = new String[]{"number", "text"};
+
+        return new CreateTableCommand(table, typesColumn, nameColumn);
+    }
+
+    public Command createManager(String str) throws Exception {
+        String cmd = str.substring(Math.min(str.length(), 7), Math.min(str.length(), 12)).toLowerCase();
+        if (cmd.compareTo("table") == 0) {
+            return createTable(str);
+        } else {
+            return new SelectCommand("table1", new ArrayList<Pair<String, Constraint>>());
+        }
     }
     public Command getCommand(String str) throws Exception {
         //str = "SELECT `id`, `password` FROM `table1` WHERE (`id` = '3' and `hyj`='dz')";
@@ -148,11 +184,18 @@ public class Parser {
 
         String cmd = str.substring(0, Math.min(str.length(), 6)).toLowerCase();
 
+//        if (cmd.compareTo("insert") != 0){
+//            str = "CREATE TABLE mytab (number VARCHAR (10), text VARCHAR (9))";
+//            cmd = "create";
+        //}
+
         if (cmd.compareTo("select") == 0) {
             return selectParse(str);
             //return selectParse(str.substring(Math.min(str.length(), 6)));
         } else if (cmd.compareTo("insert") == 0) {
             return insertParse(str);
+        } else if (cmd.compareTo("create") == 0) {
+            return createManager(str);
         } else throw new Exception("Unsupported action");
     }
 
