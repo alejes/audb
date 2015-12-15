@@ -3,6 +3,8 @@ package audb.parser;
 import audb.command.*;
 import audb.table.Table;
 import audb.table.TableManager;
+import audb.type.DoubleType;
+import audb.type.IntegerType;
 import audb.type.Type;
 import audb.type.VarcharType;
 import audb.util.Pair;
@@ -11,6 +13,7 @@ import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.Limit;
@@ -122,7 +125,7 @@ public class Parser {
         String table = createTable.getTable().toString();
 
         System.out.println(table);
-/*
+
         Type[] typesColumn = new Type[columsCount];
         String[] nameColumn = new String[columsCount];
 
@@ -136,7 +139,6 @@ public class Parser {
                 typesColumn[i] = (new DoubleType(Type.DOUBLE));
             } else {
                 String[] lenArr = currentType.split("([()])");
-                System.out.println(lenArr.length);
                 if (lenArr.length != 2) {
                     throw new IllegalArgumentException("error in VARCHAR len");
                 }
@@ -151,22 +153,7 @@ public class Parser {
             }
         }
 
-        System.out.print("table:");
-        System.out.println(table);
-
-        /*
-        for (String x : nameColumn){
-            System.out.println(x);
-        }
-        for (Type x : typesColumn){
-            System.out.println(x.toString());
-        }*/
-
-        Type[] types2 = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
-        String[] names2 = new String[]{"number", "text"};
-
-        //return new CreateTableCommand(table, typesColumn, nameColumn);
-        return new CreateTableCommand("eeee", types2, names2);
+        return new CreateTableCommand(table, typesColumn, nameColumn);
     }
 
     public Command createManager(String str) throws Exception {
@@ -185,10 +172,10 @@ public class Parser {
 
         String cmd = str.substring(0, Math.min(str.length(), 6)).toLowerCase();
 
-        if (cmd.compareTo("insert") != 0) {
-            str = "CREATE TABLE mytab2 (number VARCHAR (10), text VARCHAR (9))";
-            cmd = "create";
-        }
+//        if (cmd.compareTo("insert") != 0) {
+//            str = "CREATE TABLE mytab2 (number VARCHAR (10), text VARCHAR (9))";
+//            cmd = "create";
+        //}
 
         if (cmd.compareTo("select") == 0) {
             return selectParse(str);

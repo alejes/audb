@@ -1,7 +1,6 @@
 package audb;
 
 import audb.command.Command;
-import audb.command.CreateTableCommand;
 import audb.index.Index.Order;
 import audb.page.PageStructure;
 import audb.parser.Parser;
@@ -31,8 +30,11 @@ public class Main {
             Type[] types = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
             String[] names = new String[]{"number", "text"};
 
-            command = new CreateTableCommand("table1", types, names);
+            String qq = "CREATE TABLE table1 (number VARCHAR (15), text VARCHAR (9))";
+            command = parser.getCommand(qq);
             command.exec();
+            //command = new CreateTableCommand("table1", types, names);
+            //command.exec();
 
 
             for (int i = 0; i < 5; i++) {
