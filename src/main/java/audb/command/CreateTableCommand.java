@@ -22,8 +22,8 @@ public class CreateTableCommand extends Command {
 	}
 
     public Pair<Table, Iterator<HashMap<String, TableElement>>> exec() throws Exception {
-		if(tableManager.hasTable(tableName))
-			throw new Exception("CreateTableCommand.java");
+		// if(tableManager.hasTable(tableName))
+		// 	throw new Exception("CreateTableCommand.java");
 		tableManager.createTable(tableName, types, names);				
 		
     	return null;
