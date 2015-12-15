@@ -85,7 +85,6 @@ public class Parser {
         String[] tableNames = tableStruct.getNames();
         Type[] tableTypes = tableStruct.getTypes();
 
-        //Object arr[] = new Object[]{s1, s2};
         ArrayList<Object> args = new ArrayList<Object>();
 
         for (int i = 0; i < tableNames.length; i++) {
@@ -179,7 +178,6 @@ public class Parser {
 
         if (cmd.compareTo("select") == 0) {
             return selectParse(str);
-            //return selectParse(str.substring(Math.min(str.length(), 6)));
         } else if (cmd.compareTo("insert") == 0) {
             return insertParse(str);
         } else if (cmd.compareTo("create") == 0) {

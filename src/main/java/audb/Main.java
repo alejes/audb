@@ -1,7 +1,6 @@
 package audb;
 
 import audb.command.Command;
-import audb.index.Index.Order;
 import audb.page.PageStructure;
 import audb.parser.Parser;
 import audb.table.Table;
@@ -42,19 +41,20 @@ public class Main {
                 command = parser.getCommand(q);
                 command.exec();
             }
+
             //вставлять 10кк с 8 мб heap
             //select no fullscan where and etc.
             //shutdown
             //join
 
-
+/*
             Table t = tableManager.getTable("table1");
             Order[] orders = new Order[1];
             String[] indexNames = new String[1];
             indexNames[0] = names[0];
             orders[0] = Order.ASC;
             t.addBTreeIndex(indexNames, orders);
-            
+  */
             String s;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while ((s = in.readLine()) != null && s.length() != 0) {
