@@ -1,10 +1,5 @@
 package audb;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Iterator;
-
 import audb.command.Command;
 import audb.command.CreateTableCommand;
 import audb.command.InsertCommand;
@@ -18,6 +13,11 @@ import audb.table.VarcharElement;
 import audb.type.Type;
 import audb.type.VarcharType;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Iterator;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -28,20 +28,28 @@ public class Main {
 
         try {
             Command command;
-            Type[] types = new Type[]{new VarcharType((byte)3), new VarcharType((byte)9)};
+            Type[] types = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
             String[] names = new String[]{"number", "text"};
 
             command = new CreateTableCommand("table1", types, names);
             command.exec();
 
-            for(int i = 0; i < 15; i++) {
-                String s1 = String.format("%03d", i);;
+            for (int i = 0; i < 5; i++) {
+                String s1 = String.format("%03d", i);
                 String s2 = "some_text";
                 Object arr[] = new Object[]{s1, s2};
 
                 command = new InsertCommand("table1", arr);
                 command.exec();
+                if (i % 1000 == 0) {
+                    System.out.println(String.format("Inserted [%d] records.", i));
+                }
             }
+            //вставлять 10кк с 8 мб heap
+            //select no fullscan where and etc.
+            //shutdown
+            //join
+
             
             Table t = tableManager.getTable("table1");
             Order[] orders = new Order[1];
