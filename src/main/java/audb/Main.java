@@ -37,7 +37,7 @@ public class Main {
 
 
             for (int i = 0; i < 5; i++) {
-                String q = String.format("INSERT INTO table1 (text, number) VALUES ('%03d', 'sadfsd')", i);
+                String q = String.format("INSERT INTO table1 (number, text) VALUES ('%03d', 'sadfsd')", i);
                 command = parser.getCommand(q);
                 command.exec();
             }
@@ -62,7 +62,7 @@ public class Main {
                     command = parser.getCommand(s);
                     Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
                     for (int tableIter = 0; tableIter < exRes.first.getNames().length; ++tableIter) {
-                        System.out.print(String.format("%25s", exRes.first.getNames()[tableIter] + "   " + exRes.first.getTypes()[tableIter] + "  |"));
+                        System.out.print(String.format("%24s", exRes.first.getNames()[tableIter] + "   " + exRes.first.getTypes()[tableIter] + " |"));
                     }
                     System.out.println();
                     if (null == exRes) {
