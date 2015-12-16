@@ -227,21 +227,68 @@ public class BTreeTest extends TestCase {
 		}
 		
 		assertEquals(145500, size);
+	
+		long t1 = System.currentTimeMillis();
 		constrs.add(Pair.newPair("id", new Constraint(ConstraintType.LESS, 
 				new IntegerElement(10, (IntegerType)types[0]))));
-		
 		System.out.println(" ");
 		sc = new SelectCommand(tableName, constrs);
 		result = sc.exec();
 		iter = result.second;
 		size = 0;
+		
+		
+		
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
 			System.out.println(row.get("number"));
 		}
-		
+		long t2 = System.currentTimeMillis();
+		System.out.println("Time passed " + Long.toString(t2 - t1));
 		assertEquals(7,size);
+	}
+	
+	public void testAlexei() throws Exception {
+		Parser parser = new Parser();
+		TableManager tableManager = new TableManager();
+		Command.setTableManager(tableManager);
+
+		Command command;
+		Type[] types = new Type[]{new VarcharType((byte)3), new VarcharType((byte)9)};
+		String[] names = new String[]{"number", "text"};
+
+		String tableName = "table1";
+		command = new CreateTableCommand(tableName, types, names);
+		command.exec();
+
+		for(int i = 0; i < 15; i++) {
+			String s1 = String.format("%03d", i);;
+			String s2 = "some_text";
+			Object arr[] = new Object[]{s1, s2};
+
+			command = new InsertCommand("table1", arr);
+			command.exec();
+		}
+
+		
+
+		List<Pair<String, Constraint>> constrs = new ArrayList<Pair<String, Constraint>>();
+		
+		constrs.add(Pair.newPair("number", new Constraint(ConstraintType.LESS, 
+				new VarcharElement("002", (VarcharType)types[1]))));
+		constrs.add(Pair.newPair("number", new Constraint(ConstraintType.GREATER_OR_EQUAL, 
+				new VarcharElement("001", (VarcharType)types[1]))));
+		SelectCommand sc = new SelectCommand(tableName, constrs);
+		Pair<Table, Iterator<HashMap<String, TableElement>>> result = sc.exec();
+		Iterator<HashMap<String, TableElement>> iter = result.second;
+		int size = 0;
+		while (iter.hasNext()) {
+			size++;
+			HashMap<String, TableElement> row = iter.next();
+			System.out.println(row.get("number"));
+		}
+		assertEquals(1, size);
 	}
 
 	/*
