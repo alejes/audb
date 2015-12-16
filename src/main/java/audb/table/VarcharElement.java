@@ -24,7 +24,11 @@ public class VarcharElement implements TableElement {
 	
     public byte[] toBytes() {
     	// TODO
-        return value.getBytes(StandardCharsets.US_ASCII);
+    	try {
+        return type.toBytes(value);
+    	} catch (Exception e) {
+    		return null;
+    	}
     }
 
 	public String showString() {

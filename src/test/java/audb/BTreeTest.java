@@ -198,7 +198,7 @@ public class BTreeTest extends TestCase {
 		indexNames[1] = names[1];
 		orders[0] = Order.ASC;
 		orders[1] = Order.ASC;
-		t.addBTreeIndex(indexNames, orders);
+		//t.addBTreeIndex(indexNames, orders);
 		
 		// insert values
 		for(int i = 0; i < 150000; i++) {

@@ -111,21 +111,21 @@ public class Page {
     
     public static long bytesToLong(byte[] bytes) {
         buffer.clear();
-        buffer.put(bytes, 0, bytes.length);
+        buffer.put(bytes, 0, Long.BYTES);
         buffer.flip(); 
         return buffer.getLong();
     }
     
     public static int bytesToInt(byte[] bytes) {
     	intBuffer.clear();
-    	intBuffer.put(bytes, 0, bytes.length);
+    	intBuffer.put(bytes, 0, Integer.BYTES);
     	intBuffer.flip(); 
         return intBuffer.getInt();
     }
     
     public static double bytesToDouble(byte[] bytes) {
     	doubleBuffer.clear();
-    	doubleBuffer.put(bytes, 0, bytes.length);
+    	doubleBuffer.put(bytes, 0, Double.BYTES);
     	doubleBuffer.flip(); 
         return doubleBuffer.getDouble();
     }
