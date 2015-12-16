@@ -16,7 +16,11 @@ public class IntegerElement implements TableElement {
 		this.value = value;
 		this.type = new IntegerType(Type.INT);
 	}
-	
+
+	public String showString() {
+		return value.toString();
+	}
+
 	public String toString() {
 		return "INTEGER " + value.toString();
 	}

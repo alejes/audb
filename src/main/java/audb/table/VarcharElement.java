@@ -26,6 +26,10 @@ public class VarcharElement implements TableElement {
     	// TODO
         return value.getBytes(StandardCharsets.US_ASCII);
     }
+
+	public String showString() {
+		return value.toString();
+	}
 	
 	public int compareTo(TableElement other) {
 		if (!(other instanceof VarcharElement)) {
