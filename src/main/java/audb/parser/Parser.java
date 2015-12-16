@@ -114,7 +114,7 @@ public class Parser {
                     throw new IllegalArgumentException("not found constraint in where" + statement);
                 }
 
-                TableElement el = null;
+                TableElement el;
                 switch (fieldType.getId()) {
                     case Type.INT:
                         try {
@@ -176,15 +176,15 @@ public class Parser {
 
         ArrayList<Object> args = new ArrayList<Object>();
 
-        System.out.print("Tables:");
-        System.out.println(tableNames.length);
+        //System.out.print("Tables:");
+        //System.out.println(tableNames.length);
         for (int i = 0; i < tableNames.length; i++) {
             boolean find = false;
             for (int columnId = 0; columnId < tableNames.length; ++columnId) {
 
                 if (((Column) insert.getColumns().get(columnId)).getColumnName().compareTo(tableNames[i]) == 0) {
                     String insertValue = ((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(columnId)).getValue();
-                    System.out.println(insertValue);
+                    //System.out.println(insertValue);
                     switch (tableTypes[i].getId()) {
                         case Type.INT:
                             throw new IllegalArgumentException("Integer insert not supported by parser");
@@ -261,10 +261,10 @@ public class Parser {
 
         String cmd = str.substring(0, Math.min(str.length(), 6)).toLowerCase();
 
-        if (cmd.compareTo("insert") != 0) {
+        //if (cmd.compareTo("insert") != 0) {
             //str = "select * from table1 where (id > 4) and (id < 5)";
             //cmd = "select";
-        }
+        //}
 
         if (cmd.compareTo("select") == 0) {
             return selectParse(str);
