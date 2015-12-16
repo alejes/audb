@@ -15,7 +15,7 @@ public class VarcharElement implements TableElement {
 	}
 	
 	public String toString() {
-		return "VARCHAR (" + value.length() + ") " + value;
+		return "VARCHAR (" + type.getSize() + ") " + value;
 	}
 	
 	public int getSizeInBytes() {
