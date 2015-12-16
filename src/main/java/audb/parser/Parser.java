@@ -1,8 +1,7 @@
 package audb.parser;
 
 import audb.command.*;
-import audb.table.Table;
-import audb.table.TableManager;
+import audb.table.*;
 import audb.type.DoubleType;
 import audb.type.IntegerType;
 import audb.type.Type;
@@ -28,6 +27,7 @@ import java.util.List;
 
 public class Parser {
     private static CCJSqlParserManager parserManager = new CCJSqlParserManager();
+
     public Command selectParse(String str) throws Exception {
         final List exprList = new ArrayList();
         Select select = (Select) parserManager.parse(new StringReader(str));
@@ -49,27 +49,116 @@ public class Parser {
             throw new IllegalArgumentException("unknown table");
         }
 
-        System.out.println("");
+        //System.out.println("");
         System.out.print("Select please: ");
         for (SelectItem x :
                 selectItems) {
             System.out.print(x.toString() + "|");
         }
         System.out.println();
+        String[] tableNames = tableStruct.getNames();
+        Type[] tableTypes = tableStruct.getTypes();
 
-        System.out.println("FROM TABLES: " + from);
+
+        //System.out.println("FROM TABLES: " + from);
+
+        ArrayList<Pair<String, Constraint>> ConstraintsList = new ArrayList<Pair<String, Constraint>>();
+        if (where != null) {
+            String[] whereStatements = where.toString().split("(?i) AND ");
+            for (String statement : whereStatements) {
+                //System.out.println(statement);
+                String[] splitConstraint = statement.split("[<=>]+", 2);
+                if (splitConstraint.length != 2) {
+                    throw new IllegalArgumentException("bad where statement " + statement);
+                }
+                String field = splitConstraint[0].replace('(', ' ').trim();
+                String value = splitConstraint[1].trim();
+                if (value.charAt(value.length() - 1) == ')') {
+                    value = value.substring(0, value.length() - 1);
+                }
+                //System.out.print("[1]:");
+                //System.out.println(field);
+                //System.out.print("[2]:");
+                //System.out.println(value);
 
 
+                ArrayList<Object> args = new ArrayList<Object>();
+
+                String beginWith = statement.substring(splitConstraint[0].length());
+                Constraint.ConstraintType curent;
+                if (beginWith.startsWith("<=")) {
+                    curent = Constraint.ConstraintType.LESS_OR_EQUAL;
+                } else if (beginWith.startsWith("<>")) {
+                    curent = Constraint.ConstraintType.NOT_EQUAL;
+                } else if (beginWith.startsWith("<")) {
+                    curent = Constraint.ConstraintType.LESS;
+                } else if (beginWith.startsWith("=")) {
+                    curent = Constraint.ConstraintType.EQUAL;
+                } else if (beginWith.startsWith(">=")) {
+                    curent = Constraint.ConstraintType.GREATER_OR_EQUAL;
+                } else if (beginWith.startsWith(">")) {
+                    curent = Constraint.ConstraintType.GREATER;
+                } else if (beginWith.startsWith("!=")) {
+                    curent = Constraint.ConstraintType.NOT_EQUAL;
+                } else {
+                    throw new IllegalArgumentException("unsupported constraint in where statement" + statement);
+                }
+                //find type
+                Type fieldType = null;
+                for (int columnId = 0; columnId < tableNames.length; ++columnId) {
+                    if (tableNames[columnId].compareTo(field) == 0) {
+                        fieldType = tableTypes[columnId];
+                    }
+                }
+                if (fieldType == null) {
+                    throw new IllegalArgumentException("not found constraint in where" + statement);
+                }
+
+                TableElement el;
+                switch (fieldType.getId()) {
+                    case Type.INT:
+                        try {
+                            int val = Integer.parseInt(value);
+                            el = new IntegerElement(val);
+                        } catch (NumberFormatException nfe) {
+                            throw new IllegalArgumentException("illegal int in where " + statement);
+                        }
+                    case Type.DOUBLE:
+                        try {
+                            double val = Double.parseDouble(value);
+                            el = new DoubleElement(val);
+                        } catch (NumberFormatException nfe) {
+                            throw new IllegalArgumentException("illegal int in where " + statement);
+                        }
+                    default:
+                        if (value.length() >= fieldType.getSize()) {
+                            throw new IllegalArgumentException("very long VARCHAR in where " + statement);
+                        }
+                        el = new VarcharElement(value, new VarcharType((byte) value.length()));
+                }
+                ConstraintsList.add(Pair.newPair(field, new Constraint(curent, el)));
+            }
+        }
+        System.out.println("CONSTRAINTS");
+        for (Pair<String, Constraint> x : ConstraintsList) {
+            System.out.print(x.first);
+            System.out.print(" ");
+            System.out.println(x.second);
+        }
+        //ConstraintType
+        /*
         if (where == null)
             System.out.println("No Where");
-        else
+        else {
             System.out.println("Where: " + where.toString());
+        }
+        */
         if (limits == null)
             System.out.println("No limits");
         else
             System.out.println("Limits: " + limits.toString());
 
-        return new SelectCommand(from, new ArrayList<Pair<String, Constraint>>());
+        return new SelectCommand(from, ConstraintsList);
     }
 
     public Command insertParse(String str) throws Exception {
@@ -87,12 +176,15 @@ public class Parser {
 
         ArrayList<Object> args = new ArrayList<Object>();
 
+        //System.out.print("Tables:");
+        //System.out.println(tableNames.length);
         for (int i = 0; i < tableNames.length; i++) {
             boolean find = false;
             for (int columnId = 0; columnId < tableNames.length; ++columnId) {
 
                 if (((Column) insert.getColumns().get(columnId)).getColumnName().compareTo(tableNames[i]) == 0) {
                     String insertValue = ((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(columnId)).getValue();
+                    //System.out.println(insertValue);
                     switch (tableTypes[i].getId()) {
                         case Type.INT:
                             throw new IllegalArgumentException("Integer insert not supported by parser");
@@ -158,7 +250,7 @@ public class Parser {
         if (cmd.compareTo("table") == 0) {
             return createTable(str);
         } else {
-            return new SelectCommand("table1", new ArrayList<Pair<String, Constraint>>());
+            throw new Exception("Unsupported action");
         }
     }
     public Command getCommand(String str) throws Exception {
@@ -169,9 +261,9 @@ public class Parser {
 
         String cmd = str.substring(0, Math.min(str.length(), 6)).toLowerCase();
 
-//        if (cmd.compareTo("insert") != 0) {
-//            str = "CREATE TABLE mytab2 (number VARCHAR (10), text VARCHAR (9))";
-//            cmd = "create";
+        //if (cmd.compareTo("insert") != 0) {
+            //str = "select * from table1 where (id > 4) and (id < 5)";
+            //cmd = "select";
         //}
 
         if (cmd.compareTo("select") == 0) {

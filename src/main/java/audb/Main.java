@@ -58,27 +58,30 @@ public class Main {
             String s;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while ((s = in.readLine()) != null && s.length() != 0) {
-                command = parser.getCommand(s);
-                Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
-                if (null == exRes) {
-                    continue;
-                }
-                Iterator<HashMap<String, TableElement>> res = exRes.second;
-
-                if (null == res)
-                	continue;
-                
-                while (res.hasNext()) {
-                	HashMap<String, TableElement> arr = res.next();
-                    for (String name : arr.keySet()) {
-                        if (arr.get(name) instanceof VarcharElement) {
-                            System.out.print(arr.get(name).toString() + " ");
-                        }
-
+                try {
+                    command = parser.getCommand(s);
+                    Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
+                    if (null == exRes) {
+                        continue;
                     }
-                    System.out.println();
+                    Iterator<HashMap<String, TableElement>> res = exRes.second;
+
+                    if (null == res)
+                        continue;
+
+                    while (res.hasNext()) {
+                        HashMap<String, TableElement> arr = res.next();
+                        for (String name : arr.keySet()) {
+                            if (arr.get(name) instanceof VarcharElement) {
+                                System.out.print(arr.get(name).toString() + " ");
+                            }
+
+                        }
+                        System.out.println();
+                    }
+                } catch (Exception exp) {
+                    System.out.println("Error: " + exp.getMessage());
                 }
-                
                 
             }
             PageStructure.flush();

@@ -1,9 +1,9 @@
 package audb.table;
 
-import java.nio.charset.StandardCharsets;
-
 import audb.type.Type;
 import audb.type.VarcharType;
+
+import java.nio.charset.StandardCharsets;
 
 public class VarcharElement implements TableElement {
 	public final String value;
@@ -15,7 +15,7 @@ public class VarcharElement implements TableElement {
 	}
 	
 	public String toString() {
-		return value;
+		return "VARCHAR (" + value.length() + ") " + value;
 	}
 	
 	public int getSizeInBytes() {

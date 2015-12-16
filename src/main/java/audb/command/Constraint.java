@@ -10,7 +10,30 @@ public class Constraint {
 		constraintType = c;
 		reference = ref;
 	}
-	
+
+	public boolean elementSatisfies(TableElement element) {
+		switch (constraintType) {
+			case EQUAL:
+				return (0 == element.compareTo(reference));
+			case NOT_EQUAL:
+				return (0 != element.compareTo(reference));
+			case LESS:
+				return (element.compareTo(reference) < 0);
+			case GREATER:
+				return (element.compareTo(reference) > 0);
+			case LESS_OR_EQUAL:
+				return (element.compareTo(reference) <= 0);
+			case GREATER_OR_EQUAL:
+				return (element.compareTo(reference) >= 0);
+		}
+		return false;
+	}
+
+	@Override
+	public String toString() {
+		return "Constraint " + reference.toString() + " " + constraintType.toString();
+	}
+
 	public enum ConstraintType {
 		EQUAL,
 		NOT_EQUAL,
@@ -18,24 +41,5 @@ public class Constraint {
 		GREATER,
 		LESS_OR_EQUAL,
 		GREATER_OR_EQUAL
-	}
-	
-	
-	public boolean elementSatisfies(TableElement element) {
-		switch (constraintType) {
-		case EQUAL:
-			return (0 == element.compareTo(reference));
-		case NOT_EQUAL:
-			return (0 != element.compareTo(reference));
-		case LESS:
-			return (element.compareTo(reference) < 0);
-		case GREATER:
-			return (element.compareTo(reference) > 0);
-		case LESS_OR_EQUAL:
-			return (element.compareTo(reference) <= 0);
-		case GREATER_OR_EQUAL:
-			return (element.compareTo(reference) >= 0);
-		}
-		return false;
 	}
 }

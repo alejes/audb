@@ -1,6 +1,7 @@
 package audb.table;
 
 import audb.page.Page;
+import audb.type.DoubleType;
 import audb.type.Type;
 
 public class DoubleElement implements TableElement {
@@ -11,9 +12,14 @@ public class DoubleElement implements TableElement {
 		value = v;
 		this.type = type;
 	}
+
+	public DoubleElement(double v) {
+		value = v;
+		this.type = new DoubleType(Type.DOUBLE);
+	}
 	
 	public String toString() {
-		return value.toString();
+		return "DOUBLE " + value.toString();
 	}
 	
 	public int compareTo(TableElement other) {
