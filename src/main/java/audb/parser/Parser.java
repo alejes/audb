@@ -49,7 +49,7 @@ public class Parser {
             throw new IllegalArgumentException("unknown table");
         }
 
-        System.out.println("");
+        //System.out.println("");
         System.out.print("Select please: ");
         for (SelectItem x :
                 selectItems) {
@@ -60,14 +60,14 @@ public class Parser {
         Type[] tableTypes = tableStruct.getTypes();
 
 
-        System.out.println("FROM TABLES: " + from);
+        //System.out.println("FROM TABLES: " + from);
 
         ArrayList<Pair<String, Constraint>> ConstraintsList = new ArrayList<Pair<String, Constraint>>();
         if (where != null) {
             String[] whereStatements = where.toString().split("(?i) AND ");
             for (String statement : whereStatements) {
-                System.out.println(statement);
-                String[] splitConstraint = statement.split("[<=>]", 2);
+                //System.out.println(statement);
+                String[] splitConstraint = statement.split("[<=>]+", 2);
                 if (splitConstraint.length != 2) {
                     throw new IllegalArgumentException("bad where statement " + statement);
                 }
@@ -76,28 +76,28 @@ public class Parser {
                 if (value.charAt(value.length() - 1) == ')') {
                     value = value.substring(0, value.length() - 1);
                 }
-                System.out.print("[1]:");
-                System.out.println(field);
-                System.out.print("[2]:");
-                System.out.println(value);
+                //System.out.print("[1]:");
+                //System.out.println(field);
+                //System.out.print("[2]:");
+                //System.out.println(value);
 
 
                 ArrayList<Object> args = new ArrayList<Object>();
 
                 String beginWith = statement.substring(splitConstraint[0].length());
                 Constraint.ConstraintType curent;
-                if (beginWith.startsWith("<")) {
-                    curent = Constraint.ConstraintType.LESS;
-                } else if (beginWith.startsWith("<=")) {
+                if (beginWith.startsWith("<=")) {
                     curent = Constraint.ConstraintType.LESS_OR_EQUAL;
-                } else if (beginWith.startsWith("=")) {
-                    curent = Constraint.ConstraintType.EQUAL;
-                } else if (beginWith.startsWith(">")) {
-                    curent = Constraint.ConstraintType.GREATER;
-                } else if (beginWith.startsWith(">=")) {
-                    curent = Constraint.ConstraintType.GREATER_OR_EQUAL;
                 } else if (beginWith.startsWith("<>")) {
                     curent = Constraint.ConstraintType.NOT_EQUAL;
+                } else if (beginWith.startsWith("<")) {
+                    curent = Constraint.ConstraintType.LESS;
+                } else if (beginWith.startsWith("=")) {
+                    curent = Constraint.ConstraintType.EQUAL;
+                } else if (beginWith.startsWith(">=")) {
+                    curent = Constraint.ConstraintType.GREATER_OR_EQUAL;
+                } else if (beginWith.startsWith(">")) {
+                    curent = Constraint.ConstraintType.GREATER;
                 } else if (beginWith.startsWith("!=")) {
                     curent = Constraint.ConstraintType.NOT_EQUAL;
                 } else {
@@ -146,12 +146,13 @@ public class Parser {
             System.out.println(x.second);
         }
         //ConstraintType
+        /*
         if (where == null)
             System.out.println("No Where");
         else {
             System.out.println("Where: " + where.toString());
-
         }
+        */
         if (limits == null)
             System.out.println("No limits");
         else

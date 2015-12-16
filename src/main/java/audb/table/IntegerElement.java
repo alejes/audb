@@ -18,7 +18,7 @@ public class IntegerElement implements TableElement {
 	}
 	
 	public String toString() {
-		return value.toString();
+		return "INTEGER " + value.toString();
 	}
 	
 	public int compareTo(TableElement other) {

@@ -19,7 +19,7 @@ public class DoubleElement implements TableElement {
 	}
 	
 	public String toString() {
-		return value.toString();
+		return "DOUBLE " + value.toString();
 	}
 	
 	public int compareTo(TableElement other) {
