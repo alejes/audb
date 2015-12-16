@@ -245,12 +245,18 @@ public class Parser {
         return new CreateTableCommand(table, typesColumn, nameColumn);
     }
 
+    public Command createConstraint(String str) throws Exception {
+        CreateTable createTable = (CreateTable) parserManager.parse(new StringReader(str));
+
+
+        throw new Exception("Unsupported action");
+    }
     public Command createManager(String str) throws Exception {
         String cmd = str.substring(Math.min(str.length(), 7), Math.min(str.length(), 12)).toLowerCase();
         if (cmd.compareTo("table") == 0) {
             return createTable(str);
         } else {
-            throw new Exception("Unsupported action");
+            return createConstraint(str);
         }
     }
     public Command getCommand(String str) throws Exception {
