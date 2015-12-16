@@ -21,6 +21,10 @@ public class DoubleElement implements TableElement {
 	public String toString() {
 		return "DOUBLE " + value.toString();
 	}
+
+	public String showString() {
+		return value.toString();
+	}
 	
 	public int compareTo(TableElement other) {
 		if (other instanceof VarcharElement) {
