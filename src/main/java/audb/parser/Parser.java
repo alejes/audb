@@ -134,7 +134,7 @@ public class Parser {
                         if (value.length() >= fieldType.getSize()) {
                             throw new IllegalArgumentException("very long VARCHAR in where " + statement);
                         }
-                        el = new VarcharElement(value, new VarcharType((byte) value.length()));
+                        el = new VarcharElement(value, new VarcharType((byte) fieldType.getSize()));
                 }
                 ConstraintsList.add(Pair.newPair(field, new Constraint(curent, el)));
             }
