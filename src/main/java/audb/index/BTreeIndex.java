@@ -118,7 +118,7 @@ public class BTreeIndex extends Index {
 		pw.writeInteger(btree.getRootPage());
 	}
 	
-	public void create(String[] names, Order[] orders) {
+	public void create(String[] names, Order[] orders) throws KeySizeException {
 		super.create(names, orders);
 		long size = (pageStructure.getCountOfPages() * PageManager.PAGE_SIZE + 512) / 1024;
 		int maxKeySize = 0;
@@ -143,6 +143,10 @@ public class BTreeIndex extends Index {
 				maxKeySize + IndexValueInstance.getSizeInBytes()) / (maxKeySize + 
 						IndexValueInstance.getSizeInBytes());
 		int fanout = Math.min(innerBound, leafBound);
+		if (fanout < 2) {
+			throw new KeySizeException();
+		}
+		
 		btree = new BTree(fanout, pageStructure, keyElementsTypes, orders);
 
 		if (size <= MAX_RAM_SIZE_MB) {

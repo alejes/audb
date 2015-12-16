@@ -10,11 +10,19 @@ import audb.table.Table;
 import audb.table.TableElement;
 import audb.util.Pair;
 
-
 public abstract class Index {
 
     public enum Order {
         ASC, DESC
+    }
+    
+    public class KeySizeException extends Exception {
+		private static final long serialVersionUID = 1L;
+    	
+		@Override
+		public String getMessage() {
+			return "Key is too big to fit in page size";
+		}
     }
 
 	public static class IndexFindResults {
@@ -49,7 +57,7 @@ public abstract class Index {
 
     public abstract void init() throws Exception;
 
-    public void create(String[] names, Order[] orders) {
+    public void create(String[] names, Order[] orders) throws KeySizeException {
     	keyColumnsNames = Arrays.asList(names);
     	this.orders = orders;
     }

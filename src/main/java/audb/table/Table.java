@@ -10,6 +10,7 @@ import audb.command.Constraint;
 import audb.index.BTreeIndex;
 import audb.index.Index;
 import audb.index.Index.IndexFindResults;
+import audb.index.Index.KeySizeException;
 import audb.index.Index.Order;
 import audb.index.IndexValueInstance;
 import audb.page.Page;
@@ -236,7 +237,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		}
 	}
 
-	public void addBTreeIndex(String[] indexNames, Order[] orders) {
+	public void addBTreeIndex(String[] indexNames, Order[] orders) throws KeySizeException {
 		int emptyPage = pageStructure.getEmptyPage();
 		Index index = new BTreeIndex(this, emptyPage, pageStructure);
 		index.create(indexNames, orders);
