@@ -1,6 +1,7 @@
 package audb.table;
 
 import audb.page.Page;
+import audb.type.DoubleType;
 import audb.type.Type;
 
 public class DoubleElement implements TableElement {
@@ -10,6 +11,11 @@ public class DoubleElement implements TableElement {
 	public DoubleElement(double v, Type type) {
 		value = v;
 		this.type = type;
+	}
+
+	public DoubleElement(double v) {
+		value = v;
+		this.type = new DoubleType(Type.DOUBLE);
 	}
 	
 	public String toString() {

@@ -1,24 +1,22 @@
 package audb;
 
 import audb.command.Command;
-import audb.command.CreateTableCommand;
 import audb.page.PageCache;
 import audb.page.PageStructure;
 import audb.parser.Parser;
-import audb.table.TableManager;
-import audb.type.Type;
-import audb.type.VarcharType;
-import audb.table.VarcharElement;
 import audb.table.Table;
 import audb.table.TableElement;
+import audb.table.TableManager;
+import audb.table.VarcharElement;
+import audb.type.Type;
+import audb.type.VarcharType;
 import audb.util.Pair;
-
-import java.util.HashMap;
-import java.util.Iterator;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Unit test for simple App.
@@ -68,7 +66,6 @@ public class AppTest
 
         q = "select * from parsertab";
         command = parser.getCommand(q);
-        command.exec();
         Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
         Iterator<HashMap<String, TableElement>> res = exRes.second;
 
