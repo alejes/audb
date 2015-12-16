@@ -241,7 +241,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		Page page = pageStructure.getPage(INFO_PAGE);
 		int indexCount = page.readInteger(INDEX_COUNT) + 1;
 		page.writeInteger(INDEX_COUNT, indexCount);
-		page.writeInteger(INDEX_COUNT - (int)indexCount, emptyPage);
+		page.writeInteger(INDEX_COUNT - indexCount, emptyPage);
 		indexList.add(index);
 	}
 

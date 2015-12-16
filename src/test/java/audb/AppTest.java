@@ -1,6 +1,7 @@
 package audb;
 
 import audb.command.Command;
+import audb.command.CreateTableCommand;
 import audb.page.PageCache;
 import audb.parser.Parser;
 import audb.table.TableManager;
@@ -50,12 +51,19 @@ public class AppTest
         TableManager tableManager = new TableManager();
         Command.setTableManager(tableManager);
         String q = "insert into parsertab (number, text) VALUES ('34343','434343')";
-        Command command = parser.getCommand(q);
-        command.exec();
-
-        q = "select * from parsertab";
-        command = parser.getCommand(q);
-        command.exec();
+        Command command = null; 
+        
+        try {
+        	command = parser.getCommand(q);
+	        command.exec();
+	
+	        q = "select * from parsertab";
+	        command = parser.getCommand(q);
+	        command.exec();
+	        //assert(false);
+	    } catch (IllegalArgumentException e) {
+	    	
+	    }
         q = "CREATE TABLE parsertab (number VARCHAR (15), text VARCHAR (9))";
         command = parser.getCommand(q);
         command.exec();

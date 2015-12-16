@@ -386,22 +386,38 @@ public class BTreeIndex extends Index {
 			}
 		}
 		
-		while (keyColumnIter.hasNext()) {
-			String keyColumnName = keyColumnIter.next();
-			Iterator<Pair<String, Constraint>> consIter = isIndexedConstraint.keySet().iterator();
-			boolean found = false;
-			while (consIter.hasNext()) {
-				Pair<String, Constraint> tmp = consIter.next();
-				String constrName = tmp.first;
-				if (constrName == keyColumnName) {
-					found = true;
-					isIndexedConstraint.put(tmp, true);
-					break;
+		boolean bottomBoundsCanHaveIndexedConstraints = true;
+		boolean upperBoundsCanHaveIndexedConstraints = true;
+		boolean exactBoundsCanHaveIndexedConstraints = true;
+		boolean exactNotBoundsCanHaveIndexedConstraints = true;
+		
+		for (String keyColumn : keyColumnsNames) {
+			if (ifr.bottomBounds.containsKey(keyColumn))
+				isIndexedConstraint.put(Pair.newPair(keyColumn,
+						ifr.bottomBounds.get(keyColumn)), bottomBoundsCanHaveIndexedConstraints);
+			else
+				bottomBoundsCanHaveIndexedConstraints = false;
+			
+			if (ifr.upperBounds.containsKey(keyColumn))
+				isIndexedConstraint.put(Pair.newPair(keyColumn,
+						ifr.upperBounds.get(keyColumn)), upperBoundsCanHaveIndexedConstraints);
+			else
+				upperBoundsCanHaveIndexedConstraints = false;
+			
+			if (ifr.exactBounds.containsKey(keyColumn))
+				isIndexedConstraint.put(Pair.newPair(keyColumn,
+						ifr.exactBounds.get(keyColumn)), exactBoundsCanHaveIndexedConstraints);
+			else
+				exactBoundsCanHaveIndexedConstraints = false;
+			
+			if (ifr.exactNotBounds.containsKey(keyColumn) && exactNotBoundsCanHaveIndexedConstraints) {
+				for (Constraint con : ifr.exactNotBounds.get(keyColumn)) {
+					isIndexedConstraint.put(Pair.newPair(keyColumn, con), true);
 				}
+			} else {
+				exactNotBoundsCanHaveIndexedConstraints = false;
 			}
 			
-			if (!found)
-				break;
 		}
 		
 		List<Pair<String, Constraint>> result = new LinkedList<Pair<String,Constraint>>();
