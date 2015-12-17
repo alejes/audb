@@ -60,7 +60,16 @@ public class AppTest
 
         Command command;
         String q;
-        q = "CREATE UNIQUE INDEX indexname ON table1(number DESC, text ASC) USING BTREE;";
+        String qq = "CREATE TABLE table12 (number VARCHAR (15), text VARCHAR (9))";
+        command = parser.getCommand(qq);
+        command.exec();
+
+
+        for (int i = 0; i < 10_000_0; i++) {
+            command = parser.getCommand(String.format("INSERT INTO table12 (number, text) VALUES ('%03d', 'sadfsd')", i));
+            command.exec();
+        }
+        q = "CREATE UNIQUE INDEX indexname ON table12 (number DESC, text ASC) USING BTREE;";
 
         command = parser.getCommand(q);
         command.exec();
