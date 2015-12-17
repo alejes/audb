@@ -1,6 +1,7 @@
 package audb.parser;
 
 import audb.command.*;
+import audb.index.Index;
 import audb.table.*;
 import audb.type.DoubleType;
 import audb.type.IntegerType;
@@ -246,10 +247,100 @@ public class Parser {
     }
 
     public Command createConstraint(String str) throws Exception {
-        CreateTable createTable = (CreateTable) parserManager.parse(new StringReader(str));
+        str = str.substring(7).trim();
+        Boolean unique = false;
+        if (str.toLowerCase().startsWith("unique")) {
+            unique = true;
+            str = str.substring(7).trim();
+        }
 
 
-        throw new Exception("Unsupported action");
+        if (!str.toLowerCase().startsWith("index")) {
+            throw new Exception("Unsupported action in create query");
+        }
+        str = str.substring(6).trim();
+        String[] indexSplit = str.split(" ", 2);
+        if (indexSplit.length != 2) {
+            throw new Exception("Wrong indexname in create query");
+        }
+
+        String indexName = indexSplit[0].trim();
+        str = indexSplit[1].trim();
+
+
+        if (!str.toLowerCase().startsWith("on ")) {
+            throw new Exception("Unsupported ON in create query");
+        }
+        str = str.substring(3).trim();
+
+        int tableNameIndex = str.indexOf('(');
+        String tableName = str.substring(0, tableNameIndex).trim();
+        str = str.substring(tableNameIndex + 1);
+
+
+        TableManager tableManager = Command.getTableManager();
+        Table tableStruct = tableManager.getTable(tableName);
+        if (tableStruct == null) {
+            throw new IllegalArgumentException("unknown table");
+        }
+        String[] tableNamesList = tableStruct.getNames();
+
+
+        int tableNameIndexEnd = str.indexOf(')');
+
+        String[] columsList = str.substring(0, tableNameIndexEnd).trim().split(",");
+        str = str.substring(tableNameIndexEnd + 1).trim();
+        //System.out.println("COLUMS:" + columsList);
+        Index.Order[] orders = new Index.Order[columsList.length];
+        String[] indexColumnNames = new String[columsList.length];
+        for (int i = 0; i < columsList.length; i++) {
+            String[] items = columsList[i].trim().split(" ");
+            if (items.length != 2) {
+                throw new Exception("Wrong column constraint in create query");
+            }
+            String currentColumn = items[0].trim().toLowerCase();
+            boolean find = false;
+
+            for (String __x : tableNamesList) {
+                if (currentColumn.compareTo(__x) == 0) {
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                throw new IllegalArgumentException("Not find column " + currentColumn);
+            }
+            indexColumnNames[i] = currentColumn;
+            if (items[1].trim().toLowerCase().compareTo("ASC") == 0) {
+                orders[i] = Index.Order.ASC;
+            } else {
+                orders[i] = Index.Order.DESC;
+            }
+            //System.out.println(items[0].trim() + "|" + items[1].trim());
+
+        }
+
+
+        if (!str.toLowerCase().startsWith("using ")) {
+            throw new Exception("Not enter index type in create index query");
+        }
+
+        str = str.substring(6).trim();
+
+        if (!str.toLowerCase().startsWith("btree")) {
+            throw new Exception("Support only BTREE index");
+        }
+
+
+        //str.indexOf(' ');
+        //System.out.println(unique);
+        //System.out.println("Indexname = " + indexName);
+        //System.out.println("Tablename = " + tableName);
+        //System.out.println(str);
+
+        tableStruct.addBTreeIndex(indexColumnNames, orders);
+
+        return new EmptyCommand(tableName);
     }
     public Command createManager(String str) throws Exception {
         String cmd = str.substring(Math.min(str.length(), 7), Math.min(str.length(), 12)).toLowerCase();
@@ -267,9 +358,16 @@ public class Parser {
 
         String cmd = str.substring(0, Math.min(str.length(), 6)).toLowerCase();
 
+
         //if (cmd.compareTo("insert") != 0) {
+        //str = "CREATE[UNIQUE] INDEX indexname ON tablename(col [ASC|DESC],[col]...) USING BTREE|HASH;"
+        //str = "CREATE UNIQUE INDEX indexname ON table1(number DESC, text ASC) USING BTREE;";
             //str = "select * from table1 where (id > 4) and (id < 5)";
             //cmd = "select";
+        //}
+
+        //if (str.charAt(str.length()-1) == ';'){
+        //str = str.substring(0, str.length()-1);
         //}
 
         if (cmd.compareTo("select") == 0) {
