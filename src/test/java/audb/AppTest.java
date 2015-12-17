@@ -52,6 +52,23 @@ public class AppTest
         assertTrue(a.compareTo(b) < 0);
     }
 
+    public void testAddIndex() throws Exception {
+        assertTrue(true);
+        Parser parser = new Parser();
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+        Command command;
+        String q;
+        q = "CREATE UNIQUE INDEX indexname ON table1(number DESC, text ASC) USING BTREE;";
+
+        command = parser.getCommand(q);
+        command.exec();
+
+        PageStructure.flush();
+
+        assertTrue(true);
+    }
     public void testLoadTable() throws Exception {
         assertTrue(true);
         Parser parser = new Parser();
