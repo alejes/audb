@@ -19,7 +19,7 @@ public class EmptyCommand extends Command {
     public Pair<Table, Iterator<HashMap<String, TableElement>>> exec() throws Exception {
 
         if (!tableManager.hasTable(tableName))
-            throw new Exception("No such table.");
+            throw new Exception("Unknown table " + tableName);
         Table table = tableManager.getTable(tableName);
 
         return Pair.newPair(table, null);

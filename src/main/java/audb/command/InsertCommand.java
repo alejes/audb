@@ -1,11 +1,11 @@
 package audb.command;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
 import audb.table.Table;
 import audb.table.TableElement;
 import audb.util.Pair;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 
 public class InsertCommand extends Command {
@@ -21,7 +21,7 @@ public class InsertCommand extends Command {
     public Pair<Table, Iterator<HashMap<String, TableElement>>> exec() throws Exception {
 
     	if(!tableManager.hasTable(tableName))
-			throw new Exception("No such table.");
+			throw new Exception("Unknown table " + tableName);
 		Table table = tableManager.getTable(tableName);
 		table.addRecord(data);
 
