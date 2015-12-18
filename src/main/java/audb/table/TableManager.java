@@ -21,7 +21,7 @@ public class TableManager {
                 str = str.substring(0, str.lastIndexOf('.'));
                 try {
                     PageStructure ps = new PageStructure(new PageManager("db/" + str + ".db"));
-                    Table table = new Table(ps);
+                    Table table = new Table(ps, str);
                     table.init();
                     hashMap.put(str, table);
                 } catch(Exception e) {
@@ -44,7 +44,7 @@ public class TableManager {
         }
         PageStructure ps = new PageStructure(new PageManager("db/" + tableName + ".db"));
         ps.clear();
-		Table table = new Table(ps);
+		Table table = new Table(ps, tableName);
 		table.create(types, names);
 		hashMap.put(tableName, table);
 	}

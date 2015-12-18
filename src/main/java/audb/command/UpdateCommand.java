@@ -9,12 +9,15 @@ import audb.util.Pair;
 import audb.table.TableLine;
 
 
-public class DeleteCommand extends Command {
+public class UpdateCommand extends Command {
 
     private Iterator<HashMap<String, TableElement>> iterator;    
+    private HashMap<String, Object> values;
 
-    public DeleteCommand(Iterator<HashMap<String, TableElement>> it) {
+    public UpdateCommand(Iterator<HashMap<String, TableElement>> it, 
+        HashMap<String, Object> v) {
         this.iterator = it;
+        this.values = v;
     }
 
     public Pair<Table, Iterator<HashMap<String, TableElement>>> exec() throws Exception {
@@ -27,7 +30,10 @@ public class DeleteCommand extends Command {
                 throw new Exception("No such table.");
             Table table = tableManager.getTable(tableName);
             String[] names = table.getNames();
-            table.delete(curr.getPageNumber(), curr.getOffset());
+            Object[] newValues = new Object[names.length];
+            for (int i = 0; i < names.length; ++i)
+                newValues[i] = values.containsKey(names[i]) ? values.get(names[i]) : null;
+            table.write(curr.getPageNumber(), curr.getOffset(), newValues);
         }
         
 

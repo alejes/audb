@@ -12,6 +12,8 @@ import java.util.Iterator;
 import audb.command.Command;
 import audb.command.CreateTableCommand;
 import audb.command.InsertCommand;
+import audb.command.UpdateCommand;
+import audb.command.DeleteCommand;
 import audb.page.PageStructure;
 import audb.table.Table;
 import audb.table.TableElement;
@@ -82,6 +84,56 @@ public class PageTest extends TestCase {
                 System.out.println();
     
                 ++counter;
+            }
+
+            PageStructure.flush();
+        } catch(Exception e) {
+             e.printStackTrace();
+        }    
+    }
+
+    public void testUpdate() {
+        if (false)
+            return;
+
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+        try {
+            Command command;
+            Type[] types = new Type[]{new VarcharType((byte)7), new VarcharType((byte)9)};
+            String[] names = new String[]{"number", "text"};
+
+            command = new CreateTableCommand("table1", types, names);
+            command.exec();
+
+            for(int i = 0; i < 100; i++) {
+                String s1 = String.format("%07d", i);
+                String s2 = "some_text";
+                Object arr[] = new Object[]{s1, s2};
+
+                command = new InsertCommand("table1", arr);
+                command.exec();
+            }
+            
+            Table t = tableManager.getTable("table1");
+            
+
+            Iterator<HashMap<String, TableElement>> it = new FullScanIterator(t);
+            HashMap<String, Object> newValues = new HashMap<String, Object>();
+            newValues.put("number", "1");
+            command = new UpdateCommand(it, newValues);
+            // command = new DeleteCommand(it);
+            command.exec();
+            it = new FullScanIterator(t);
+            while (it.hasNext()) {
+                HashMap<String, TableElement> arr = it.next();
+                for (String name : arr.keySet()) {
+                    if (arr.get(name) instanceof VarcharElement) {
+                        System.out.print(arr.get(name).toString() + " ");
+                    }
+                    System.out.println();
+                }
             }
 
             PageStructure.flush();

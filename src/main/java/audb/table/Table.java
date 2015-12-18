@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import audb.table.TableLine;
 import audb.command.Constraint;
 import audb.index.BTreeIndex;
 import audb.index.Index;
@@ -22,6 +23,7 @@ import audb.result.IndexedConditionalTableIterator;
 import audb.type.MutableInt;
 import audb.type.Type;
 import audb.util.Pair;
+import audb.table.DeletedElement;
 
 
 public class Table implements Iterable<HashMap<String, TableElement>> {
@@ -45,6 +47,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
 	private PageStructure pageStructure;
 	private List<Index> indexList;
+	private String tableName;
 
 	private String[] names;
 	private Type[] types;
@@ -59,9 +62,10 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 	private int countOfPages;
 
 
-	public Table(PageStructure ps) {
+	public Table(PageStructure ps, String name) {
 		pageStructure = ps;
 		indexList = new LinkedList<Index>();
+		tableName = name;
 	}
 
 	public PageStructure getPageStructure() {
@@ -167,16 +171,27 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		return types;
 	}
 
-	private void write(int pageNum, int offset, Object[] objects) throws Exception {
+	public void write(int pageNum, int offset, Object[] objects) throws Exception {
 		Page page = pageStructure.getPage(pageNum);
 		int ptr = offset * recordSize;
 		for(int i = 0; i < types.length; i++) {
+			if (objects[i] == null)
+				continue;
+			if (!types[i].isValid(objects[i]))
+				throw new Exception("not valid data");
 			byte[] data = types[i].toBytes(objects[i]);
 			System.arraycopy(data, 0, page.data, ptr, data.length);
 			ptr += data.length;
 		}
-		ptr += 1;
+		page.data[ptr] = 0;
 		page.write();
+	}
+
+	public void delete(int pageNum, int offset) throws Exception {
+		Page page = pageStructure.getPage(pageNum);
+		int ptr = (offset + 1) * recordSize - 1;
+		page.data[ptr] = 1;
+		page.write();	
 	}
 
 	public HashMap<String, TableElement> read(int pageNumber, int offset) {
@@ -186,7 +201,9 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
 	public HashMap<String, TableElement> read(Page page, int offset) {
 		int ptr = offset * recordSize;
-		HashMap<String, TableElement> objects = new HashMap<String, TableElement>();
+		TableLine objects = new TableLine(tableName, page.getPageNumber(), offset);
+		if (page.data[ptr + recordSize - 1] != 0)
+			return objects;
 		for(int i = 0; i < types.length; i++) {
 			byte[] data = new byte[types[i].getSize()];
 			System.arraycopy(page.data, ptr, data, 0, types[i].getSize());
