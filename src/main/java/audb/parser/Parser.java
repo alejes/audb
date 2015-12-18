@@ -121,7 +121,7 @@ public class Parser {
                             double val = Double.parseDouble(value);
                             el = new DoubleElement(val);
                         } catch (NumberFormatException nfe) {
-                            throw new IllegalArgumentException("illegal int in where " + statement);
+                            throw new IllegalArgumentException("illegal double in where " + statement);
                         }
                     default:
                         if (value.length() >= fieldType.getSize()) {
@@ -177,9 +177,19 @@ public class Parser {
                     String insertValue = ((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(columnId)).getValue();
                     switch (tableTypes[i].getId()) {
                         case Type.INT:
-                            throw new IllegalArgumentException("Integer insert not supported by parser");
+                            try {
+                                int val = Integer.parseInt(insertValue);
+                                args.add(val);
+                            } catch (NumberFormatException nfe) {
+                                throw new IllegalArgumentException("illegal int in where " + insertValue);
+                            }
                         case Type.DOUBLE:
-                            throw new IllegalArgumentException("Double insert not supported by parser");
+                            try {
+                                double val = Double.parseDouble(insertValue);
+                                args.add(val);
+                            } catch (NumberFormatException nfe) {
+                                throw new IllegalArgumentException("illegal double in where " + insertValue);
+                            }
                         default:
                             //Varchar
                             if (tableTypes[i].getSize() < insertValue.length()) {
