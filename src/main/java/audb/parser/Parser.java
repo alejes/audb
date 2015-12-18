@@ -60,14 +60,10 @@ public class Parser {
         String[] tableNames = tableStruct.getNames();
         Type[] tableTypes = tableStruct.getTypes();
 
-
-        //System.out.println("FROM TABLES: " + from);
-
         ArrayList<Pair<String, Constraint>> ConstraintsList = new ArrayList<Pair<String, Constraint>>();
         if (where != null) {
             String[] whereStatements = where.toString().split("(?i) AND ");
             for (String statement : whereStatements) {
-                //System.out.println(statement);
                 String[] splitConstraint = statement.split("[<=>]+", 2);
                 if (splitConstraint.length != 2) {
                     throw new IllegalArgumentException("bad where statement " + statement);
@@ -77,11 +73,6 @@ public class Parser {
                 if (value.charAt(value.length() - 1) == ')') {
                     value = value.substring(0, value.length() - 1);
                 }
-                //System.out.print("[1]:");
-                //System.out.println(field);
-                //System.out.print("[2]:");
-                //System.out.println(value);
-
 
                 ArrayList<Object> args = new ArrayList<Object>();
 
@@ -177,15 +168,12 @@ public class Parser {
 
         ArrayList<Object> args = new ArrayList<Object>();
 
-        //System.out.print("Tables:");
-        //System.out.println(tableNames.length);
         for (int i = 0; i < tableNames.length; i++) {
             boolean find = false;
             for (int columnId = 0; columnId < tableNames.length; ++columnId) {
 
                 if (((Column) insert.getColumns().get(columnId)).getColumnName().compareTo(tableNames[i]) == 0) {
                     String insertValue = ((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(columnId)).getValue();
-                    //System.out.println(insertValue);
                     switch (tableTypes[i].getId()) {
                         case Type.INT:
                             throw new IllegalArgumentException("Integer insert not supported by parser");
@@ -290,7 +278,6 @@ public class Parser {
 
         String[] columsList = str.substring(0, tableNameIndexEnd).trim().split(",");
         str = str.substring(tableNameIndexEnd + 1).trim();
-        //System.out.println("COLUMS:" + columsList);
         Index.Order[] orders = new Index.Order[columsList.length];
         String[] indexColumnNames = new String[columsList.length];
         for (int i = 0; i < columsList.length; i++) {
@@ -332,12 +319,6 @@ public class Parser {
         }
 
 
-        //str.indexOf(' ');
-        //System.out.println(unique);
-        //System.out.println("Indexname = " + indexName);
-        //System.out.println("Tablename = " + tableName);
-        //System.out.println(str);
-
         tableStruct.addBTreeIndex(indexColumnNames, orders);
 
         return new EmptyCommand(tableName);
@@ -350,6 +331,12 @@ public class Parser {
             return createConstraint(str);
         }
     }
+
+    public Command deleteParser(String str) throws Exception {
+
+        throw new IllegalArgumentException("delete parser unimplemented");
+    }
+
     public Command getCommand(String str) throws Exception {
         //str = "SELECT `id`, `password` FROM `table1` WHERE (`id` = '3' and `hyj`='dz')";
         //str = "INSERT INTO table1 (number, text) VALUES ('33', 'sadfsd')";
@@ -366,16 +353,14 @@ public class Parser {
             //cmd = "select";
         //}
 
-        //if (str.charAt(str.length()-1) == ';'){
-        //str = str.substring(0, str.length()-1);
-        //}
-
         if (cmd.compareTo("select") == 0) {
             return selectParse(str);
         } else if (cmd.compareTo("insert") == 0) {
             return insertParse(str);
         } else if (cmd.compareTo("create") == 0) {
             return createManager(str);
+        } else if (cmd.compareTo("delete") == 0) {
+            return deleteParser(str);
         } else throw new Exception("Unsupported action");
     }
 
