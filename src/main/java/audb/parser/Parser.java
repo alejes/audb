@@ -15,6 +15,7 @@ import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -47,7 +48,7 @@ public class Parser {
         TableManager tableManager = Command.getTableManager();
         Table tableStruct = tableManager.getTable(from);
         if (tableStruct == null) {
-            throw new IllegalArgumentException("unknown table");
+            throw new IllegalArgumentException("unknown table " + from);
         }
 
         //System.out.println("");
@@ -333,8 +334,98 @@ public class Parser {
     }
 
     public Command deleteParser(String str) throws Exception {
+        Delete delete = (Delete) parserManager.parse(new StringReader(str));
+        String from = delete.getTable().getName();
 
-        throw new IllegalArgumentException("delete parser unimplemented");
+        TableManager tableManager = Command.getTableManager();
+        Table tableStruct = tableManager.getTable(from);
+        if (tableStruct == null) {
+            throw new IllegalArgumentException("unknown table " + from);
+        }
+
+        Expression where = delete.getWhere();
+        String[] tableNames = tableStruct.getNames();
+        Type[] tableTypes = tableStruct.getTypes();
+
+        ArrayList<Pair<String, Constraint>> ConstraintsList = new ArrayList<Pair<String, Constraint>>();
+        if (where != null) {
+            String[] whereStatements = where.toString().split("(?i) AND ");
+            for (String statement : whereStatements) {
+                String[] splitConstraint = statement.split("[<=>]+", 2);
+                if (splitConstraint.length != 2) {
+                    throw new IllegalArgumentException("bad where statement " + statement);
+                }
+                String field = splitConstraint[0].replace('(', ' ').trim();
+                String value = splitConstraint[1].trim();
+                if (value.charAt(value.length() - 1) == ')') {
+                    value = value.substring(0, value.length() - 1);
+                }
+
+                ArrayList<Object> args = new ArrayList<Object>();
+
+                String beginWith = statement.substring(splitConstraint[0].length());
+                Constraint.ConstraintType curent;
+                if (beginWith.startsWith("<=")) {
+                    curent = Constraint.ConstraintType.LESS_OR_EQUAL;
+                } else if (beginWith.startsWith("<>")) {
+                    curent = Constraint.ConstraintType.NOT_EQUAL;
+                } else if (beginWith.startsWith("<")) {
+                    curent = Constraint.ConstraintType.LESS;
+                } else if (beginWith.startsWith("=")) {
+                    curent = Constraint.ConstraintType.EQUAL;
+                } else if (beginWith.startsWith(">=")) {
+                    curent = Constraint.ConstraintType.GREATER_OR_EQUAL;
+                } else if (beginWith.startsWith(">")) {
+                    curent = Constraint.ConstraintType.GREATER;
+                } else if (beginWith.startsWith("!=")) {
+                    curent = Constraint.ConstraintType.NOT_EQUAL;
+                } else {
+                    throw new IllegalArgumentException("unsupported constraint in where statement" + statement);
+                }
+                //find type
+                Type fieldType = null;
+                for (int columnId = 0; columnId < tableNames.length; ++columnId) {
+                    if (tableNames[columnId].compareTo(field) == 0) {
+                        fieldType = tableTypes[columnId];
+                    }
+                }
+                if (fieldType == null) {
+                    throw new IllegalArgumentException("not found constraint in where" + statement);
+                }
+
+                TableElement el;
+                switch (fieldType.getId()) {
+                    case Type.INT:
+                        try {
+                            int val = Integer.parseInt(value);
+                            el = new IntegerElement(val);
+                        } catch (NumberFormatException nfe) {
+                            throw new IllegalArgumentException("illegal int in where " + statement);
+                        }
+                    case Type.DOUBLE:
+                        try {
+                            double val = Double.parseDouble(value);
+                            el = new DoubleElement(val);
+                        } catch (NumberFormatException nfe) {
+                            throw new IllegalArgumentException("illegal int in where " + statement);
+                        }
+                    default:
+                        if (value.length() >= fieldType.getSize()) {
+                            throw new IllegalArgumentException("very long VARCHAR in where " + statement);
+                        }
+                        el = new VarcharElement(value, new VarcharType((byte) fieldType.getSize()));
+                }
+                ConstraintsList.add(Pair.newPair(field, new Constraint(curent, el)));
+            }
+        }
+        System.out.println("CONSTRAINTS");
+        for (Pair<String, Constraint> x : ConstraintsList) {
+            System.out.print(x.first);
+            System.out.print(" ");
+            System.out.println(x.second);
+        }
+        //throw new IllegalArgumentException("delete parser unimplemented");
+        return new DeleteCommand(from, ConstraintsList);
     }
 
     public Command getCommand(String str) throws Exception {
