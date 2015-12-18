@@ -23,7 +23,6 @@ import audb.result.IndexedConditionalTableIterator;
 import audb.type.MutableInt;
 import audb.type.Type;
 import audb.util.Pair;
-import audb.table.DeletedElement;
 
 
 public class Table implements Iterable<HashMap<String, TableElement>> {
