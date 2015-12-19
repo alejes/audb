@@ -597,8 +597,8 @@ public class Parser {
 
 
         if (cmd.compareTo("insert") != 0) {
-            str = "UPDATE table1 set col1='as', col2=?, col3=565 Where number >= 3";
-            cmd = "update";
+            //str = "UPDATE table1 set col1='as', col2=?, col3=565 Where number >= 3";
+            //cmd = "update";
         //str = "CREATE[UNIQUE] INDEX indexname ON tablename(col [ASC|DESC],[col]...) USING BTREE|HASH;"
         //str = "CREATE UNIQUE INDEX indexname ON table1(number DESC, text ASC) USING BTREE;";
             //str = "select * from table1 where (id > 4) and (id < 5)";
