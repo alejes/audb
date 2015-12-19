@@ -85,7 +85,9 @@ public class Main {
                             }
 
                         }
-                        System.out.println();
+                        if (!arr.isEmpty()) {
+                            System.out.println();
+                        }
                     }
                 } catch (Exception exp) {
                     System.out.println("Error: " + exp.getMessage());
