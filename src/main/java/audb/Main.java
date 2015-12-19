@@ -36,7 +36,7 @@ public class Main {
             //command.exec();
 
 
-            for (int i = 0; i < 10_000_0; i++) {
+            for (int i = 0; i < 10_00_0; i++) {
                 String q = String.format("INSERT INTO table1 (number, text) VALUES ('%03d', 'sadfsd')", i);
                 command = parser.getCommand(q);
                 command.exec();

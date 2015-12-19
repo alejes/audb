@@ -437,7 +437,8 @@ public class Parser {
             System.out.println(x.second);
         }
         //throw new IllegalArgumentException("delete parser unimplemented");
-        return null/*new DeleteCommand(from, ConstraintsList)*/;
+        SelectCommand select = new SelectCommand(from, ConstraintsList);
+        return new DeleteCommand(select.exec().second);
     }
 
     public Command updateParser(String str) throws Exception {
