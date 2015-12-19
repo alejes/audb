@@ -93,7 +93,7 @@ public class PageTest extends TestCase {
     }
 
     public void testUpdate() {
-        if (false)
+        if (true)
             return;
 
         TableManager tableManager = new TableManager();

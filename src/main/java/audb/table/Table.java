@@ -174,8 +174,10 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		Page page = pageStructure.getPage(pageNum);
 		int ptr = offset * recordSize;
 		for(int i = 0; i < types.length; i++) {
-			if (objects[i] == null)
+			if (objects[i] == null) {
+				ptr += types[i].getSize();
 				continue;
+			}
 			if (!types[i].isValid(objects[i]))
 				throw new Exception("not valid data");
 			byte[] data = types[i].toBytes(objects[i]);
