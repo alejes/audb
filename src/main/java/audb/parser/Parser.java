@@ -583,6 +583,7 @@ public class Parser {
             System.out.print(" ");
             System.out.println(x.second);
         }
+
         SelectCommand select = new SelectCommand(from, ConstraintsList);
         //return new DeleteCommand(select.exec().second);
         return new UpdateCommand(select.exec().second, nwValuesList);

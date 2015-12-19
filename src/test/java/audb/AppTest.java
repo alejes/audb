@@ -78,6 +78,48 @@ public class AppTest
 
         assertTrue(true);
     }
+
+    public void testUpdate() throws Exception {
+        assertTrue(true);
+        Parser parser = new Parser();
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+        Command command;
+        String q;
+        String qq = "CREATE TABLE table123 (number VARCHAR (15), text VARCHAR (9))";
+        command = parser.getCommand(qq);
+        command.exec();
+
+
+        for (int i = 0; i < 15; i++) {
+            command = parser.getCommand(String.format("INSERT INTO table123 (number, text) VALUES ('%03d', 'sadfsd')", i));
+            command.exec();
+        }
+        q = "update table123 set text = 'aaaaa' where number < 005;";
+
+        command = parser.getCommand(q);
+        command.exec();
+        q = "select * from table123";
+        command = parser.getCommand(q);
+        Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
+        Iterator<HashMap<String, TableElement>> res = exRes.second;
+
+        while (res.hasNext()) {
+            HashMap<String, TableElement> arr = res.next();
+            for (String name : arr.keySet()) {
+                if (arr.get(name) instanceof VarcharElement) {
+                    System.out.print(arr.get(name).showString() + " ");
+                }
+
+            }
+            System.out.println();
+        }
+
+        PageStructure.flush();
+
+        assertTrue(true);
+    }
     public void testLoadTable() throws Exception {
         assertTrue(true);
         Parser parser = new Parser();
