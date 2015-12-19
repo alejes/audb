@@ -457,7 +457,7 @@ public class Parser {
         String[] tableNames = tableStruct.getNames();
         Type[] tableTypes = tableStruct.getTypes();
 
-        HashMap<String, TableElement> nwValuesList = new HashMap<>();
+        HashMap<String, Object> nwValuesList = new HashMap<>();
 
         int countColums = update.getColumns().size();
 
@@ -478,20 +478,20 @@ public class Parser {
             if (fieldType == null) {
                 throw new Exception("Not found column " + currentColumnName);
             }
-            TableElement el;
+
             String value = ((StringValue) update.getExpressions().get(i)).getValue();
             switch (fieldType.getId()) {
                 case Type.INT:
                     try {
                         int val = Integer.parseInt(value);
-                        el = new IntegerElement(val);
+                        nwValuesList.put(currentColumnName, val);
                     } catch (NumberFormatException nfe) {
                         throw new IllegalArgumentException("illegal int in expession list " + value);
                     }
                 case Type.DOUBLE:
                     try {
                         double val = Double.parseDouble(value);
-                        el = new DoubleElement(val);
+                        nwValuesList.put(currentColumnName, val);
                     } catch (NumberFormatException nfe) {
                         throw new IllegalArgumentException("illegal int in expession list " + value);
                     }
@@ -499,11 +499,10 @@ public class Parser {
                     if (value.length() >= fieldType.getSize()) {
                         throw new IllegalArgumentException("very long VARCHAR in expession list  " + value);
                     }
-                    el = new VarcharElement(value, new VarcharType((byte) fieldType.getSize()));
+                    nwValuesList.put(currentColumnName, value);
             }
 
 
-            nwValuesList.put(currentColumnName, el);
         }
 
         ArrayList<Pair<String, Constraint>> ConstraintsList = new ArrayList<Pair<String, Constraint>>();
@@ -584,8 +583,10 @@ public class Parser {
             System.out.print(" ");
             System.out.println(x.second);
         }
-        //return new UpdateCommand(from, nwValuesList.entrySet());
-        throw new IllegalArgumentException("unimplmented");
+        SelectCommand select = new SelectCommand(from, ConstraintsList);
+        //return new DeleteCommand(select.exec().second);
+        return new UpdateCommand(select.exec().second, nwValuesList);
+        //throw new IllegalArgumentException("unimplmented");
     }
 
     public Command getCommand(String str) throws Exception {
