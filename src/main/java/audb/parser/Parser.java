@@ -21,9 +21,11 @@ import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.update.Update;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -400,7 +402,7 @@ public class Parser {
                     }
                 }
                 if (fieldType == null) {
-                    throw new IllegalArgumentException("not found constraint in where" + statement);
+                    throw new IllegalArgumentException("not found constraint in where " + statement);
                 }
 
                 TableElement el;
@@ -438,6 +440,153 @@ public class Parser {
         return null/*new DeleteCommand(from, ConstraintsList)*/;
     }
 
+    public Command updateParser(String str) throws Exception {
+        System.out.println(str);
+        Update update = (Update) parserManager.parse(new StringReader(str));
+
+        String from = update.getTable().getName();
+
+        TableManager tableManager = Command.getTableManager();
+        Table tableStruct = tableManager.getTable(from);
+        if (tableStruct == null) {
+            throw new IllegalArgumentException("unknown table " + from);
+        }
+
+        Expression where = update.getWhere();
+        String[] tableNames = tableStruct.getNames();
+        Type[] tableTypes = tableStruct.getTypes();
+
+        HashMap<String, TableElement> nwValuesList = new HashMap<>();
+
+        int countColums = update.getColumns().size();
+
+        for (int i = 0; i < countColums; ++i) {
+            Column column = ((Column) update.getColumns().get(i));
+            Boolean find = false;
+            String currentColumnName = column.getColumnName();
+
+            Type fieldType = null;
+            for (int columnId = 0; columnId < tableNames.length; ++columnId) {
+                if (tableNames[columnId].compareTo(currentColumnName) == 0) {
+                    fieldType = tableTypes[columnId];
+                    break;
+                }
+            }
+
+
+            if (fieldType == null) {
+                throw new Exception("Not found column " + currentColumnName);
+            }
+            TableElement el;
+            String value = ((StringValue) update.getExpressions().get(i)).getValue();
+            switch (fieldType.getId()) {
+                case Type.INT:
+                    try {
+                        int val = Integer.parseInt(value);
+                        el = new IntegerElement(val);
+                    } catch (NumberFormatException nfe) {
+                        throw new IllegalArgumentException("illegal int in expession list " + value);
+                    }
+                case Type.DOUBLE:
+                    try {
+                        double val = Double.parseDouble(value);
+                        el = new DoubleElement(val);
+                    } catch (NumberFormatException nfe) {
+                        throw new IllegalArgumentException("illegal int in expession list " + value);
+                    }
+                default:
+                    if (value.length() >= fieldType.getSize()) {
+                        throw new IllegalArgumentException("very long VARCHAR in expession list  " + value);
+                    }
+                    el = new VarcharElement(value, new VarcharType((byte) fieldType.getSize()));
+            }
+
+
+            nwValuesList.put(currentColumnName, el);
+        }
+
+        ArrayList<Pair<String, Constraint>> ConstraintsList = new ArrayList<Pair<String, Constraint>>();
+        if (where != null) {
+            String[] whereStatements = where.toString().split("(?i) AND ");
+            for (String statement : whereStatements) {
+                String[] splitConstraint = statement.split("[<=>]+", 2);
+                if (splitConstraint.length != 2) {
+                    throw new IllegalArgumentException("bad where statement " + statement);
+                }
+                String field = splitConstraint[0].replace('(', ' ').trim();
+                String value = splitConstraint[1].trim();
+                if (value.charAt(value.length() - 1) == ')') {
+                    value = value.substring(0, value.length() - 1);
+                }
+
+                ArrayList<Object> args = new ArrayList<Object>();
+
+                String beginWith = statement.substring(splitConstraint[0].length());
+                Constraint.ConstraintType curent;
+                if (beginWith.startsWith("<=")) {
+                    curent = Constraint.ConstraintType.LESS_OR_EQUAL;
+                } else if (beginWith.startsWith("<>")) {
+                    curent = Constraint.ConstraintType.NOT_EQUAL;
+                } else if (beginWith.startsWith("<")) {
+                    curent = Constraint.ConstraintType.LESS;
+                } else if (beginWith.startsWith("=")) {
+                    curent = Constraint.ConstraintType.EQUAL;
+                } else if (beginWith.startsWith(">=")) {
+                    curent = Constraint.ConstraintType.GREATER_OR_EQUAL;
+                } else if (beginWith.startsWith(">")) {
+                    curent = Constraint.ConstraintType.GREATER;
+                } else if (beginWith.startsWith("!=")) {
+                    curent = Constraint.ConstraintType.NOT_EQUAL;
+                } else {
+                    throw new IllegalArgumentException("unsupported constraint in where statement" + statement);
+                }
+                //find type
+                Type fieldType = null;
+                for (int columnId = 0; columnId < tableNames.length; ++columnId) {
+                    if (tableNames[columnId].compareTo(field) == 0) {
+                        fieldType = tableTypes[columnId];
+                        break;
+                    }
+                }
+                if (fieldType == null) {
+                    throw new IllegalArgumentException("not found constraint in where " + statement);
+                }
+
+                TableElement el;
+                switch (fieldType.getId()) {
+                    case Type.INT:
+                        try {
+                            int val = Integer.parseInt(value);
+                            el = new IntegerElement(val);
+                        } catch (NumberFormatException nfe) {
+                            throw new IllegalArgumentException("illegal int in where " + statement);
+                        }
+                    case Type.DOUBLE:
+                        try {
+                            double val = Double.parseDouble(value);
+                            el = new DoubleElement(val);
+                        } catch (NumberFormatException nfe) {
+                            throw new IllegalArgumentException("illegal int in where " + statement);
+                        }
+                    default:
+                        if (value.length() >= fieldType.getSize()) {
+                            throw new IllegalArgumentException("very long VARCHAR in where " + statement);
+                        }
+                        el = new VarcharElement(value, new VarcharType((byte) fieldType.getSize()));
+                }
+                ConstraintsList.add(Pair.newPair(field, new Constraint(curent, el)));
+            }
+        }
+        System.out.println("CONSTRAINTS");
+        for (Pair<String, Constraint> x : ConstraintsList) {
+            System.out.print(x.first);
+            System.out.print(" ");
+            System.out.println(x.second);
+        }
+        //return new UpdateCommand(from, nwValuesList.entrySet());
+        throw new IllegalArgumentException("unimplmented");
+    }
+
     public Command getCommand(String str) throws Exception {
         //str = "SELECT `id`, `password` FROM `table1` WHERE (`id` = '3' and `hyj`='dz')";
         //str = "INSERT INTO table1 (number, text) VALUES ('33', 'sadfsd')";
@@ -447,12 +596,14 @@ public class Parser {
         String cmd = str.substring(0, Math.min(str.length(), 6)).toLowerCase();
 
 
-        //if (cmd.compareTo("insert") != 0) {
+        if (cmd.compareTo("insert") != 0) {
+            str = "UPDATE table1 set col1='as', col2=?, col3=565 Where number >= 3";
+            cmd = "update";
         //str = "CREATE[UNIQUE] INDEX indexname ON tablename(col [ASC|DESC],[col]...) USING BTREE|HASH;"
         //str = "CREATE UNIQUE INDEX indexname ON table1(number DESC, text ASC) USING BTREE;";
             //str = "select * from table1 where (id > 4) and (id < 5)";
             //cmd = "select";
-        //}
+        }
 
         if (cmd.compareTo("select") == 0) {
             return selectParse(str);
@@ -462,6 +613,8 @@ public class Parser {
             return createManager(str);
         } else if (cmd.compareTo("delete") == 0) {
             return deleteParser(str);
+        } else if (cmd.compareTo("update") == 0) {
+            return updateParser(str);
         } else throw new Exception("Unsupported action");
     }
 
