@@ -36,4 +36,8 @@ public class IntegerType extends Type {
 		return new IntegerElement((Integer)obj, this);
 	}
 
+	@Override
+	public String toString() {
+		return "INTEGER ";
+	}
 }

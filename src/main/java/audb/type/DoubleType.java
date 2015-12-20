@@ -36,4 +36,9 @@ public class DoubleType extends Type {
 		return new DoubleElement((Double)obj, this);
 	}
 
+	@Override
+	public String toString() {
+		return "DOUBLE ";
+	}
+
 }
