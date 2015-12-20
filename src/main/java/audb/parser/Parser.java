@@ -59,6 +59,10 @@ public class Parser {
         System.out.print("Select please: ");
         for (SelectItem x :
                 selectItems) {
+            if (x.toString().compareTo("*") == 0) {
+                selectList.clear();
+                break;
+            }
             selectList.add(x.toString());
             //System.out.print(x.toString() + "|");
         }
