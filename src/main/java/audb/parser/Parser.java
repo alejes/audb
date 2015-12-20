@@ -186,8 +186,6 @@ public class Parser {
             for (int columnId = 0; columnId < tableNames.length; ++columnId) {
 
                 if (((Column) insert.getColumns().get(columnId)).getColumnName().compareTo(tableNames[i]) == 0) {
-                    System.out.println(tableTypes[i].toString());
-                    System.out.println(tableTypes[i].getId());
                     switch (tableTypes[i].getId()) {
                         case Type.INT:
                             try {
