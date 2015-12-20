@@ -68,7 +68,9 @@ public class Main {
                         continue;
                     }
                     for (int tableIter = 0; tableIter < exRes.first.getNames().length; ++tableIter) {
-                        System.out.print(String.format("%24s", exRes.first.getNames()[tableIter] + "   " + exRes.first.getTypes()[tableIter] + " |"));
+                        if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(exRes.first.getNames()[tableIter])) {
+                            System.out.print(String.format("%24s", exRes.first.getNames()[tableIter] + "   " + exRes.first.getTypes()[tableIter] + " |"));
+                        }
                     }
                     System.out.println();
 
@@ -80,10 +82,11 @@ public class Main {
                     while (res.hasNext()) {
                         HashMap<String, TableElement> arr = res.next();
                         for (String name : arr.keySet()) {
-                            if (arr.get(name) instanceof VarcharElement) {
-                                System.out.print(String.format("%25s", arr.get(name).showString() + " |"));
+                            if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(name)) {
+                                if (arr.get(name) instanceof VarcharElement) {
+                                    System.out.print(String.format("%25s", arr.get(name).showString() + " |"));
+                                }
                             }
-
                         }
                         if (!arr.isEmpty()) {
                             System.out.println();

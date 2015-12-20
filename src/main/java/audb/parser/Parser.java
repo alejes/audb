@@ -31,6 +31,7 @@ import java.util.List;
 
 
 public class Parser {
+    public static HashSet<String> selectList;
     private static CCJSqlParserManager parserManager = new CCJSqlParserManager();
 
     public Command selectParse(String str) throws Exception {
@@ -55,7 +56,7 @@ public class Parser {
         }
 
         //System.out.println("");
-        HashSet<String> selectList = new HashSet<>();
+        selectList = new HashSet<>();
         System.out.print("Select please: ");
         for (SelectItem x :
                 selectItems) {
@@ -160,7 +161,7 @@ public class Parser {
         else
             System.out.println("Limits: " + limits.toString());
 
-        return new SelectCommand(from, ConstraintsList, selectList);
+        return new SelectCommand(from, ConstraintsList);
     }
 
     public Command insertParse(String str) throws Exception {
