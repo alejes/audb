@@ -26,6 +26,7 @@ import net.sf.jsqlparser.statement.update.Update;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -54,10 +55,12 @@ public class Parser {
         }
 
         //System.out.println("");
+        HashSet<String> selectList = new HashSet<>();
         System.out.print("Select please: ");
         for (SelectItem x :
                 selectItems) {
-            System.out.print(x.toString() + "|");
+            selectList.add(x.toString());
+            //System.out.print(x.toString() + "|");
         }
         System.out.println();
         String[] tableNames = tableStruct.getNames();
@@ -153,7 +156,7 @@ public class Parser {
         else
             System.out.println("Limits: " + limits.toString());
 
-        return new SelectCommand(from, ConstraintsList);
+        return new SelectCommand(from, ConstraintsList, selectList);
     }
 
     public Command insertParse(String str) throws Exception {
