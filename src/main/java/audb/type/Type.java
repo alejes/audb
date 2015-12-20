@@ -22,9 +22,12 @@ public abstract class Type {
     }
     
     public static Type makeType(byte id) throws Exception {
-        if(id >= 100 || id <= 0) {
+        if(id >= 102 || id <= 0)
             throw new Exception("Wrong type.");
-        } 
+        else if (id == INT)
+            return new IntegerType(id);
+        else if (id == DOUBLE)
+            return new DoubleType(id);
         
         return new VarcharType(id);
     }
