@@ -81,7 +81,7 @@ public class Main {
 
                     while (res.hasNext()) {
                         HashMap<String, TableElement> arr = res.next();
-                        for (String name : arr.keySet()) {
+                        for (String name : exRes.first.getNames()) {
                             if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(name)) {
                                 System.out.print(String.format("%25s", arr.get(name).showString() + " |"));
                             }
