@@ -120,6 +120,82 @@ public class AppTest
 
         assertTrue(true);
     }
+
+    public void testintTest() throws Exception {
+        assertTrue(true);
+        Parser parser = new Parser();
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+        Command command;
+        String q;
+        String qq = "CREATE TABLE tableinttest (number INT, text VARCHAR (9));";
+        command = parser.getCommand(qq);
+        command.exec();
+
+        for (int i = 0; i < 10; ++i) {
+            command = parser.getCommand("INSERT INTO tableinttest (number, text) VALUES (" + i + ", 'tesxt');");
+            command.exec();
+        }
+
+        q = "select * from tableinttest";
+        command = parser.getCommand(q);
+        Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
+        Iterator<HashMap<String, TableElement>> res = exRes.second;
+
+        while (res.hasNext()) {
+            HashMap<String, TableElement> arr = res.next();
+            for (String name : arr.keySet()) {
+                if (arr.get(name) instanceof VarcharElement) {
+                    System.out.print(arr.get(name).toString() + " ");
+                }
+
+            }
+            System.out.println();
+        }
+
+        PageStructure.flush();
+
+        assertTrue(true);
+    }
+
+    public void testdoubleTest() throws Exception {
+        assertTrue(true);
+        Parser parser = new Parser();
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+        Command command;
+        String q;
+        String qq = "CREATE TABLE tabledoubletest (number INT, text VARCHAR (9), val double);";
+        command = parser.getCommand(qq);
+        command.exec();
+
+        for (int i = 0; i < 10; ++i) {
+            command = parser.getCommand("INSERT INTO tabledoubletest (number, text, val) VALUES (" + i + ", 'tesxt', 2.34);");
+            command.exec();
+        }
+
+        q = "select * from tabledoubletest";
+        command = parser.getCommand(q);
+        Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
+        Iterator<HashMap<String, TableElement>> res = exRes.second;
+
+        while (res.hasNext()) {
+            HashMap<String, TableElement> arr = res.next();
+            for (String name : arr.keySet()) {
+                if (arr.get(name) instanceof VarcharElement) {
+                    System.out.print(arr.get(name).toString() + " ");
+                }
+
+            }
+            System.out.println();
+        }
+
+        PageStructure.flush();
+
+        assertTrue(true);
+    }
     public void testLoadTable() throws Exception {
         assertTrue(true);
         Parser parser = new Parser();
