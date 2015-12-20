@@ -18,7 +18,7 @@ public class DoubleType extends Type {
 
 	@Override
 	public byte[] toBytes(Object o) throws Exception {
-		return Page.doubleToBytes(((DoubleElement)o).value);
+		return Page.doubleToBytes((Double)o);
 	}
 
 	@Override

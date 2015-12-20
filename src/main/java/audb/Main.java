@@ -83,9 +83,7 @@ public class Main {
                         HashMap<String, TableElement> arr = res.next();
                         for (String name : arr.keySet()) {
                             if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(name)) {
-                                if (arr.get(name) instanceof VarcharElement) {
-                                    System.out.print(String.format("%25s", arr.get(name).showString() + " |"));
-                                }
+                                System.out.print(String.format("%25s", arr.get(name).showString() + " |"));
                             }
                         }
                         if (!arr.isEmpty()) {

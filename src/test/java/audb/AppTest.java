@@ -184,10 +184,7 @@ public class AppTest
         while (res.hasNext()) {
             HashMap<String, TableElement> arr = res.next();
             for (String name : arr.keySet()) {
-                if (arr.get(name) instanceof VarcharElement) {
-                    System.out.print(arr.get(name).toString() + " ");
-                }
-
+                System.out.print(arr.get(name).toString() + " ");
             }
             System.out.println();
         }
