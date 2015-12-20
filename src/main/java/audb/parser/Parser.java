@@ -8,7 +8,9 @@ import audb.type.IntegerType;
 import audb.type.Type;
 import audb.type.VarcharType;
 import audb.util.Pair;
+import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
@@ -184,24 +186,31 @@ public class Parser {
             for (int columnId = 0; columnId < tableNames.length; ++columnId) {
 
                 if (((Column) insert.getColumns().get(columnId)).getColumnName().compareTo(tableNames[i]) == 0) {
-                    String insertValue = ((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(columnId)).getValue();
+                    System.out.println(tableTypes[i].toString());
+                    System.out.println(tableTypes[i].getId());
                     switch (tableTypes[i].getId()) {
                         case Type.INT:
                             try {
-                                int val = Integer.parseInt(insertValue);
+                                int val = (int) ((LongValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(columnId)).getValue();
                                 args.add(val);
                             } catch (NumberFormatException nfe) {
-                                throw new IllegalArgumentException("illegal int in where " + insertValue);
+                                throw new IllegalArgumentException("illegal int in where ");
                             }
+                            find = true;
+                            break;
                         case Type.DOUBLE:
                             try {
-                                double val = Double.parseDouble(insertValue);
+
+                                double val = ((DoubleValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(columnId)).getValue();
                                 args.add(val);
                             } catch (NumberFormatException nfe) {
-                                throw new IllegalArgumentException("illegal double in where " + insertValue);
+                                throw new IllegalArgumentException("illegal double in where ");
                             }
+                            find = true;
+                            break;
                         default:
                             //Varchar
+                            String insertValue = ((StringValue) ((ExpressionList) insert.getItemsList()).getExpressions().get(columnId)).getValue();
                             if (tableTypes[i].getSize() < insertValue.length()) {
                                 throw new IllegalArgumentException("To long argument for field");
                             } else {
@@ -213,9 +222,10 @@ public class Parser {
                 }
             }
             if (!find) {
-                throw new IllegalArgumentException("unknown row name");
+                throw new IllegalArgumentException("unknown row name" + tableNames[i]);
             }
         }
+
         return new InsertCommand(table, args.toArray());
     }
 

@@ -93,7 +93,7 @@ public class Main {
                         }
                     }
                 } catch (Exception exp) {
-                    System.out.println("Error: " + exp.getMessage());
+                    System.out.println("Error: " + exp.getMessage() + exp.toString());
                 }
                 
             }
