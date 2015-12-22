@@ -1,12 +1,5 @@
 package audb.table;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
-import audb.table.TableLine;
 import audb.command.Constraint;
 import audb.index.BTreeIndex;
 import audb.index.Index;
@@ -23,6 +16,13 @@ import audb.result.IndexedConditionalTableIterator;
 import audb.type.MutableInt;
 import audb.type.Type;
 import audb.util.Pair;
+import audb.util.Third;
+
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 
 public class Table implements Iterable<HashMap<String, TableElement>> {
@@ -97,7 +97,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
 		int indexCount = page.readInteger(INDEX_COUNT);
 		for (int i = 1; i <= indexCount; ++i) {
-			Index index = new BTreeIndex(this, page.readInteger(INDEX_COUNT - (int)i), pageStructure);
+			Index index = new BTreeIndex(this, page.readInteger(INDEX_COUNT - i), pageStructure);
 			index.init();
 			indexList.add(index);
 			index.init();
@@ -271,7 +271,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		return new FullScanIterator(this);
 	}
 
-	public Iterator<HashMap<String, TableElement>> select(List<Pair<String, Constraint>> constrs) {
+	public Iterator<HashMap<String, TableElement>> select(List<Third<String, Constraint, String>> constrs) {
 		Index goodIndex = null;
 		for (Index idx : indexList) {
 			if (idx.canResolve(constrs)) {

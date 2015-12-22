@@ -1,26 +1,18 @@
 package audb.index;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 import audb.command.Constraint;
 import audb.command.Constraint.ConstraintType;
 import audb.index.btree.BTree;
-import audb.page.Page;
-import audb.page.PageManager;
-import audb.page.PageReader;
-import audb.page.PageStructure;
-import audb.page.PageWriter;
+import audb.page.*;
 import audb.result.FullScanIterator;
 import audb.table.Table;
 import audb.table.TableElement;
 import audb.type.Type;
 import audb.util.ComparablePair;
 import audb.util.Pair;
+import audb.util.Third;
+
+import java.util.*;
 
 
 public class BTreeIndex extends Index {
@@ -59,7 +51,7 @@ public class BTreeIndex extends Index {
 			FullScanIterator iter, String[] names) {
 		HashMap<String, TableElement> row = iter.next();
 		int offset = iter.getCurrentOffset();
-		int pageNum = (int) iter.getCurrentPageNumber();
+		int pageNum = iter.getCurrentPageNumber();
 		TableElement[] elements = new TableElement[names.length];
 		for (int i = 0; i < names.length; i++) {
 			elements[i] = row.get(names[i]);
@@ -166,8 +158,8 @@ public class BTreeIndex extends Index {
 			keys[index++] = data[i];
 		}
 			
-		boolean rootChanged = btree.insert(ComparablePair.newPair(new IndexKeyInstance(orders, keys), 
-				new IndexValueInstance((int)pageNumber, offset)));
+		boolean rootChanged = btree.insert(ComparablePair.newPair(new IndexKeyInstance(orders, keys),
+				new IndexValueInstance(pageNumber, offset)));
 		if (rootChanged) {
 			fillMainPage();
 		}
@@ -357,8 +349,8 @@ public class BTreeIndex extends Index {
 	}
 
 	@Override
-	public boolean canResolve(List<Pair<String, Constraint>> constrs) {
-		for (Pair<String, Constraint> con : constrs) {
+	public boolean canResolve(List<Third<String, Constraint, String>> constrs) {
+		for (Third<String, Constraint, String> con : constrs) {
 			if (con.first == keyColumnsNames.get(0)) {
 				return true;
 			}
@@ -434,12 +426,12 @@ public class BTreeIndex extends Index {
 	}
 
 	@Override
-	public IndexFindResults find(List<Pair<String, Constraint>> constraints) {
+	public IndexFindResults find(List<Third<String, Constraint, String>> constraints) {
 		String[] names = new String[constraints.size()];
 		Constraint[] cons = new Constraint[constraints.size()];
 		
 		int idx = 0;
-		for (Pair<String, Constraint> p : constraints) {
+		for (Third<String, Constraint, String> p : constraints) {
 			names[idx] = p.first;
 			cons[idx] = p.second;
 			idx++;

@@ -1,30 +1,23 @@
 package audb;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-
-import audb.command.Command;
-import audb.command.Constraint;
+import audb.command.*;
 import audb.command.Constraint.ConstraintType;
-import audb.command.CreateTableCommand;
-import audb.command.InsertCommand;
-import audb.command.SelectCommand;
 import audb.index.Index.Order;
 import audb.parser.Parser;
-import audb.table.IntegerElement;
-import audb.table.Table;
-import audb.table.TableElement;
-import audb.table.TableManager;
-import audb.table.VarcharElement;
+import audb.table.*;
 import audb.type.IntegerType;
 import audb.type.Type;
 import audb.type.VarcharType;
 import audb.util.Pair;
+import audb.util.Third;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 public class BTreeTest extends TestCase {
 	public BTreeTest(String testName) {
@@ -80,7 +73,7 @@ public class BTreeTest extends TestCase {
 		command.exec();
 
 		for(int i = 0; i < 15; i++) {
-			String s1 = String.format("%03d", i);;
+			String s1 = String.format("%03d", i);
 			String s2 = "some_text";
 			Object arr[] = new Object[]{s1, s2};
 
@@ -110,7 +103,7 @@ public class BTreeTest extends TestCase {
 		command.exec();
 
 		for(int i = 0; i < 15; i++) {
-			String s1 = String.format("%03d", i);;
+			String s1 = String.format("%03d", i);
 			String s2 = "some_text";
 			Object arr[] = new Object[]{s1, s2};
 
@@ -125,7 +118,7 @@ public class BTreeTest extends TestCase {
 		orders[0] = Order.ASC;
 		t.addBTreeIndex(indexNames, orders);
 
-		List<Pair<String, Constraint>> constrs = new ArrayList<Pair<String, Constraint>>();
+		List<Third<String, Constraint, String>> constrs = new ArrayList<>();
 		SelectCommand sc = new SelectCommand(tableName, constrs);
 		Pair<Table, Iterator<HashMap<String, TableElement>>> result = sc.exec();
 		Iterator<HashMap<String, TableElement>> iter = result.second;
@@ -138,8 +131,8 @@ public class BTreeTest extends TestCase {
 		assertEquals(15, size);
 	
 		System.out.println(" ");
-		constrs.add(Pair.newPair("number", new Constraint(ConstraintType.GREATER, 
-				new VarcharElement("002", (VarcharType)types[0]))));
+		constrs.add(Third.newThird("number", new Constraint(ConstraintType.GREATER,
+				new VarcharElement("002", (VarcharType) types[0])), "table1"));
 		sc = new SelectCommand(tableName, constrs);
 		result = sc.exec();
 		iter = result.second;
@@ -151,8 +144,8 @@ public class BTreeTest extends TestCase {
 		assertEquals(size, 12);
 		
 		System.out.println(" ");
-		constrs.add(Pair.newPair("number", new Constraint(ConstraintType.GREATER, 
-				new VarcharElement("001", (VarcharType)types[0]))));
+		constrs.add(Third.newThird("number", new Constraint(ConstraintType.GREATER,
+				new VarcharElement("001", (VarcharType) types[0])), "table1"));
 		sc = new SelectCommand(tableName, constrs);
 		result = sc.exec();
 		iter = result.second;
@@ -164,8 +157,8 @@ public class BTreeTest extends TestCase {
 		assertEquals(12, size);
 		
 		System.out.println(" ");
-		constrs.add(Pair.newPair("number", new Constraint(ConstraintType.LESS, 
-				new VarcharElement("005", (VarcharType)types[0]))));
+		constrs.add(Third.newThird("number", new Constraint(ConstraintType.GREATER,
+				new VarcharElement("005", (VarcharType) types[0])), "table1"));
 		sc = new SelectCommand(tableName, constrs);
 		result = sc.exec();
 		iter = result.second;
@@ -203,7 +196,7 @@ public class BTreeTest extends TestCase {
 		// insert values
 		for(int i = 0; i < 150000; i++) {
 			Integer id = i;
-			String s1 = String.format("%03d", i % 100);;
+			String s1 = String.format("%03d", i % 100);
 			String s2 = "some_text";
 			Object arr[] = new Object[]{id, s1, s2};
 
@@ -211,11 +204,11 @@ public class BTreeTest extends TestCase {
 			command.exec();
 			
 		}
-		
-		List<Pair<String, Constraint>> constrs = new ArrayList<Pair<String, Constraint>>();
-		
-		constrs.add(Pair.newPair("number", new Constraint(ConstraintType.GREATER, 
-				new VarcharElement("002", (VarcharType)types[1]))));
+
+		List<Third<String, Constraint, String>> constrs = new ArrayList<>();
+
+		constrs.add(Third.newThird("number", new Constraint(ConstraintType.GREATER,
+				new VarcharElement("002", (VarcharType) types[0])), "table1"));
 		SelectCommand sc = new SelectCommand(tableName, constrs);
 		Pair<Table, Iterator<HashMap<String, TableElement>>> result = sc.exec();
 		Iterator<HashMap<String, TableElement>> iter = result.second;
@@ -229,8 +222,8 @@ public class BTreeTest extends TestCase {
 		assertEquals(145500, size);
 	
 		long t1 = System.currentTimeMillis();
-		constrs.add(Pair.newPair("id", new Constraint(ConstraintType.LESS, 
-				new IntegerElement(10, (IntegerType)types[0]))));
+		constrs.add(Third.newThird("id", new Constraint(ConstraintType.LESS,
+				new IntegerElement(10, types[0])), "table1"));
 		System.out.println(" ");
 		sc = new SelectCommand(tableName, constrs);
 		result = sc.exec();
@@ -263,7 +256,7 @@ public class BTreeTest extends TestCase {
 		command.exec();
 
 		for(int i = 0; i < 15; i++) {
-			String s1 = String.format("%03d", i);;
+			String s1 = String.format("%03d", i);
 			String s2 = "some_text";
 			Object arr[] = new Object[]{s1, s2};
 
@@ -271,14 +264,13 @@ public class BTreeTest extends TestCase {
 			command.exec();
 		}
 
-		
 
-		List<Pair<String, Constraint>> constrs = new ArrayList<Pair<String, Constraint>>();
-		
-		constrs.add(Pair.newPair("number", new Constraint(ConstraintType.LESS, 
-				new VarcharElement("002", (VarcharType)types[1]))));
-		constrs.add(Pair.newPair("number", new Constraint(ConstraintType.GREATER_OR_EQUAL, 
-				new VarcharElement("001", (VarcharType)types[1]))));
+		List<Third<String, Constraint, String>> constrs = new ArrayList<>();
+
+		constrs.add(Third.newThird("number", new Constraint(ConstraintType.LESS,
+				new VarcharElement("002", (VarcharType) types[1])), "table1"));
+		constrs.add(Third.newThird("number", new Constraint(ConstraintType.GREATER_OR_EQUAL,
+				new VarcharElement("001", (VarcharType) types[1])), "table1"));
 		SelectCommand sc = new SelectCommand(tableName, constrs);
 		Pair<Table, Iterator<HashMap<String, TableElement>>> result = sc.exec();
 		Iterator<HashMap<String, TableElement>> iter = result.second;

@@ -1,18 +1,18 @@
 package audb.result;
 
-import java.util.HashMap;
-import java.util.List;
-
 import audb.command.Constraint;
 import audb.table.Table;
 import audb.table.TableElement;
-import audb.util.Pair;
+import audb.util.Third;
+
+import java.util.HashMap;
+import java.util.List;
 
 public class ConditionalTableIterator extends FullScanIterator {
-	private List<Pair<String, Constraint>> constraints;
 	HashMap<String, TableElement> nextRow = null;
-	
-	public ConditionalTableIterator(Table table, List<Pair<String, Constraint>> constraints) {
+	private List<Third<String, Constraint, String>> constraints;
+
+	public ConditionalTableIterator(Table table, List<Third<String, Constraint, String>> constraints) {
 		super(table);
 		this.constraints = constraints;
 		rewindToNextSatisfying();
@@ -23,7 +23,7 @@ public class ConditionalTableIterator extends FullScanIterator {
 		while (super.hasNext()) {
 			HashMap<String, TableElement> row = super.next();
 			boolean needNext = false;
-			for (Pair<String, Constraint> p : constraints) {
+			for (Third<String, Constraint, String> p : constraints) {
 				if (!p.second.elementSatisfies(row.get(p.first))) {
 					needNext = true;
 					break;
