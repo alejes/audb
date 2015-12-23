@@ -46,16 +46,6 @@ public class BTreeInnerNode extends BTreeNode {
 
 		BTreeNode child = nodeReader.readNode(childrenNodes.get(insertIndex));
 		
-		// TODO remove this after FIXME
-		if (child.pageNumber == pageNumber) {
-			System.out.println("fail with");
-			System.out.println(pageNumber);
-			for (int i : childrenNodes) {
-				System.out.print(i);
-				System.out.print(" ");
-			}
-			System.exit(1);
-		}
 		result = child.insert(p);
 		
 		if (null == result)
@@ -210,10 +200,7 @@ public class BTreeInnerNode extends BTreeNode {
 
 	protected IndexKeyInstance getMaxKey() {
 		int pageNum = childrenNodes.get(childrenNodes.size() - 1);
-		if (pageNum == 0)
-		{
-			System.out.println("SHIT");
-		}
+		assert(pageNum > 0);
 		return nodeReader.readNode(pageNum).getMaxKey();
 	}
 

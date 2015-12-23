@@ -30,21 +30,12 @@ public abstract class BTreeNode {
 		this.keys = keys == null ? new ArrayList<IndexKeyInstance>(maxKeysNumber) : keys;
 	}
 	
-	static int counter = 0;
 	private BTreeNode(int fanout, NodeReader nr, int pageNumber) {
 		this.fanout = fanout;
 		maxKeysNumber = fanout - 1;
 		minChildrenNumber = (fanout + 1) / 2;
 		this.nodeReader = nr;
 		this.pageNumber = pageNumber == -1 ? (int)nr.getPageStructure().getEmptyPage() : pageNumber;
-		
-		if (6 == this.pageNumber && pageNumber == -1)
-		{
-			// THIS COUNTER MUST NOT EXCEED 1!!
-			counter++;
-			//new Exception().printStackTrace(System.out);
-			assert(counter < 2);
-		}
 	}
 
 	public BTreeNode(int fanout, NodeReader nr, BTreeNode child1, BTreeNode child2) {

@@ -7,6 +7,8 @@ import java.util.List;
 
 import audb.index.IndexKeyInstance;
 import audb.index.IndexValueInstance;
+import audb.page.PageManager;
+import audb.page.PageStructure;
 import audb.page.PageWriter;
 import audb.util.Pair;
 

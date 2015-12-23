@@ -75,8 +75,6 @@ public class AppTest
         command.exec();
 
         PageStructure.flush();
-
-        assertTrue(true);
     }
 
     public void testUpdate() throws Exception {
@@ -181,18 +179,20 @@ public class AppTest
         Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
         Iterator<HashMap<String, TableElement>> res = exRes.second;
 
-        while (res.hasNext()) {
+      /*  while (res.hasNext()) {
             HashMap<String, TableElement> arr = res.next();
             for (String name : arr.keySet()) {
                 System.out.print(arr.get(name).toString() + " ");
             }
             System.out.println();
-        }
+        }*/
 
         PageStructure.flush();
 
         assertTrue(true);
     }
+    
+    
     public void testLoadTable() throws Exception {
         assertTrue(true);
         Parser parser = new Parser();
@@ -201,6 +201,9 @@ public class AppTest
 
         Command command;
         String q;
+        Table t = tableManager.getTable("parsertab");
+        assert (t != null);
+        
         q = "insert into parsertab (number, text) VALUES ('34343','434343')";
         command = parser.getCommand(q);
         command.exec();

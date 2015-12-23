@@ -216,10 +216,10 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
 	private void calculateRecordInfo() {
 		recordSize = 0;
-		for(int i = 0; i < types.length; i++) {
-			recordSize += types[i].getSize();
+		for (Type t : types) {
+			recordSize += t.getSize();
 		}
-		recordSize += 1;
+		recordSize += 1; // deleted flag
 		maxRecords = (PageManager.PAGE_SIZE - INFO_SIZE) / recordSize;
 	}
 

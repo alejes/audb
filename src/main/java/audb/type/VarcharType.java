@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 public class VarcharType extends Type {
 
-    private int length;
+    private final int length;
 
     public VarcharType(byte length) throws Exception {
     	super(length);
@@ -39,7 +39,8 @@ public class VarcharType extends Type {
         byte[] bytes = Arrays.copyOf(((String)o).getBytes(StandardCharsets.US_ASCII), length);
         
         byte[] result = concat(size, bytes);
-       // bytes = Arrays.copyOf(result, length);
+        
+        assert(result.length == getSize());
         return result;
     }
 
@@ -47,10 +48,17 @@ public class VarcharType extends Type {
         return (o instanceof String && ((String)o).length() <= length);
     }
     
-    // TODO when element is saved, write it's actual length!!!!
     public TableElement fromBytes(byte[] data) {
     	int length = Page.bytesToInt(data);
-    	//System.out.println(length);
+    	
+    	if (length > this.length)
+    	{
+    		System.out.println("length read is " + Integer.toString(length) + " and actual length should be <= " 
+    				+ Integer.toString(this.length));
+    		new Exception().printStackTrace();
+    		
+    	}
+    		
     	byte[] bytes = new byte[length];
     	System.arraycopy(data, Integer.BYTES, bytes, 0, length);
 		return new VarcharElement(new String(bytes, StandardCharsets.US_ASCII), this);

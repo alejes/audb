@@ -1,12 +1,13 @@
 package audb.page;
 
+
 public class PageWriter {
 	Page page;
 	int offset = 0;
 	
 	public PageWriter(Page page) {
 		this.page = page;
-		page.write(); // TODO this is starnge, but it's so now to make page dirty once we start writing
+		page.write(); // TODO this is strange, but it's so now to make page dirty once we start writing
 	}
 	
 	void rewind(int newOffset) {

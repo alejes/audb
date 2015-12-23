@@ -75,7 +75,7 @@ public class BTreeTest extends TestCase {
 		Type[] types = new Type[]{new VarcharType((byte)3), new VarcharType((byte)9)};
 		String[] names = new String[]{"number", "text"};
 
-		String tableName = "table1";
+		String tableName = "table2";
 		command = new CreateTableCommand(tableName, types, names);
 		command.exec();
 
@@ -84,7 +84,7 @@ public class BTreeTest extends TestCase {
 			String s2 = "some_text";
 			Object arr[] = new Object[]{s1, s2};
 
-			command = new InsertCommand("table1", arr);
+			command = new InsertCommand(tableName, arr);
 			command.exec();
 		}
 
@@ -105,7 +105,7 @@ public class BTreeTest extends TestCase {
 		Type[] types = new Type[]{new VarcharType((byte)3), new VarcharType((byte)9)};
 		String[] names = new String[]{"number", "text"};
 
-		String tableName = "table1";
+		String tableName = "table3";
 		command = new CreateTableCommand(tableName, types, names);
 		command.exec();
 
@@ -114,7 +114,7 @@ public class BTreeTest extends TestCase {
 			String s2 = "some_text";
 			Object arr[] = new Object[]{s1, s2};
 
-			command = new InsertCommand("table1", arr);
+			command = new InsertCommand(tableName, arr);
 			command.exec();
 		}
 
@@ -186,7 +186,7 @@ public class BTreeTest extends TestCase {
 		Type[] types = new Type[]{new IntegerType(Type.INT), new VarcharType((byte)3), new VarcharType((byte)9)};
 		String[] names = new String[]{"id", "number", "text"};
 
-		String tableName = "table1";
+		String tableName = "table4";
 		command = new CreateTableCommand(tableName, types, names);
 		command.exec();
 
@@ -198,7 +198,7 @@ public class BTreeTest extends TestCase {
 		indexNames[1] = names[1];
 		orders[0] = Order.ASC;
 		orders[1] = Order.ASC;
-		//t.addBTreeIndex(indexNames, orders);
+		
 		
 		// insert values
 		for(int i = 0; i < 150000; i++) {
@@ -207,11 +207,11 @@ public class BTreeTest extends TestCase {
 			String s2 = "some_text";
 			Object arr[] = new Object[]{id, s1, s2};
 
-			command = new InsertCommand("table1", arr);
+			command = new InsertCommand(tableName, arr);
 			command.exec();
 			
 		}
-		
+		t.addBTreeIndex(indexNames, orders);
 		List<Pair<String, Constraint>> constrs = new ArrayList<Pair<String, Constraint>>();
 		
 		constrs.add(Pair.newPair("number", new Constraint(ConstraintType.GREATER, 
@@ -223,7 +223,6 @@ public class BTreeTest extends TestCase {
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
-			//System.out.println(row.get("number"));
 		}
 		
 		assertEquals(145500, size);
@@ -258,7 +257,7 @@ public class BTreeTest extends TestCase {
 		Type[] types = new Type[]{new VarcharType((byte)3), new VarcharType((byte)9)};
 		String[] names = new String[]{"number", "text"};
 
-		String tableName = "table1";
+		String tableName = "table5";
 		command = new CreateTableCommand(tableName, types, names);
 		command.exec();
 
@@ -267,7 +266,7 @@ public class BTreeTest extends TestCase {
 			String s2 = "some_text";
 			Object arr[] = new Object[]{s1, s2};
 
-			command = new InsertCommand("table1", arr);
+			command = new InsertCommand(tableName, arr);
 			command.exec();
 		}
 

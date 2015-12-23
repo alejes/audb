@@ -12,6 +12,15 @@ public class IndexKeyInstance implements Comparable<IndexKeyInstance> {
 		this.elements = elements;
 	}
 	
+	public int getSize() {
+		int size = 0;
+		for (TableElement el : elements) {
+			size += el.getType().getSize();
+		}
+		
+		return size;
+	}
+	
 	public int compareTo(IndexKeyInstance other) {
 		for (int i = 0; i < elements.length; i++) {		
 			if (null == other.elements[i] || null == elements[i]) {

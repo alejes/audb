@@ -12,6 +12,7 @@ public class VarcharElement implements TableElement {
 	public VarcharElement(String s, VarcharType t) {
 		value = s;
 		type = t;
+		assert (type.isValid(s));
 	}
 	
 	public String toString() {
