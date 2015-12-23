@@ -202,8 +202,12 @@ public class AppTest
         Command command;
         String q;
         Table t = tableManager.getTable("parsertab");
-        assert (t != null);
-        
+        //assert (t != null);
+
+        q = "CREATE TABLE parsertab (number VARCHAR (15), text VARCHAR (9))";
+        command = parser.getCommand(q);
+        command.exec();
+
         q = "insert into parsertab (number, text) VALUES ('34343','434343')";
         command = parser.getCommand(q);
         command.exec();
