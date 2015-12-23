@@ -3,6 +3,7 @@ package audb.command;
 import audb.table.Table;
 import audb.table.TableElement;
 import audb.util.Pair;
+import audb.util.Third;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,10 +11,10 @@ import java.util.List;
 
 public class SelectCommand extends Command {
 
-    private final List<Pair<String, Constraint>> constraints;
+    private final List<Third<String, Constraint, String>> constraints;
     private String tableName;
 
-    public SelectCommand(String tableName, List<Pair<String, Constraint>> constraints) {
+    public SelectCommand(String tableName, List<Third<String, Constraint, String>> constraints) {
         this.tableName = tableName;
         this.constraints = constraints;
     }
