@@ -86,15 +86,15 @@ public class Parser {
                 String fieldName, fieldTable;
                 System.out.println(fullFieldName + "{}{}" + fieldList.length);
                 if (fieldList.length == 1) {
-                    fieldName = fieldList[0];
+                    fieldName = from + "." + fieldList[0];
                     fieldTable = from;
                 } else if (fieldList.length == 2) {
-                    fieldTable = fieldList[0];
+                    fieldTable = fieldList[0] + "." + fieldList[1];
                     fieldName = fieldList[1];
                 } else {
                     throw new IllegalArgumentException("unknown table in where " + fullFieldName);
                 }
-                System.out.println("! " + fieldName + "{}{}" + fieldTable);
+                //System.out.println("! " + fieldName + "{}{}" + fieldTable);
                 String value = splitConstraint[1].trim();
                 if (value.charAt(value.length() - 1) == ')') {
                     value = value.substring(0, value.length() - 1);
@@ -193,6 +193,7 @@ public class Parser {
 
         TableManager tableManager = Command.getTableManager();
         Table tableStruct = tableManager.getTable(table);
+
         if (tableStruct == null) {
             throw new IllegalArgumentException("unknown table");
         }
@@ -205,7 +206,7 @@ public class Parser {
             boolean find = false;
             for (int columnId = 0; columnId < tableNames.length; ++columnId) {
 
-                if (((Column) insert.getColumns().get(columnId)).getColumnName().compareTo(tableNames[i]) == 0) {
+                if ((table + "." + ((Column) insert.getColumns().get(columnId)).getColumnName()).compareTo(tableNames[i]) == 0) {
                     switch (tableTypes[i].getId()) {
                         case Type.INT:
                             try {
@@ -408,15 +409,15 @@ public class Parser {
                 String fieldName, fieldTable;
                 System.out.println(fullFieldName + "{}{}" + fieldList.length);
                 if (fieldList.length == 1) {
-                    fieldName = fieldList[0];
+                    fieldName = from + "." + fieldList[0];
                     fieldTable = from;
                 } else if (fieldList.length == 2) {
-                    fieldTable = fieldList[0];
+                    fieldTable = fieldList[0] + "." + fieldList[1];
                     fieldName = fieldList[1];
                 } else {
                     throw new IllegalArgumentException("unknown table in where " + fullFieldName);
                 }
-                System.out.println("! " + fieldName + "{}{}" + fieldTable);
+                //System.out.println("! " + fieldName + "{}{}" + fieldTable);
                 String value = splitConstraint[1].trim();
                 if (value.charAt(value.length() - 1) == ')') {
                     value = value.substring(0, value.length() - 1);
@@ -524,7 +525,7 @@ public class Parser {
 
             Type fieldType = null;
             for (int columnId = 0; columnId < tableNames.length; ++columnId) {
-                if (tableNames[columnId].compareTo(currentColumnName) == 0) {
+                if ((tableNames[columnId]).compareTo(from + "." + currentColumnName) == 0) {
                     fieldType = tableTypes[columnId];
                     break;
                 }
@@ -574,15 +575,15 @@ public class Parser {
                 String fieldName, fieldTable;
                 System.out.println(fullFieldName + "{}{}" + fieldList.length);
                 if (fieldList.length == 1) {
-                    fieldName = fieldList[0];
+                    fieldName = from + "." + fieldList[0];
                     fieldTable = from;
                 } else if (fieldList.length == 2) {
-                    fieldTable = fieldList[0];
+                    fieldTable = fieldList[0] + "." + fieldList[1];
                     fieldName = fieldList[1];
                 } else {
                     throw new IllegalArgumentException("unknown table in where " + fullFieldName);
                 }
-                System.out.println("! " + fieldName + "{}{}" + fieldTable);
+                //System.out.println("! " + fieldName + "{}{}" + fieldTable);
                 String value = splitConstraint[1].trim();
                 if (value.charAt(value.length() - 1) == ')') {
                     value = value.substring(0, value.length() - 1);
