@@ -159,7 +159,7 @@ public class Parser {
                         }
                         el = new VarcharElement(value, new VarcharType((byte) fieldType.getSize()));
                 }
-                ConstraintsList.add(Third.newThird(fieldName, new Constraint(curent, el), fieldTable));
+                ConstraintsList.add(Third.newThird(fieldTable + "." + fieldName, new Constraint(curent, el), fieldTable));
             }
         }
         System.out.println("CONSTRAINTS");
