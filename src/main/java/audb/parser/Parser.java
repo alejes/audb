@@ -12,6 +12,7 @@ import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
@@ -19,10 +20,7 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.select.Limit;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.statement.update.Update;
 
 import java.io.StringReader;
@@ -56,6 +54,21 @@ public class Parser {
         if (tableStruct == null) {
             throw new IllegalArgumentException("unknown table " + from);
         }
+        List fromJoin = plainSelect.getJoins();
+
+
+        if (fromJoin != null) {
+            if (fromJoin.size() >= 0) {
+                System.out.println(((Join) fromJoin.get(0)).getOnExpression().toString());
+                String leftColumn = ((Column) ((EqualsTo) ((Join) fromJoin.get(0)).getOnExpression()).getLeftExpression()).getWholeColumnName();
+                String rightColumn = ((Column) ((EqualsTo) ((Join) fromJoin.get(0)).getOnExpression()).getRightExpression()).getWholeColumnName();
+                System.out.println(leftColumn);
+                System.out.println(rightColumn);
+            }
+        }
+
+
+        System.out.println();
 
         //System.out.println("");
         selectList = new HashSet<>();
@@ -183,7 +196,8 @@ public class Parser {
         else
             System.out.println("Limits: " + limits.toString());
 
-        return new SelectCommand(from, ConstraintsList);
+        //return new SelectCommand(from, ConstraintsList);
+        throw new IllegalArgumentException("ww");
     }
 
     public Command insertParse(String str) throws Exception {
