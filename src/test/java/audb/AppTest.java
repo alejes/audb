@@ -172,11 +172,11 @@ public class AppTest
         command.exec();
 
         for (int i = 0; i < 10; ++i) {
-            command = parser.getCommand("INSERT INTO tabledoubletest (number, text, val) VALUES (" + i + ", 'tesxt', 2.34);");
+            command = parser.getCommand("INSERT INTO tabledoubletest (number, text, val) VALUES (" + i + ", 'tesxt', " + (2.34 + i) + ");");
             command.exec();
         }
 
-        q = "select * from tabledoubletest";
+        q = "select * from tabledoubletest where (val < 5.0)";
         command = parser.getCommand(q);
         Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
         Iterator<HashMap<String, TableElement>> res = exRes.second;
