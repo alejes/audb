@@ -191,8 +191,27 @@ public class AppTest
 
         assertTrue(true);
     }
-    
-    
+
+    public void testOfJoins() throws Exception {
+        assertTrue(true);
+        Parser parser = new Parser();
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+        Command command;
+        String q;
+        Table t = tableManager.getTable("parsertab");
+        //assert (t != null);
+
+        q = "SELECT * FROM table1 JOIN tab2 ON tab1.id = tab2.id";
+        command = parser.getCommand(q);
+        command.exec();
+
+        PageStructure.flush();
+
+        assertTrue(true);
+    }
+
     public void testLoadTable() throws Exception {
         assertTrue(true);
         Parser parser = new Parser();

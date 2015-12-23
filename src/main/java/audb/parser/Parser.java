@@ -56,14 +56,15 @@ public class Parser {
         }
         List fromJoin = plainSelect.getJoins();
 
-
+        String leftColumnJoin = null;
+        String rightColumnJoin = null;
         if (fromJoin != null) {
             if (fromJoin.size() >= 0) {
-                System.out.println(((Join) fromJoin.get(0)).getOnExpression().toString());
-                String leftColumn = ((Column) ((EqualsTo) ((Join) fromJoin.get(0)).getOnExpression()).getLeftExpression()).getWholeColumnName();
-                String rightColumn = ((Column) ((EqualsTo) ((Join) fromJoin.get(0)).getOnExpression()).getRightExpression()).getWholeColumnName();
-                System.out.println(leftColumn);
-                System.out.println(rightColumn);
+                //System.out.println(((Join) fromJoin.get(0)).getOnExpression().toString());
+                leftColumnJoin = ((Column) ((EqualsTo) ((Join) fromJoin.get(0)).getOnExpression()).getLeftExpression()).getWholeColumnName();
+                rightColumnJoin = ((Column) ((EqualsTo) ((Join) fromJoin.get(0)).getOnExpression()).getRightExpression()).getWholeColumnName();
+                System.out.println(leftColumnJoin);
+                System.out.println(rightColumnJoin);
             }
         }
 
@@ -196,8 +197,7 @@ public class Parser {
         else
             System.out.println("Limits: " + limits.toString());
 
-        //return new SelectCommand(from, ConstraintsList);
-        throw new IllegalArgumentException("ww");
+        return new SelectCommand(from, ConstraintsList);
     }
 
     public Command insertParse(String str) throws Exception {
