@@ -91,7 +91,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 			for(int j = 0; j < name.length; j++)
 				name[j] = page.data[ptr + j];
 			ptr += name.length;
-			this.names[i] = new String(name, StandardCharsets.UTF_8);
+			this.names[i] = tableName + "." + (new String(name, StandardCharsets.UTF_8));
 			this.types[i] = Type.makeType(type);
 		}
 
@@ -134,7 +134,10 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
 		this.names = new String[names.length];
 		this.types = new Type[types.length];
-		System.arraycopy(names, 0, this.names, 0, names.length);
+		for (int i = 0; i < this.names.length; ++i) {
+			this.names[i] = tableName + "." + names[i];
+		}
+		// System.arraycopy(names, 0, this.names, 0, names.length);
 		System.arraycopy(types, 0, this.types, 0, types.length);
 
 
