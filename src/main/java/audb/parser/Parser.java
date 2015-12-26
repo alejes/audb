@@ -349,7 +349,7 @@ public class Parser {
             if (items.length != 2) {
                 throw new Exception("Wrong column constraint in create query");
             }
-            String currentColumn = items[0].trim().toLowerCase();
+            String currentColumn = tableName + "." + items[0].trim().toLowerCase();
             boolean find = false;
 
             for (String __x : tableNamesList) {
