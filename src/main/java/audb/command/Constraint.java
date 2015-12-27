@@ -9,6 +9,7 @@ public class Constraint {
 	public Constraint(ConstraintType c, TableElement ref) {
 		constraintType = c;
 		reference = ref;
+		assert (reference != null);
 	}
 
 	public boolean elementSatisfies(TableElement element) {
