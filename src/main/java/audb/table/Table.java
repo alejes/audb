@@ -96,7 +96,9 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
 		int indexCount = page.readInteger(INDEX_COUNT);
 		for (int i = 1; i <= indexCount; ++i) {
-			Index index = new BTreeIndex(this, page.readInteger(INDEX_COUNT - i), pageStructure);
+			int mainPage = page.readInteger(INDEX_COUNT - i);
+			assert(0 != mainPage);
+			Index index = new BTreeIndex(this, mainPage, pageStructure);
 			// index.init();
 			indexList.add(index);
 			index.init();
@@ -262,8 +264,10 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		index.create(indexNames, orders);
 
 		Page page = pageStructure.getPage(INFO_PAGE);
+		page.write();
 		int indexCount = page.readInteger(INDEX_COUNT) + 1;
 		page.writeInteger(INDEX_COUNT, indexCount);
+		assert (indexCount >= 1);
 		page.writeInteger(INDEX_COUNT - indexCount, emptyPage);
 		indexList.add(index);
 	}

@@ -31,4 +31,10 @@ public class PageReader {
 		return ret;
 	}
 	
+	public byte readByte() {
+		byte ret = page.readByte(offset);
+		offset += 1;
+		return ret;
+	}
+	
 }

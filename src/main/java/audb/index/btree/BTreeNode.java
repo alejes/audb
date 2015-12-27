@@ -36,6 +36,7 @@ public abstract class BTreeNode {
 		minChildrenNumber = (fanout + 1) / 2;
 		this.nodeReader = nr;
 		this.pageNumber = pageNumber == -1 ? (int)nr.getPageStructure().getEmptyPage() : pageNumber;
+		assert(this.pageNumber != 0);
 	}
 
 	public BTreeNode(int fanout, NodeReader nr, BTreeNode child1, BTreeNode child2) {
