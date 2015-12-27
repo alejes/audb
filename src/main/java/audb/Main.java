@@ -3,18 +3,11 @@ package audb;
 import audb.command.Command;
 import audb.page.PageStructure;
 import audb.parser.Parser;
-import audb.result.TableIterator;
-import audb.table.Table;
-import audb.table.TableLine;
-import audb.table.TableElement;
+import audb.parser.Shower;
 import audb.table.TableManager;
-import audb.type.Type;
-import audb.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Iterator;
 
 public class Main {
 
@@ -61,54 +54,7 @@ public class Main {
             String s;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while ((s = in.readLine()) != null && s.length() != 0) {
-                try {
-                    command = parser.getCommand(s);
-                    Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
-                    if (null == exRes) {
-                        if (Parser.affectedRows >= 0) {
-                            System.out.println("OK " + Parser.affectedRows + " rows affected");
-                        } else {
-                            System.out.println("OK");
-                        }
-                        continue;
-                    }
-
-                    TableIterator res = (TableIterator) exRes.second;
-
-                    if (null == res) {
-                        continue;
-                    }
-                    String[] names1 = res.getNames();
-                    Type[] types1 = res.getTypes();
-                    for (int i = 0, names1Length = names1.length; i < names1Length; i++) {
-                        String fieldName = names1[i];
-                        Type fieldType = types1[i];
-                        if ((Parser.selectList == null) || Parser.selectList.isEmpty()) {
-                            System.out.print(String.format("%30s", fieldName + "  " + fieldType + "  |"));
-                        }
-                    }
-                    System.out.println();
-
-
-                    while (res.hasNext()) {
-                        HashMap<String, TableElement> arr = res.next();
-
-                        if (!((TableLine)arr).isDeleted()) {
-                            for (String name : arr.keySet()) {
-                                if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(name)) {
-                                    System.out.print(String.format("%30s", arr.get(name).showString() + " |"));
-                                }
-                            }
-                            System.out.println();
-                        }
-                    }
-                } catch (Exception exp) {
-                    System.out.println("Error: " + exp.getMessage() + exp.toString());
-                    for (StackTraceElement stackTraceElement : exp.getStackTrace()) {
-                        System.out.println(stackTraceElement);
-                    }
-                }
-                
+                Shower.show(s);
             }
             PageStructure.flush();
         } catch(Exception e) {
