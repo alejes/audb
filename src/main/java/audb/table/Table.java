@@ -206,14 +206,14 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 	public HashMap<String, TableElement> read(Page page, int offset) {
 		int ptr = offset * recordSize;
 		TableLine objects = new TableLine(tableName, page.getPageNumber(), offset);
-		if (page.data[ptr + recordSize - 1] != 0)
-			return objects;
 		for(int i = 0; i < types.length; i++) {
 			byte[] data = new byte[types[i].getSize()];
 			System.arraycopy(page.data, ptr, data, 0, types[i].getSize());
 			objects.put(names[i], types[i].fromBytes(data));
 			ptr += types[i].getSize();
 		}
+		if (page.data[offset * recordSize + recordSize - 1] != 0)
+			objects.setDeleted();
 		return objects;
 	}
 

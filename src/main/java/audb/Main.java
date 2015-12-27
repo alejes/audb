@@ -5,6 +5,7 @@ import audb.page.PageStructure;
 import audb.parser.Parser;
 import audb.result.TableIterator;
 import audb.table.Table;
+import audb.table.TableLine;
 import audb.table.TableElement;
 import audb.table.TableManager;
 import audb.type.Type;
@@ -92,12 +93,12 @@ public class Main {
                     while (res.hasNext()) {
                         HashMap<String, TableElement> arr = res.next();
 
-                        for (String name : arr.keySet()) {
-                            if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(name)) {
-                                System.out.print(String.format("%30s", arr.get(name).showString() + " |"));
+                        if (!((TableLine)arr).isDeleted()) {
+                            for (String name : arr.keySet()) {
+                                if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(name)) {
+                                    System.out.print(String.format("%30s", arr.get(name).showString() + " |"));
+                                }
                             }
-                        }
-                        if (!arr.isEmpty()) {
                             System.out.println();
                         }
                     }
