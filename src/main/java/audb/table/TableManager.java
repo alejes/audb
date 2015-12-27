@@ -26,6 +26,7 @@ public class TableManager {
                     hashMap.put(str, table);
                 } catch(Exception e) {
                     System.err.println("Can't open table " + str + " because " + e.toString());
+                    // e.printStackTrace();
                 }
             }
         }
