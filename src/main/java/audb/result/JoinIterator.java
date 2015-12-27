@@ -24,23 +24,42 @@ public class JoinIterator implements TableIterator {
     private HashMap<String, TableElement> currentElement;
     private Iterator<HashMap<String, TableElement>> mainIterator;
     private Iterator<HashMap<String, TableElement>> secondIterator;
-    private List<Pair<String, String>> names;
+    private List<Pair<String, String>> columnNames;
+    private String[] names;
     private List<Third<String, Constraint, String>> constraints;
-    int offset;
-    int currentOffset = -1;
-    int countOfRecords;
 
-    public JoinIterator(Iterator<HashMap<String, TableElement>> it, 
-        List<Pair<String, String>> names, List<Third<String, Constraint, String>> constraints, Table table) {
+
+    public JoinIterator(TableIterator it, List<Pair<String, String>> columnNames, 
+        List<Third<String, Constraint, String>> constraints, Table table) {
 
         this.table = new WeakReference<Table>(table);
-        this.names = names;
+        this.columnNames = columnNames;
         this.constraints = constraints;
 
 
         mainIterator = it;
         next = getNext();
 
+        names = new String[it.getNames().length + table.getNames().length - columnNames.size()];
+        int ind = 0;
+        for (; ind < it.getNames().length; ++ind) {
+            names[ind] = it.getNames()[ind];
+        }
+        for (int i = 0; i < table.getNames().length; ++i) {
+            boolean isNeeded = true;
+            for (Pair<String, String> p: columnNames)
+                if (p.second == table.getNames()[i]) {
+                    isNeeded = false;
+                    break;
+                }
+            if (isNeeded)
+                names[ind++] = table.getNames()[i];
+        }
+
+    }
+
+    public String[] getNames() {
+        return names;
     }
 
     public void close() {
@@ -56,7 +75,7 @@ public class JoinIterator implements TableIterator {
             currentElement = mainIterator.next();
             LinkedList<Third<String, Constraint, String>> ll = 
                 new LinkedList<Third<String, Constraint, String>>(constraints);
-            for (Pair<String, String> el: names) {
+            for (Pair<String, String> el: columnNames) {
                 Constraint c = new Constraint(Constraint.ConstraintType.EQUAL, currentElement.get(el.first));
                 ll.add(Third.newThird(el.second, c, ""));
             }

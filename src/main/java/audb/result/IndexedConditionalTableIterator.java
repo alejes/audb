@@ -60,4 +60,8 @@ public class IndexedConditionalTableIterator implements TableIterator {
 		return retRow;
 	}
 
+	public String[] getNames() {
+		return table.getNames();
+	}
+
 }

@@ -57,6 +57,10 @@ public class FullScanIterator implements TableIterator {
 	public int getCurrentOffset() {
 		return currentOffset;
 	}
+
+    public String[] getNames() {
+        return table.get().getNames();
+    }
 	
     public Type[] getTypes() {
     	return table.get().getTypes();

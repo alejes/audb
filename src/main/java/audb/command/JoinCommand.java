@@ -7,18 +7,18 @@ import java.util.Iterator;
 import audb.table.Table;
 import audb.table.TableElement;
 import audb.type.Type;
-import audb.result.JoinIterator;
+import audb.result.*;
 import audb.util.*;
 
 
 public class JoinCommand extends Command {
 
     private String tableName;
-    private Iterator iterator;
+    private TableIterator iterator;
     private List<Pair<String, String>> names;
     private List<Third<String, Constraint, String>> constraints;
 
-    public JoinCommand(Iterator<HashMap<String, TableElement>> it, List<Pair<String, String>> names, 
+    public JoinCommand(TableIterator it, List<Pair<String, String>> names, 
         List<Third<String, Constraint, String>> constraints, String tableName) {
         
         this.tableName = tableName;
@@ -33,7 +33,7 @@ public class JoinCommand extends Command {
             throw new Exception("Unknown table " + tableName);
         Table table = tableManager.getTable(tableName);
         Iterator<HashMap<String, TableElement>> it = new JoinIterator(iterator, names, constraints, table);
-        
+
         return Pair.newPair((Table)null, it);
     }
 
