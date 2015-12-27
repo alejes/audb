@@ -7,6 +7,7 @@ import audb.type.DoubleType;
 import audb.type.IntegerType;
 import audb.type.Type;
 import audb.type.VarcharType;
+import audb.util.Pair;
 import audb.util.Third;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -62,10 +63,11 @@ public class Parser {
 
         String leftColumnJoin;
         String rightColumnJoin;
-        String joinTable;
+        String joinTable = null;
         Table joinTableStruct;
         String[] joinTableNames;
         Type[] joinTableTypes;
+        List<Pair<String, String>> joinPars = new ArrayList<>();
         if (fromJoin != null) {
             if (fromJoin.size() >= 0) {
                 joinTable = (((Join) fromJoin.get(0)).getRightItem()).toString();
@@ -115,7 +117,7 @@ public class Parser {
                 if (joinTableTypes[columnJoinId].getId() != tableTypes[columnOriginalId].getId()) {
                     throw new IllegalArgumentException("can't solve mismatch join column types " + leftColumnJoin + " [" + tableTypes[columnOriginalId] + "] with " + rightColumnJoin + " [" + joinTableTypes[columnJoinId] + "]");
                 }
-
+                joinPars.add(Pair.newPair(leftColumnJoin, rightColumnJoin));
                 //System.out.println(leftColumnJoin);
                 //System.out.println(rightColumnJoin);
             }
@@ -152,7 +154,15 @@ public class Parser {
         else
             System.out.println("Limits: " + limits.toString());
 
-        return new SelectCommand(from, ConstraintsList);
+        SelectCommand selector = new SelectCommand(from, ConstraintsList);
+        if (joinTable == null) {
+            return selector;
+        } else {
+            //SelectCommand select = new SelectCommand(from, ConstraintsList);
+            ///return new UpdateCommand(select.exec().second, nwValuesList);
+            //public JoinCommand(Iterator<HashMap<String, TableElement>> it, List<Pair<String, String>> names,  List<Third<String, Constraint, String>> constraints, String tableName) {
+            return new JoinCommand(selector.exec().second, joinPars, ConstraintsList, joinTable);
+        }
     }
 
     public Command insertParse(String str) throws Exception {
