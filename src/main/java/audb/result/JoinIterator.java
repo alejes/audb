@@ -40,20 +40,13 @@ public class JoinIterator implements TableIterator {
         mainIterator = it;
         next = getNext();
 
-        names = new String[it.getNames().length + table.getNames().length - columnNames.size()];
+        names = new String[it.getNames().length + table.getNames().length];
         int ind = 0;
         for (; ind < it.getNames().length; ++ind) {
             names[ind] = it.getNames()[ind];
         }
         for (int i = 0; i < table.getNames().length; ++i) {
-            boolean isNeeded = true;
-            for (Pair<String, String> p: columnNames)
-                if (p.second == table.getNames()[i]) {
-                    isNeeded = false;
-                    break;
-                }
-            if (isNeeded)
-                names[ind++] = table.getNames()[i];
+            names[ind++] = table.getNames()[i];
         }
 
     }
