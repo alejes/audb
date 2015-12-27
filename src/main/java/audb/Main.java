@@ -72,6 +72,7 @@ public class Main {
                         continue;
                     }
                     System.out.println("FILED!+");
+
                     for (int tableIter = 0; tableIter < exRes.first.getNames().length; ++tableIter) {
                         if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(exRes.first.getNames()[tableIter])) {
                             System.out.print(String.format("%24s", exRes.first.getNames()[tableIter] + "   " + exRes.first.getTypes()[tableIter] + " |"));
