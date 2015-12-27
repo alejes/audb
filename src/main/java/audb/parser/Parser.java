@@ -149,6 +149,11 @@ public class Parser {
             System.out.println(x.third);
         }
 
+        System.out.println("JOIN");
+        for (Pair<String, String> __x : joinPars) {
+            System.out.println("F " + __x.first + "; " + __x.second);
+        }
+
         if (limits == null)
             System.out.println("No limits");
         else
