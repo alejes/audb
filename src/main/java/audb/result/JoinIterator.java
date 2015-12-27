@@ -1,19 +1,17 @@
 package audb.result;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Iterator;
-import java.lang.ref.WeakReference;
-
 import audb.command.Constraint;
-import audb.page.Page;
-import audb.page.PageStructure;
-import audb.table.PageIterator;
 import audb.table.Table;
 import audb.table.TableElement;
 import audb.type.Type;
-import audb.util.*;
+import audb.util.Pair;
+import audb.util.Third;
+
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class JoinIterator implements TableIterator {
 
@@ -26,6 +24,7 @@ public class JoinIterator implements TableIterator {
     private Iterator<HashMap<String, TableElement>> secondIterator;
     private List<Pair<String, String>> columnNames;
     private String[] names;
+    private Type[] types;
     private List<Third<String, Constraint, String>> constraints;
 
 
@@ -41,18 +40,25 @@ public class JoinIterator implements TableIterator {
         next = getNext();
 
         names = new String[it.getNames().length + table.getNames().length];
+        types = new Type[it.getNames().length + table.getNames().length];
         int ind = 0;
         for (; ind < it.getNames().length; ++ind) {
             names[ind] = it.getNames()[ind];
+            types[ind] = it.getTypes()[ind];
         }
         for (int i = 0; i < table.getNames().length; ++i) {
-            names[ind++] = table.getNames()[i];
+            names[ind] = table.getNames()[i];
+            types[ind++] = table.getTypes()[i];
         }
 
     }
 
     public String[] getNames() {
         return names;
+    }
+
+    public Type[] getTypes() {
+        return types;
     }
 
     public void close() {

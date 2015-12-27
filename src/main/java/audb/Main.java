@@ -3,6 +3,7 @@ package audb;
 import audb.command.Command;
 import audb.page.PageStructure;
 import audb.parser.Parser;
+import audb.result.TableIterator;
 import audb.table.Table;
 import audb.table.TableElement;
 import audb.table.TableManager;
@@ -71,26 +72,30 @@ public class Main {
                         }
                         continue;
                     }
-                    System.out.println("FILED!+");
 
-                    for (int tableIter = 0; tableIter < exRes.first.getNames().length; ++tableIter) {
-                        if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(exRes.first.getNames()[tableIter])) {
-                            System.out.print(String.format("%24s", exRes.first.getNames()[tableIter] + "   " + exRes.first.getTypes()[tableIter] + " |"));
-                        }
-                    }
-                    System.out.println();
-
-                    Iterator<HashMap<String, TableElement>> res = exRes.second;
+                    TableIterator res = (TableIterator) exRes.second;
 
                     if (null == res) {
                         continue;
                     }
+                    String[] names1 = res.getNames();
+                    Type[] types1 = res.getTypes();
+                    for (int i = 0, names1Length = names1.length; i < names1Length; i++) {
+                        String fieldName = names1[i];
+                        Type fieldType = types1[i];
+                        if ((Parser.selectList == null) || Parser.selectList.isEmpty()) {
+                            System.out.print(String.format("%30s", fieldName + "  " + fieldType + "  |"));
+                        }
+                    }
+                    System.out.println();
+
 
                     while (res.hasNext()) {
                         HashMap<String, TableElement> arr = res.next();
-                        for (String name : exRes.first.getNames()) {
+
+                        for (String name : arr.keySet()) {
                             if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(name)) {
-                                System.out.print(String.format("%25s", arr.get(name).showString() + " |"));
+                                System.out.print(String.format("%30s", arr.get(name).showString() + " |"));
                             }
                         }
                         if (!arr.isEmpty()) {
