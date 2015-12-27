@@ -157,6 +157,42 @@ public class AppTest
         assertTrue(true);
     }
 
+    public void testSimpleUpdateTest() throws Exception {
+        assertTrue(true);
+        Parser parser = new Parser();
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+        Command command;
+        String q;
+        String qq = "CREATE TABLE simplupdtest (number VARCHAR (9), text VARCHAR (9));";
+        command = parser.getCommand(qq);
+        command.exec();
+        command = parser.getCommand("INSERT INTO simplupdtest (number, text) VALUES ('77777', '55555')");
+        command.exec();
+        command = parser.getCommand("UPDATE simplupdtest SET text = '88888'");
+        command.exec();
+        q = "select * from simplupdtest";
+        command = parser.getCommand(q);
+        Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
+        Iterator<HashMap<String, TableElement>> res = exRes.second;
+
+        while (res.hasNext()) {
+            HashMap<String, TableElement> arr = res.next();
+            /*
+            for (String name : arr.keySet()) {
+                System.out.print(arr.get(name).toString() + " ");
+            }
+            */
+            System.out.println(arr.get("simplupdtest.text").toString());
+
+            assertTrue(arr.get("simplupdtest.text").toString().compareTo("88888") == 0);
+            System.out.println();
+        }
+        PageStructure.flush();
+
+        assertTrue(true);
+    }
     public void testdoubleTest() throws Exception {
         assertTrue(true);
         Parser parser = new Parser();
