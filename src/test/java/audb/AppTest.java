@@ -4,6 +4,7 @@ import audb.command.Command;
 import audb.page.PageCache;
 import audb.page.PageStructure;
 import audb.parser.Parser;
+import audb.parser.Shower;
 import audb.table.Table;
 import audb.table.TableElement;
 import audb.table.TableManager;
@@ -260,9 +261,8 @@ public class AppTest
         Table t = tableManager.getTable("parsertab");
         //assert (t != null);
 
-        q = "SELECT * FROM table1 JOIN tab2 ON tab1.id = tab2.id";
-        command = parser.getCommand(q);
-        command.exec();
+
+        Shower.show_exsept("SELECT * FROM table3 JOIN table2 ON table3.number = table2.number");
 
         PageStructure.flush();
 
