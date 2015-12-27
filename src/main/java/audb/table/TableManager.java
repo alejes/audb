@@ -1,11 +1,11 @@
 package audb.table;
 
-import java.util.HashMap;
-import java.io.File;
-
-import audb.type.Type;
 import audb.page.PageManager;
 import audb.page.PageStructure;
+import audb.type.Type;
+
+import java.io.File;
+import java.util.HashMap;
 
 
 public class TableManager {
@@ -25,7 +25,8 @@ public class TableManager {
                     table.init();
                     hashMap.put(str, table);
                 } catch(Exception e) {
-                    System.err.println("Can't open table " + str);
+                    System.err.println("Can't open table " + str + " because " + e.toString());
+                    // e.printStackTrace();
                 }
             }
         }

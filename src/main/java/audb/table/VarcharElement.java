@@ -3,8 +3,6 @@ package audb.table;
 import audb.type.Type;
 import audb.type.VarcharType;
 
-import java.nio.charset.StandardCharsets;
-
 public class VarcharElement implements TableElement {
 	public final String value;
 	public final VarcharType type;
@@ -33,14 +31,15 @@ public class VarcharElement implements TableElement {
     }
 
 	public String showString() {
-		return value.toString();
+		return value;
 	}
-	
+
+	@Override
 	public int compareTo(TableElement other) {
 		if (!(other instanceof VarcharElement)) {
 			throw new ClassCastException("Can not cast not VarcharElement to VarcharElement");
 		}
-		
+
 		String tmp = ((VarcharElement)other).value;
 		return value.compareTo(tmp);
 	}

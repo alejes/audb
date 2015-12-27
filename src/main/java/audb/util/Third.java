@@ -14,4 +14,10 @@ public class Third<F, S, T> {
     public static <F, S, T> Third<F, S, T> newThird(F f, S s, T t) {
         return new Third<>(f, s, t);
     }
+
+    @Override
+    public String toString() {
+        return "Third < " + first + ";" + second + ";" + third + ">";
+    }
+
 }

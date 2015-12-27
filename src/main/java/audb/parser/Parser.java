@@ -2,16 +2,19 @@ package audb.parser;
 
 import audb.command.*;
 import audb.index.Index;
+import audb.result.TableIterator;
 import audb.table.*;
 import audb.type.DoubleType;
 import audb.type.IntegerType;
 import audb.type.Type;
 import audb.type.VarcharType;
+import audb.util.Pair;
 import audb.util.Third;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
@@ -19,10 +22,7 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
-import net.sf.jsqlparser.statement.select.Limit;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.statement.update.Update;
 
 import java.io.StringReader;
@@ -34,10 +34,10 @@ import java.util.List;
 
 public class Parser {
     public static HashSet<String> selectList;
+    public static int affectedRows;
     private static CCJSqlParserManager parserManager = new CCJSqlParserManager();
 
     public Command selectParse(String str) throws Exception {
-        final List exprList = new ArrayList();
         Select select = (Select) parserManager.parse(new StringReader(str));
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
         Expression where = plainSelect.getWhere();
@@ -57,7 +57,76 @@ public class Parser {
             throw new IllegalArgumentException("unknown table " + from);
         }
 
-        //System.out.println("");
+        String[] tableNames = tableStruct.getNames();
+        Type[] tableTypes = tableStruct.getTypes();
+
+        List fromJoin = plainSelect.getJoins();
+
+        String leftColumnJoin;
+        String rightColumnJoin;
+        String joinTable = null;
+        Table joinTableStruct;
+        String[] joinTableNames;
+        Type[] joinTableTypes;
+        List<Pair<String, String>> joinPars = new ArrayList<>();
+        if (fromJoin != null) {
+            if (fromJoin.size() >= 0) {
+                joinTable = (((Join) fromJoin.get(0)).getRightItem()).toString();
+                joinTableStruct = tableManager.getTable(joinTable);
+                if (joinTableStruct == null) {
+                    throw new IllegalArgumentException("unknown table in join " + joinTable);
+                }
+                joinTableNames = joinTableStruct.getNames();
+                joinTableTypes = joinTableStruct.getTypes();
+                //System.out.println(((Join) fromJoin.get(0)).getOnExpression().toString());
+                leftColumnJoin = ((Column) ((EqualsTo) ((Join) fromJoin.get(0)).getOnExpression()).getLeftExpression()).getWholeColumnName();
+                if (!leftColumnJoin.contains(".")) {
+                    leftColumnJoin = from + "." + leftColumnJoin;
+                }
+                rightColumnJoin = ((Column) ((EqualsTo) ((Join) fromJoin.get(0)).getOnExpression()).getRightExpression()).getWholeColumnName();
+                if (!rightColumnJoin.contains(".")) {
+                    rightColumnJoin = from + "." + rightColumnJoin;
+                }
+                if (!leftColumnJoin.startsWith(from + ".")) {
+                    String swp = leftColumnJoin;
+                    leftColumnJoin = rightColumnJoin;
+                    rightColumnJoin = swp;
+                }
+                if (!rightColumnJoin.startsWith(joinTable + ".")) {
+                    throw new IllegalArgumentException("left and right join expression link to one table and no one to " + joinTable);
+                }
+                int columnJoinId = -1;
+                for (int i = 0; i < joinTableNames.length; i++) {
+                    if (joinTableNames[i].compareTo(rightColumnJoin) == 0) {
+                        columnJoinId = i;
+                        break;
+                    }
+                }
+                if (columnJoinId < 0) {
+                    throw new IllegalArgumentException("Not found join column " + leftColumnJoin + " in table" + joinTable);
+                }
+                int columnOriginalId = -1;
+                for (int i = 0; i < tableNames.length; i++) {
+                    if (tableNames[i].compareTo(leftColumnJoin) == 0) {
+                        columnOriginalId = i;
+                        break;
+                    }
+                }
+                if (columnOriginalId < 0) {
+                    throw new IllegalArgumentException("Not found join column " + leftColumnJoin + " in table" + from);
+                }
+                if (joinTableTypes[columnJoinId].getId() != tableTypes[columnOriginalId].getId()) {
+                    throw new IllegalArgumentException("can't solve mismatch join column types " + leftColumnJoin + " [" + tableTypes[columnOriginalId] + "] with " + rightColumnJoin + " [" + joinTableTypes[columnJoinId] + "]");
+                }
+                joinPars.add(Pair.newPair(leftColumnJoin, rightColumnJoin));
+                //System.out.println(leftColumnJoin);
+                //System.out.println(rightColumnJoin);
+            }
+        }
+
+
+        System.out.println();
+
         selectList = new HashSet<>();
         System.out.print("Select please: ");
         for (SelectItem x :
@@ -67,123 +136,22 @@ public class Parser {
                 break;
             }
             selectList.add(x.toString());
-            //System.out.print(x.toString() + "|");
         }
         System.out.println();
-        String[] tableNames = tableStruct.getNames();
-        Type[] tableTypes = tableStruct.getTypes();
 
-        ArrayList<Third<String, Constraint, String>> ConstraintsList = new ArrayList<>();
-        if (where != null) {
-            String[] whereStatements = where.toString().split("(?i) AND ");
-            for (String statement : whereStatements) {
-                String[] splitConstraint = statement.split("[<=>]+", 2);
-                if (splitConstraint.length != 2) {
-                    throw new IllegalArgumentException("bad where statement " + statement);
-                }
-                String fullFieldName = splitConstraint[0].replace('(', ' ').trim();
-                String[] fieldList = fullFieldName.split("\\.");
-                String fieldName, fieldTable;
-                System.out.println(fullFieldName + "{}{}" + fieldList.length);
-                if (fieldList.length == 1) {
-                    fieldName = from + "." + fieldList[0];
-                    fieldTable = from;
-                } else if (fieldList.length == 2) {
-                    fieldTable = fieldList[0] + "." + fieldList[1];
-                    fieldName = fieldList[1];
-                } else {
-                    throw new IllegalArgumentException("unknown table in where " + fullFieldName);
-                }
-                //System.out.println("! " + fieldName + "{}{}" + fieldTable);
-                String value = splitConstraint[1].trim();
-                if (value.charAt(value.length() - 1) == ')') {
-                    value = value.substring(0, value.length() - 1);
-                }
+        ArrayList<Third<String, Constraint, String>> ConstraintsList = whereParser(from, tableManager, where);
 
 
-                ArrayList<Object> args = new ArrayList<Object>();
+        SelectCommand selector = new SelectCommand(from, ConstraintsList);
+        if (joinTable == null) {
+            return selector;
+        } else {
+            //SelectCommand select = new SelectCommand(from, ConstraintsList);
+            ///return new UpdateCommand(select.exec().second, nwValuesList);
+            //public JoinCommand(Iterator<HashMap<String, TableElement>> it, List<Pair<String, String>> names,  List<Third<String, Constraint, String>> constraints, String tableName) {
 
-                String beginWith = statement.substring(splitConstraint[0].length());
-                Constraint.ConstraintType curent;
-                if (beginWith.startsWith("<=")) {
-                    curent = Constraint.ConstraintType.LESS_OR_EQUAL;
-                } else if (beginWith.startsWith("<>")) {
-                    curent = Constraint.ConstraintType.NOT_EQUAL;
-                } else if (beginWith.startsWith("<")) {
-                    curent = Constraint.ConstraintType.LESS;
-                } else if (beginWith.startsWith("=")) {
-                    curent = Constraint.ConstraintType.EQUAL;
-                } else if (beginWith.startsWith(">=")) {
-                    curent = Constraint.ConstraintType.GREATER_OR_EQUAL;
-                } else if (beginWith.startsWith(">")) {
-                    curent = Constraint.ConstraintType.GREATER;
-                } else if (beginWith.startsWith("!=")) {
-                    curent = Constraint.ConstraintType.NOT_EQUAL;
-                } else {
-                    throw new IllegalArgumentException("unsupported constraint in where statement" + statement);
-                }
-                //find type
-                Type fieldType = null;
-                System.out.println("FT" + fieldTable);
-                Table currentWhereTable = tableManager.getTable(fieldTable);
-                String[] currentWhereTableNames = currentWhereTable.getNames();
-                Type[] currentWhereTableTypes = currentWhereTable.getTypes();
-                for (int columnId = 0; columnId < currentWhereTableNames.length; ++columnId) {
-                    if (currentWhereTableNames[columnId].compareTo(fieldName) == 0) {
-                        fieldType = currentWhereTableTypes[columnId];
-                    }
-                }
-                if (fieldType == null) {
-                    throw new IllegalArgumentException("not found constraint " + fieldName + " in where" + statement);
-                }
-
-                TableElement el;
-                switch (fieldType.getId()) {
-                    case Type.INT:
-                        try {
-                            int val = Integer.parseInt(value);
-                            el = new IntegerElement(val);
-                        } catch (NumberFormatException nfe) {
-                            throw new IllegalArgumentException("illegal int in where " + statement);
-                        }
-                    case Type.DOUBLE:
-                        try {
-                            double val = Double.parseDouble(value);
-                            el = new DoubleElement(val);
-                        } catch (NumberFormatException nfe) {
-                            throw new IllegalArgumentException("illegal double in where " + statement);
-                        }
-                    default:
-                        if (value.length() >= fieldType.getSize()) {
-                            throw new IllegalArgumentException("very long VARCHAR in where " + statement);
-                        }
-                        el = new VarcharElement(value, new VarcharType((byte) fieldType.getSize()));
-                }
-                ConstraintsList.add(Third.newThird(fieldName, new Constraint(curent, el), fieldTable));
-            }
+            return new JoinCommand((TableIterator)selector.exec().second, joinPars, ConstraintsList, joinTable);
         }
-        System.out.println("CONSTRAINTS");
-        for (Third<String, Constraint, String> x : ConstraintsList) {
-            System.out.print(x.first);
-            System.out.print(" ");
-            System.out.print(x.second);
-            System.out.print(" ");
-            System.out.println(x.third);
-        }
-        //ConstraintType
-        /*
-        if (where == null)
-            System.out.println("No Where");
-        else {
-            System.out.println("Where: " + where.toString());
-        }
-        */
-        if (limits == null)
-            System.out.println("No limits");
-        else
-            System.out.println("Limits: " + limits.toString());
-
-        return new SelectCommand(from, ConstraintsList);
     }
 
     public Command insertParse(String str) throws Exception {
@@ -200,7 +168,7 @@ public class Parser {
         String[] tableNames = tableStruct.getNames();
         Type[] tableTypes = tableStruct.getTypes();
 
-        ArrayList<Object> args = new ArrayList<Object>();
+        ArrayList<Object> args = new ArrayList<>();
 
         for (int i = 0; i < tableNames.length; i++) {
             boolean find = false;
@@ -335,7 +303,7 @@ public class Parser {
             if (items.length != 2) {
                 throw new Exception("Wrong column constraint in create query");
             }
-            String currentColumn = items[0].trim().toLowerCase();
+            String currentColumn = tableName + "." + items[0].trim().toLowerCase();
             boolean find = false;
 
             for (String __x : tableNamesList) {
@@ -353,8 +321,6 @@ public class Parser {
             } else {
                 orders[i] = Index.Order.DESC;
             }
-            //System.out.println(items[0].trim() + "|" + items[1].trim());
-
         }
 
 
@@ -396,6 +362,23 @@ public class Parser {
         String[] tableNames = tableStruct.getNames();
         Type[] tableTypes = tableStruct.getTypes();
 
+        ArrayList<Third<String, Constraint, String>> ConstraintsList = whereParser(from, tableManager, where);
+        /*
+        System.out.println("CONSTRAINTS");
+        for (Third<String, Constraint, String> x : ConstraintsList) {
+            System.out.print(x.first);
+            System.out.print(" ");
+            System.out.print(x.second);
+            System.out.print(" ");
+            System.out.println(x.third);
+        }
+        */
+
+        SelectCommand select = new SelectCommand(from, ConstraintsList);
+        return new DeleteCommand(select.exec().second);
+    }
+
+    public ArrayList<Third<String, Constraint, String>> whereParser(String from, TableManager tableManager, Expression where) throws Exception {
         ArrayList<Third<String, Constraint, String>> ConstraintsList = new ArrayList<>();
         if (where != null) {
             String[] whereStatements = where.toString().split("(?i) AND ");
@@ -407,24 +390,25 @@ public class Parser {
                 String fullFieldName = splitConstraint[0].replace('(', ' ').trim();
                 String[] fieldList = fullFieldName.split("\\.");
                 String fieldName, fieldTable;
-                System.out.println(fullFieldName + "{}{}" + fieldList.length);
+                //System.out.println(fullFieldName + "{}{}" + fieldList.length);
                 if (fieldList.length == 1) {
                     fieldName = from + "." + fieldList[0];
                     fieldTable = from;
                 } else if (fieldList.length == 2) {
-                    fieldTable = fieldList[0] + "." + fieldList[1];
-                    fieldName = fieldList[1];
+                    fieldTable = fieldList[0];
+                    fieldName = fieldList[0] + "." + fieldList[1];
                 } else {
                     throw new IllegalArgumentException("unknown table in where " + fullFieldName);
                 }
                 //System.out.println("! " + fieldName + "{}{}" + fieldTable);
                 String value = splitConstraint[1].trim();
-                if (value.charAt(value.length() - 1) == ')') {
-                    value = value.substring(0, value.length() - 1);
+
+                while (value.charAt(value.length() - 1) == ')') {
+                    value = value.substring(0, value.length() - 1).trim();
                 }
 
 
-                ArrayList<Object> args = new ArrayList<Object>();
+                ArrayList<Object> args = new ArrayList<>();
 
                 String beginWith = statement.substring(splitConstraint[0].length());
                 Constraint.ConstraintType curent;
@@ -447,8 +431,11 @@ public class Parser {
                 }
                 //find type
                 Type fieldType = null;
-                System.out.println("FT" + fieldTable);
+                //System.out.println("FT" + fieldTable);
                 Table currentWhereTable = tableManager.getTable(fieldTable);
+                if (currentWhereTable == null) {
+                    throw new IllegalArgumentException("unknown table " + fieldTable + " in where expression list");
+                }
                 String[] currentWhereTableNames = currentWhereTable.getNames();
                 Type[] currentWhereTableTypes = currentWhereTable.getTypes();
                 for (int columnId = 0; columnId < currentWhereTableNames.length; ++columnId) {
@@ -469,6 +456,7 @@ public class Parser {
                         } catch (NumberFormatException nfe) {
                             throw new IllegalArgumentException("illegal int in where " + statement);
                         }
+                        break;
                     case Type.DOUBLE:
                         try {
                             double val = Double.parseDouble(value);
@@ -476,7 +464,13 @@ public class Parser {
                         } catch (NumberFormatException nfe) {
                             throw new IllegalArgumentException("illegal double in where " + statement);
                         }
+                        break;
                     default:
+                        if ((value.charAt(0) != '\'') || (value.charAt(value.length() - 1) != '\'')) {
+                            throw new IllegalArgumentException("VARCHAR must be framed in quotes");
+                        }
+                        value = value.substring(1);
+                        value = value.substring(0, value.length() - 1);
                         if (value.length() >= fieldType.getSize()) {
                             throw new IllegalArgumentException("very long VARCHAR in where " + statement);
                         }
@@ -485,21 +479,17 @@ public class Parser {
                 ConstraintsList.add(Third.newThird(fieldName, new Constraint(curent, el), fieldTable));
             }
         }
-        System.out.println("CONSTRAINTS");
+        /*System.out.println("CONSTRAINTS123");
         for (Third<String, Constraint, String> x : ConstraintsList) {
             System.out.print(x.first);
             System.out.print(" ");
             System.out.print(x.second);
             System.out.print(" ");
             System.out.println(x.third);
-        }
-        //throw new IllegalArgumentException("delete parser unimplemented");
-        SelectCommand select = new SelectCommand(from, ConstraintsList);
-        return new DeleteCommand(select.exec().second);
+        }*/
+        return ConstraintsList;
     }
-
     public Command updateParser(String str) throws Exception {
-        System.out.println(str);
         Update update = (Update) parserManager.parse(new StringReader(str));
 
         String from = update.getTable().getName();
@@ -520,7 +510,6 @@ public class Parser {
 
         for (int i = 0; i < countColums; ++i) {
             Column column = ((Column) update.getColumns().get(i));
-            Boolean find = false;
             String currentColumnName = column.getColumnName();
 
             Type fieldType = null;
@@ -541,14 +530,14 @@ public class Parser {
                 case Type.INT:
                     try {
                         int val = Integer.parseInt(value);
-                        nwValuesList.put(currentColumnName, val);
+                        nwValuesList.put(from + "." + currentColumnName, val);
                     } catch (NumberFormatException nfe) {
                         throw new IllegalArgumentException("illegal int in expession list " + value);
                     }
                 case Type.DOUBLE:
                     try {
                         double val = Double.parseDouble(value);
-                        nwValuesList.put(currentColumnName, val);
+                        nwValuesList.put(from + "." + currentColumnName, val);
                     } catch (NumberFormatException nfe) {
                         throw new IllegalArgumentException("illegal int in expession list " + value);
                     }
@@ -556,101 +545,15 @@ public class Parser {
                     if (value.length() >= fieldType.getSize()) {
                         throw new IllegalArgumentException("very long VARCHAR in expession list  " + value);
                     }
-                    nwValuesList.put(currentColumnName, value);
+                    nwValuesList.put(from + "." + currentColumnName, value);
             }
 
 
         }
-
-        ArrayList<Third<String, Constraint, String>> ConstraintsList = new ArrayList<>();
-        if (where != null) {
-            String[] whereStatements = where.toString().split("(?i) AND ");
-            for (String statement : whereStatements) {
-                String[] splitConstraint = statement.split("[<=>]+", 2);
-                if (splitConstraint.length != 2) {
-                    throw new IllegalArgumentException("bad where statement " + statement);
-                }
-                String fullFieldName = splitConstraint[0].replace('(', ' ').trim();
-                String[] fieldList = fullFieldName.split("\\.");
-                String fieldName, fieldTable;
-                System.out.println(fullFieldName + "{}{}" + fieldList.length);
-                if (fieldList.length == 1) {
-                    fieldName = from + "." + fieldList[0];
-                    fieldTable = from;
-                } else if (fieldList.length == 2) {
-                    fieldTable = fieldList[0] + "." + fieldList[1];
-                    fieldName = fieldList[1];
-                } else {
-                    throw new IllegalArgumentException("unknown table in where " + fullFieldName);
-                }
-                //System.out.println("! " + fieldName + "{}{}" + fieldTable);
-                String value = splitConstraint[1].trim();
-                if (value.charAt(value.length() - 1) == ')') {
-                    value = value.substring(0, value.length() - 1);
-                }
+        ArrayList<Third<String, Constraint, String>> ConstraintsList = whereParser(from, tableManager, where);
 
 
-                ArrayList<Object> args = new ArrayList<Object>();
-
-                String beginWith = statement.substring(splitConstraint[0].length());
-                Constraint.ConstraintType curent;
-                if (beginWith.startsWith("<=")) {
-                    curent = Constraint.ConstraintType.LESS_OR_EQUAL;
-                } else if (beginWith.startsWith("<>")) {
-                    curent = Constraint.ConstraintType.NOT_EQUAL;
-                } else if (beginWith.startsWith("<")) {
-                    curent = Constraint.ConstraintType.LESS;
-                } else if (beginWith.startsWith("=")) {
-                    curent = Constraint.ConstraintType.EQUAL;
-                } else if (beginWith.startsWith(">=")) {
-                    curent = Constraint.ConstraintType.GREATER_OR_EQUAL;
-                } else if (beginWith.startsWith(">")) {
-                    curent = Constraint.ConstraintType.GREATER;
-                } else if (beginWith.startsWith("!=")) {
-                    curent = Constraint.ConstraintType.NOT_EQUAL;
-                } else {
-                    throw new IllegalArgumentException("unsupported constraint in where statement" + statement);
-                }
-                //find type
-                Type fieldType = null;
-                System.out.println("FT" + fieldTable);
-                Table currentWhereTable = tableManager.getTable(fieldTable);
-                String[] currentWhereTableNames = currentWhereTable.getNames();
-                Type[] currentWhereTableTypes = currentWhereTable.getTypes();
-                for (int columnId = 0; columnId < currentWhereTableNames.length; ++columnId) {
-                    if (currentWhereTableNames[columnId].compareTo(fieldName) == 0) {
-                        fieldType = currentWhereTableTypes[columnId];
-                    }
-                }
-                if (fieldType == null) {
-                    throw new IllegalArgumentException("not found constraint " + fieldName + " in where" + statement);
-                }
-
-                TableElement el;
-                switch (fieldType.getId()) {
-                    case Type.INT:
-                        try {
-                            int val = Integer.parseInt(value);
-                            el = new IntegerElement(val);
-                        } catch (NumberFormatException nfe) {
-                            throw new IllegalArgumentException("illegal int in where " + statement);
-                        }
-                    case Type.DOUBLE:
-                        try {
-                            double val = Double.parseDouble(value);
-                            el = new DoubleElement(val);
-                        } catch (NumberFormatException nfe) {
-                            throw new IllegalArgumentException("illegal double in where " + statement);
-                        }
-                    default:
-                        if (value.length() >= fieldType.getSize()) {
-                            throw new IllegalArgumentException("very long VARCHAR in where " + statement);
-                        }
-                        el = new VarcharElement(value, new VarcharType((byte) fieldType.getSize()));
-                }
-                ConstraintsList.add(Third.newThird(fieldName, new Constraint(curent, el), fieldTable));
-            }
-        }
+        /*
         System.out.println("CONSTRAINTS");
         for (Third<String, Constraint, String> x : ConstraintsList) {
             System.out.print(x.first);
@@ -659,31 +562,15 @@ public class Parser {
             System.out.print(" ");
             System.out.println(x.third);
         }
+        */
 
         SelectCommand select = new SelectCommand(from, ConstraintsList);
-        //return new DeleteCommand(select.exec().second);
         return new UpdateCommand(select.exec().second, nwValuesList);
-        //throw new IllegalArgumentException("unimplmented");
     }
 
     public Command getCommand(String str) throws Exception {
-        //str = "SELECT `id`, `password` FROM `table1` WHERE (`id` = '3' and `hyj`='dz')";
-        //str = "INSERT INTO table1 (number, text) VALUES ('33', 'sadfsd')";
-        //System.out.println("Parser had \"" + str + "\" on input and ignored it.");
-        //System.out.println("FullScan for table1 returned instead.");
-
         String cmd = str.substring(0, Math.min(str.length(), 6)).toLowerCase();
-
-
-        if (cmd.compareTo("insert") != 0) {
-            //str = "UPDATE table1 set col1='as', col2=?, col3=565 Where number >= 3";
-            //cmd = "update";
-        //str = "CREATE[UNIQUE] INDEX indexname ON tablename(col [ASC|DESC],[col]...) USING BTREE|HASH;"
-        //str = "CREATE UNIQUE INDEX indexname ON table1(number DESC, text ASC) USING BTREE;";
-            //str = "select * from table1 where (id > 4) and (id < 5)";
-            //cmd = "select";
-        }
-
+        affectedRows = -1;
         if (cmd.compareTo("select") == 0) {
             return selectParse(str);
         } else if (cmd.compareTo("insert") == 0) {
@@ -696,5 +583,4 @@ public class Parser {
             return updateParser(str);
         } else throw new Exception("Unsupported action");
     }
-
 }

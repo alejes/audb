@@ -1,27 +1,27 @@
 package audb;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Iterator;
-
-import audb.command.Command;
-import audb.command.CreateTableCommand;
-import audb.command.InsertCommand;
-import audb.command.UpdateCommand;
-import audb.command.DeleteCommand;
+import audb.result.*;
+import audb.command.*;
 import audb.page.PageStructure;
+import audb.parser.Parser;
+import audb.result.FullScanIterator;
+import audb.result.JoinIterator;
 import audb.table.Table;
 import audb.table.TableElement;
 import audb.table.TableManager;
 import audb.table.VarcharElement;
 import audb.type.Type;
 import audb.type.VarcharType;
-import audb.result.FullScanIterator;
+import audb.util.Pair;
+import audb.util.Third;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class PageTest extends TestCase {
     /**
@@ -185,6 +185,59 @@ public class PageTest extends TestCase {
                     System.out.println();
                 }
                 ++counter;
+            }
+
+            PageStructure.flush();
+        } catch(Exception e) {
+             e.printStackTrace();
+        }    
+    }
+
+
+    public void testJoin() {
+        //if (true)
+//            return;
+
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+        Parser parser = new Parser();
+
+        try {
+            Command command;
+            Type[] types = new Type[]{new VarcharType((byte)3), new VarcharType((byte)3)};
+            String[] names = new String[]{"a_field", "b_field"};
+
+            new CreateTableCommand("join1", types, names).exec();
+            new CreateTableCommand("join2", types, names).exec();
+
+            parser.getCommand("INSERT INTO join1 (a_field, b_field) VALUES ('00a', '001')").exec();
+            parser.getCommand("INSERT INTO join1 (a_field, b_field) VALUES ('00b', '002')").exec();
+            parser.getCommand("INSERT INTO join1 (a_field, b_field) VALUES ('01b', '002')").exec();
+            parser.getCommand("INSERT INTO join2 (a_field, b_field) VALUES ('001', '00c')").exec();
+            parser.getCommand("INSERT INTO join2 (a_field, b_field) VALUES ('002', '00d')").exec();
+
+
+            Table t1 = tableManager.getTable("join1");
+            Table t2 = tableManager.getTable("join2");
+            TableIterator it;
+            TableIterator it1;
+            List<Pair<String, String>> list;
+            list = new LinkedList();
+            list.add(Pair.newPair("join1.b_field", "join2.a_field"));
+            it1 = new FullScanIterator(t1);
+            it = new JoinIterator((TableIterator)it1, list, new LinkedList<Third<String, Constraint, String>>(), t2);
+
+            for (String name: it.getNames()) {
+                System.out.println(name);
+            }
+            while (it.hasNext()) {
+                HashMap<String, TableElement> elem = it.next();
+                for (String name : elem.keySet()) {
+                    if (elem.get(name) instanceof VarcharElement) {
+                        System.out.print(elem.get(name).toString() + " ");
+                    }
+                }
+                System.out.println();
             }
 
             PageStructure.flush();

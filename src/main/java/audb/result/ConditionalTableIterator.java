@@ -24,9 +24,11 @@ public class ConditionalTableIterator extends FullScanIterator {
 			HashMap<String, TableElement> row = super.next();
 			boolean needNext = false;
 			for (Third<String, Constraint, String> p : constraints) {
-				if (!p.second.elementSatisfies(row.get(p.first))) {
-					needNext = true;
-					break;
+				if (table.get().getTableName().compareTo(p.third) == 0) {
+					if (!p.second.elementSatisfies(row.get(p.first))) {
+						needNext = true;
+						break;
+					}
 				}
 			}
 			if (!needNext) {

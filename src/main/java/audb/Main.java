@@ -3,18 +3,11 @@ package audb;
 import audb.command.Command;
 import audb.page.PageStructure;
 import audb.parser.Parser;
-import audb.table.Table;
-import audb.table.TableElement;
+import audb.parser.Shower;
 import audb.table.TableManager;
-import audb.table.VarcharElement;
-import audb.type.Type;
-import audb.type.VarcharType;
-import audb.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Iterator;
 
 public class Main {
 
@@ -26,8 +19,8 @@ public class Main {
 
         try {
             Command command;
-            Type[] types = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
-            String[] names = new String[]{"number", "text"};
+            //Type[] types = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
+            //String[] names = new String[]{"number", "text"};
 
             String qq = "CREATE TABLE table1 (number VARCHAR (15), text VARCHAR (9))";
             command = parser.getCommand(qq);
@@ -61,39 +54,7 @@ public class Main {
             String s;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while ((s = in.readLine()) != null && s.length() != 0) {
-                try {
-                    command = parser.getCommand(s);
-                    Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
-                    if (null == exRes) {
-                        continue;
-                    }
-                    for (int tableIter = 0; tableIter < exRes.first.getNames().length; ++tableIter) {
-                        if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(exRes.first.getNames()[tableIter])) {
-                            System.out.print(String.format("%24s", exRes.first.getNames()[tableIter] + "   " + exRes.first.getTypes()[tableIter] + " |"));
-                        }
-                    }
-                    System.out.println();
-
-                    Iterator<HashMap<String, TableElement>> res = exRes.second;
-
-                    if (null == res)
-                        continue;
-
-                    while (res.hasNext()) {
-                        HashMap<String, TableElement> arr = res.next();
-                        for (String name : exRes.first.getNames()) {
-                            if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(name)) {
-                                System.out.print(String.format("%25s", arr.get(name).showString() + " |"));
-                            }
-                        }
-                        if (!arr.isEmpty()) {
-                            System.out.println();
-                        }
-                    }
-                } catch (Exception exp) {
-                    System.out.println("Error: " + exp.getMessage() + exp.toString());
-                }
-                
+                Shower.show(s);
             }
             PageStructure.flush();
         } catch(Exception e) {

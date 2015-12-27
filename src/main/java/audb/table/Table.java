@@ -63,7 +63,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
 	public Table(PageStructure ps, String name) {
 		pageStructure = ps;
-		indexList = new LinkedList<Index>();
+		indexList = new LinkedList<>();
 		tableName = name;
 	}
 
@@ -88,8 +88,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 			byte type = page.data[ptr++];
 			int nameLength = page.data[ptr++];
 			byte[] name = new byte[nameLength];
-			for(int j = 0; j < name.length; j++)
-				name[j] = page.data[ptr + j];
+			System.arraycopy(page.data, ptr + 0, name, 0, name.length);
 			ptr += name.length;
 			this.names[i] = tableName + "." + (new String(name, StandardCharsets.UTF_8));
 			this.types[i] = Type.makeType(type);
@@ -98,7 +97,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		int indexCount = page.readInteger(INDEX_COUNT);
 		for (int i = 1; i <= indexCount; ++i) {
 			Index index = new BTreeIndex(this, page.readInteger(INDEX_COUNT - i), pageStructure);
-			index.init();
+			// index.init();
 			indexList.add(index);
 			index.init();
 		}
@@ -119,8 +118,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 			page.data[ptr++] = types[i].getId();
 			byte[] name = names[i].getBytes();
 			page.data[ptr++] = (byte)name.length;
-			for(int j = 0; j < name.length; j++)
-				page.data[ptr + j] = name[j];
+			System.arraycopy(name, 0, page.data, ptr + 0, name.length);
 			ptr += name.length;
 		}
 
@@ -206,14 +204,14 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 	public HashMap<String, TableElement> read(Page page, int offset) {
 		int ptr = offset * recordSize;
 		TableLine objects = new TableLine(tableName, page.getPageNumber(), offset);
-		if (page.data[ptr + recordSize - 1] != 0)
-			return objects;
 		for(int i = 0; i < types.length; i++) {
 			byte[] data = new byte[types[i].getSize()];
 			System.arraycopy(page.data, ptr, data, 0, types[i].getSize());
 			objects.put(names[i], types[i].fromBytes(data));
 			ptr += types[i].getSize();
 		}
+		if (page.data[offset * recordSize + recordSize - 1] != 0)
+			objects.setDeleted();
 		return objects;
 	}
 
@@ -293,6 +291,16 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		} else {
 			return new ConditionalTableIterator(this, constrs);
 		}
+	}
+
+
+	public String getTableName() {
+		return tableName;
+	}
+
+	@Override
+	public String toString() {
+		return "Table " + tableName;
 	}
 
 }
