@@ -1,12 +1,13 @@
 package audb.command;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
+import audb.parser.Parser;
 import audb.table.Table;
 import audb.table.TableElement;
-import audb.util.Pair;
 import audb.table.TableLine;
+import audb.util.Pair;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 
 public class UpdateCommand extends Command {
@@ -21,21 +22,22 @@ public class UpdateCommand extends Command {
     }
 
     public Pair<Table, Iterator<HashMap<String, TableElement>>> exec() throws Exception {
-
+        int affectedRows = 0;
         while (iterator.hasNext()) {
             TableLine curr = (TableLine)iterator.next();
             String tableName = curr.getTableName();
             
             if(!tableManager.hasTable(tableName))
-                throw new Exception("No such table.");
+                throw new Exception("No such table " + tableName + ".");
             Table table = tableManager.getTable(tableName);
             String[] names = table.getNames();
             Object[] newValues = new Object[names.length];
             for (int i = 0; i < names.length; ++i)
                 newValues[i] = values.containsKey(names[i]) ? values.get(names[i]) : null;
             table.write(curr.getPageNumber(), curr.getOffset(), newValues);
+            ++affectedRows;
         }
-        
+        Parser.affectedRows = affectedRows;
 
         return null;
     }

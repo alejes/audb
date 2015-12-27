@@ -32,6 +32,7 @@ import java.util.List;
 
 public class Parser {
     public static HashSet<String> selectList;
+    public static int affectedRows;
     private static CCJSqlParserManager parserManager = new CCJSqlParserManager();
 
     public Command selectParse(String str) throws Exception {
@@ -146,7 +147,7 @@ public class Parser {
                 String fullFieldName = splitConstraint[0].replace('(', ' ').trim();
                 String[] fieldList = fullFieldName.split("\\.");
                 String fieldName, fieldTable;
-                System.out.println(fullFieldName + "{}{}" + fieldList.length);
+                //System.out.println(fullFieldName + "{}{}" + fieldList.length);
                 if (fieldList.length == 1) {
                     fieldName = from + "." + fieldList[0];
                     fieldTable = from;
@@ -186,7 +187,7 @@ public class Parser {
                 }
                 //find type
                 Type fieldType = null;
-                System.out.println("FT" + fieldTable);
+                //System.out.println("FT" + fieldTable);
                 Table currentWhereTable = tableManager.getTable(fieldTable);
                 String[] currentWhereTableNames = currentWhereTable.getNames();
                 Type[] currentWhereTableTypes = currentWhereTable.getTypes();
@@ -460,7 +461,7 @@ public class Parser {
                 String fullFieldName = splitConstraint[0].replace('(', ' ').trim();
                 String[] fieldList = fullFieldName.split("\\.");
                 String fieldName, fieldTable;
-                System.out.println(fullFieldName + "{}{}" + fieldList.length);
+                //System.out.println(fullFieldName + "{}{}" + fieldList.length);
                 if (fieldList.length == 1) {
                     fieldName = from + "." + fieldList[0];
                     fieldTable = from;
@@ -500,7 +501,7 @@ public class Parser {
                 }
                 //find type
                 Type fieldType = null;
-                System.out.println("FT" + fieldTable);
+                //System.out.println("FT" + fieldTable);
                 Table currentWhereTable = tableManager.getTable(fieldTable);
                 String[] currentWhereTableNames = currentWhereTable.getNames();
                 Type[] currentWhereTableTypes = currentWhereTable.getTypes();
@@ -538,6 +539,7 @@ public class Parser {
                 ConstraintsList.add(Third.newThird(fieldName, new Constraint(curent, el), fieldTable));
             }
         }
+        /*
         System.out.println("CONSTRAINTS");
         for (Third<String, Constraint, String> x : ConstraintsList) {
             System.out.print(x.first);
@@ -546,6 +548,7 @@ public class Parser {
             System.out.print(" ");
             System.out.println(x.third);
         }
+        */
 
         SelectCommand select = new SelectCommand(from, ConstraintsList);
         return new DeleteCommand(select.exec().second);
@@ -625,7 +628,7 @@ public class Parser {
                 String fullFieldName = splitConstraint[0].replace('(', ' ').trim();
                 String[] fieldList = fullFieldName.split("\\.");
                 String fieldName, fieldTable;
-                System.out.println(fullFieldName + "{}{}" + fieldList.length);
+                //System.out.println(fullFieldName + "{}{}" + fieldList.length);
                 if (fieldList.length == 1) {
                     fieldName = from + "." + fieldList[0];
                     fieldTable = from;
@@ -665,7 +668,7 @@ public class Parser {
                 }
                 //find type
                 Type fieldType = null;
-                System.out.println("FT" + fieldTable);
+                //System.out.println("FT" + fieldTable);
                 Table currentWhereTable = tableManager.getTable(fieldTable);
                 String[] currentWhereTableNames = currentWhereTable.getNames();
                 Type[] currentWhereTableTypes = currentWhereTable.getTypes();
@@ -703,6 +706,7 @@ public class Parser {
                 ConstraintsList.add(Third.newThird(fieldName, new Constraint(curent, el), fieldTable));
             }
         }
+        /*
         System.out.println("CONSTRAINTS");
         for (Third<String, Constraint, String> x : ConstraintsList) {
             System.out.print(x.first);
@@ -711,6 +715,7 @@ public class Parser {
             System.out.print(" ");
             System.out.println(x.third);
         }
+        */
 
         SelectCommand select = new SelectCommand(from, ConstraintsList);
         return new UpdateCommand(select.exec().second, nwValuesList);
@@ -718,7 +723,7 @@ public class Parser {
 
     public Command getCommand(String str) throws Exception {
         String cmd = str.substring(0, Math.min(str.length(), 6)).toLowerCase();
-
+        affectedRows = -1;
         if (cmd.compareTo("select") == 0) {
             return selectParse(str);
         } else if (cmd.compareTo("insert") == 0) {

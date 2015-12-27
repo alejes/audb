@@ -1,12 +1,13 @@
 package audb.command;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
+import audb.parser.Parser;
 import audb.table.Table;
 import audb.table.TableElement;
-import audb.util.Pair;
 import audb.table.TableLine;
+import audb.util.Pair;
+
+import java.util.HashMap;
+import java.util.Iterator;
 
 
 public class DeleteCommand extends Command {
@@ -18,7 +19,7 @@ public class DeleteCommand extends Command {
     }
 
     public Pair<Table, Iterator<HashMap<String, TableElement>>> exec() throws Exception {
-
+        int affectedRows = 0;
         while (iterator.hasNext()) {
             TableLine curr = (TableLine)iterator.next();
             String tableName = curr.getTableName();
@@ -28,8 +29,9 @@ public class DeleteCommand extends Command {
             Table table = tableManager.getTable(tableName);
             String[] names = table.getNames();
             table.delete(curr.getPageNumber(), curr.getOffset());
+            ++affectedRows;
         }
-        
+        Parser.affectedRows = affectedRows;
 
         return null;
     }
