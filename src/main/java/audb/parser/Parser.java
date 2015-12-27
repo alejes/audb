@@ -109,8 +109,8 @@ public class Parser {
                         break;
                     }
                 }
-                if (columnJoinId < 0) {
-                    throw new IllegalArgumentException("Not found join column " + leftColumnJoin + " in table" + joinTable);
+                if (columnOriginalId < 0) {
+                    throw new IllegalArgumentException("Not found join column " + leftColumnJoin + " in table" + from);
                 }
                 if (joinTableTypes[columnJoinId].getId() != tableTypes[columnOriginalId].getId()) {
                     throw new IllegalArgumentException("can't solve mismatch join column types " + leftColumnJoin + " [" + tableTypes[columnOriginalId] + "] with " + rightColumnJoin + " [" + joinTableTypes[columnJoinId] + "]");
