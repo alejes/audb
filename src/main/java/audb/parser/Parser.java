@@ -512,14 +512,14 @@ public class Parser {
                 case Type.INT:
                     try {
                         int val = Integer.parseInt(value);
-                        nwValuesList.put(currentColumnName, val);
+                        nwValuesList.put(from + "." + currentColumnName, val);
                     } catch (NumberFormatException nfe) {
                         throw new IllegalArgumentException("illegal int in expession list " + value);
                     }
                 case Type.DOUBLE:
                     try {
                         double val = Double.parseDouble(value);
-                        nwValuesList.put(currentColumnName, val);
+                        nwValuesList.put(from + "." + currentColumnName, val);
                     } catch (NumberFormatException nfe) {
                         throw new IllegalArgumentException("illegal int in expession list " + value);
                     }
@@ -527,7 +527,7 @@ public class Parser {
                     if (value.length() >= fieldType.getSize()) {
                         throw new IllegalArgumentException("very long VARCHAR in expession list  " + value);
                     }
-                    nwValuesList.put(currentColumnName, value);
+                    nwValuesList.put(from + "." + currentColumnName, value);
             }
 
 

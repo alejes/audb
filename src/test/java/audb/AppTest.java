@@ -186,7 +186,7 @@ public class AppTest
             */
             System.out.println(arr.get("simplupdtest.text").toString());
 
-            assertTrue(arr.get("simplupdtest.text").toString().compareTo("88888") == 0);
+            assertTrue(arr.get("simplupdtest.text").showString().compareTo("88888") == 0);
             System.out.println();
         }
         PageStructure.flush();
