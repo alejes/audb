@@ -68,6 +68,10 @@ public class Page {
         return bytesToInt(bytes);
     }
     
+    public byte readByte(int offset) {
+        return data[offset];
+    }
+    
     public void writeInteger(int offset, int value) {
     	byte[] bytes = intToBytes(value);
     	System.arraycopy(bytes, 0, data, offset, bytes.length);

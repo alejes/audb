@@ -24,18 +24,19 @@ public abstract class BTreeNode {
 	final int pageNumber;
 	NodeReader nodeReader;
 	List<IndexKeyInstance> keys;
-	
+
 	protected BTreeNode(int fanout, NodeReader nr, int pageNumber, List<IndexKeyInstance> keys) {
 		this(fanout, nr, pageNumber);
 		this.keys = keys == null ? new ArrayList<IndexKeyInstance>(maxKeysNumber) : keys;
 	}
-	
+
 	private BTreeNode(int fanout, NodeReader nr, int pageNumber) {
 		this.fanout = fanout;
 		maxKeysNumber = fanout - 1;
 		minChildrenNumber = (fanout + 1) / 2;
 		this.nodeReader = nr;
 		this.pageNumber = pageNumber == -1 ? (int)nr.getPageStructure().getEmptyPage() : pageNumber;
+		assert(this.pageNumber != 0);
 	}
 
 	public BTreeNode(int fanout, NodeReader nr, BTreeNode child1, BTreeNode child2) {
@@ -59,7 +60,7 @@ public abstract class BTreeNode {
 	// TODO binary search is a must here
 	protected int findChildIndex(IndexKeyInstance key, int maxIndex) {
 		int result = maxIndex;
-		
+
 		if (null == key) {
 			return 0;
 		}
@@ -72,8 +73,8 @@ public abstract class BTreeNode {
 
 		return result;
 	}
-	
-	
+
+
 	int getMyPage() {
 		return pageNumber;
 	}
@@ -85,15 +86,19 @@ public abstract class BTreeNode {
 		pw.writeByte(getMyType());
 		pw.writeInteger(keys.size());
 
-		int elementsInKey = keys.get(0).elements.length; // TODO check
-		for (int i = 0; i < keys.size(); i++) {
-			for (int j = 0; j < elementsInKey; j++) {
-				pw.writeData(keys.get(i).elements[j].toBytes());
+
+		if (keys.size() > 0) {
+			int elementsInKey = keys.get(0).elements.length; // TODO check
+
+			for (int i = 0; i < keys.size(); i++) {
+				for (int j = 0; j < elementsInKey; j++) {
+					pw.writeData(keys.get(i).elements[j].toBytes());
+				}
 			}
 		}
 		return pw;
 	}
-	
+
 	protected abstract int getChildrenNumber();
 	protected abstract IndexKeyInstance getMaxKey();
 	protected abstract byte getMyType();

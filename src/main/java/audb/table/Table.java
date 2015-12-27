@@ -173,10 +173,6 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
 	public void write(int pageNum, int offset, Object[] objects) throws Exception {
 		Page page = pageStructure.getPage(pageNum);
-		// if (page.data[offset * recordSize + recordSize - 1] != 0 && 
-		// 	page.readInteger(COUNT_OF_RECORDS) >= offset)
-		// 	return;
-
 		int ptr = offset * recordSize;
 		for(int i = 0; i < types.length; i++) {
 			if (objects[i] == null) {
@@ -266,6 +262,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		index.create(indexNames, orders);
 
 		Page page = pageStructure.getPage(INFO_PAGE);
+		page.write();
 		int indexCount = page.readInteger(INDEX_COUNT) + 1;
 		page.writeInteger(INDEX_COUNT, indexCount);
 		page.writeInteger(INDEX_COUNT - indexCount * Integer.BYTES, emptyPage);

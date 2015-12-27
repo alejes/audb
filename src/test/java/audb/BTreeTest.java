@@ -190,12 +190,12 @@ public class BTreeTest extends TestCase {
 		Table t = tableManager.getTable(tableName);
 		Order[] orders = new Order[indexSize];
 		String[] indexNames = new String[indexSize];
-		indexNames[0] = names[0];
-		indexNames[1] = names[1];
+		indexNames[0] = tableName + "." + names[0];
+		indexNames[1] = tableName + "." + names[1];
 		orders[0] = Order.ASC;
 		orders[1] = Order.ASC;
-		
-		
+						
+		t.addBTreeIndex(indexNames, orders);
 		// insert values
 		for(int i = 0; i < 150000; i++) {
 			Integer id = i;
