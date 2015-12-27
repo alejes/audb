@@ -6,7 +6,6 @@ import audb.parser.Parser;
 import audb.table.Table;
 import audb.table.TableElement;
 import audb.table.TableManager;
-import audb.table.VarcharElement;
 import audb.type.Type;
 import audb.type.VarcharType;
 import audb.util.Pair;
@@ -65,6 +64,11 @@ public class Main {
                     command = parser.getCommand(s);
                     Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
                     if (null == exRes) {
+                        if (Parser.affectedRows >= 0) {
+                            System.out.println("OK " + Parser.affectedRows + " rows affected");
+                        } else {
+                            System.out.println("OK");
+                        }
                         continue;
                     }
                     for (int tableIter = 0; tableIter < exRes.first.getNames().length; ++tableIter) {
@@ -76,8 +80,9 @@ public class Main {
 
                     Iterator<HashMap<String, TableElement>> res = exRes.second;
 
-                    if (null == res)
+                    if (null == res) {
                         continue;
+                    }
 
                     while (res.hasNext()) {
                         HashMap<String, TableElement> arr = res.next();
