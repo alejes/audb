@@ -11,9 +11,6 @@ import audb.util.Pair;
 import java.util.HashMap;
 import java.util.Iterator;
 
-/**
- * Created by Alexey on 27.12.2015.
- */
 public class Shower {
     private static Parser parser = new Parser();
     private static Command command;
