@@ -49,7 +49,7 @@ public class BTreeTest extends TestCase {
 		Table t = tableManager.getTable(tableName);
 		Order[] orders = new Order[1];
 		String[] indexNames = new String[1];
-		indexNames[0] = names[0];
+		indexNames[0] = tableName + "." + names[0];
 		orders[0] = Order.ASC;
 		t.addBTreeIndex(indexNames, orders);
 		} catch (Exception e) {
@@ -84,7 +84,7 @@ public class BTreeTest extends TestCase {
 		Table t = tableManager.getTable(tableName);
 		Order[] orders = new Order[1];
 		String[] indexNames = new String[1];
-		indexNames[0] = names[0];
+		indexNames[0] = tableName + "." + names[0];
 		orders[0] = Order.ASC;
 		t.addBTreeIndex(indexNames, orders);
 	}
@@ -114,7 +114,7 @@ public class BTreeTest extends TestCase {
 		Table t = tableManager.getTable(tableName);
 		Order[] orders = new Order[1];
 		String[] indexNames = new String[1];
-		indexNames[0] = names[0];
+		indexNames[0] = tableName + "." + names[0];
 		orders[0] = Order.ASC;
 		t.addBTreeIndex(indexNames, orders);
 
@@ -131,7 +131,7 @@ public class BTreeTest extends TestCase {
 		assertEquals(15, size);
 	
 		System.out.println(" ");
-		constrs.add(Third.newThird("number", new Constraint(ConstraintType.GREATER,
+		constrs.add(Third.newThird(tableName + "." + "number", new Constraint(ConstraintType.GREATER,
 				new VarcharElement("002", (VarcharType) types[0])), tableName));
 		sc = new SelectCommand(tableName, constrs);
 		result = sc.exec();
@@ -144,7 +144,7 @@ public class BTreeTest extends TestCase {
 		assertEquals(size, 12);
 		
 		System.out.println(" ");
-		constrs.add(Third.newThird("number", new Constraint(ConstraintType.GREATER,
+		constrs.add(Third.newThird(tableName + "." + "number", new Constraint(ConstraintType.GREATER,
 				new VarcharElement("001", (VarcharType) types[0])), tableName));
 		sc = new SelectCommand(tableName, constrs);
 		result = sc.exec();
@@ -157,7 +157,7 @@ public class BTreeTest extends TestCase {
 		assertEquals(12, size);
 		
 		System.out.println(" ");
-		constrs.add(Third.newThird("number", new Constraint(ConstraintType.GREATER,
+		constrs.add(Third.newThird(tableName + "." + "number", new Constraint(ConstraintType.GREATER,
 				new VarcharElement("005", (VarcharType) types[0])),tableName));
 		sc = new SelectCommand(tableName, constrs);
 		result = sc.exec();
@@ -167,7 +167,7 @@ public class BTreeTest extends TestCase {
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
-			System.out.println(row.get("number"));
+			System.out.println(row.get(tableName + "." + "number"));
 		}
 		
 		assertEquals(9, size);
@@ -210,7 +210,7 @@ public class BTreeTest extends TestCase {
 
 		List<Third<String, Constraint, String>> constrs = new ArrayList<>();
 
-		constrs.add(Third.newThird("number", new Constraint(ConstraintType.GREATER,
+		constrs.add(Third.newThird(tableName + "." + "number", new Constraint(ConstraintType.GREATER,
 				new VarcharElement("002", (VarcharType) types[1])), tableName));
 		
 		SelectCommand sc = new SelectCommand(tableName, constrs);
@@ -225,7 +225,7 @@ public class BTreeTest extends TestCase {
 		assertEquals(145500, size);
 	
 		long t1 = System.currentTimeMillis();
-		constrs.add(Third.newThird("id", new Constraint(ConstraintType.LESS,
+		constrs.add(Third.newThird(tableName + "." + "id", new Constraint(ConstraintType.LESS,
 				new IntegerElement(10, types[0])), tableName));
 		System.out.println(" ");
 		sc = new SelectCommand(tableName, constrs);
@@ -238,7 +238,7 @@ public class BTreeTest extends TestCase {
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
-			System.out.println(row.get("number"));
+			System.out.println(row.get(tableName + "." + "number"));
 		}
 		long t2 = System.currentTimeMillis();
 		System.out.println("Time passed " + Long.toString(t2 - t1));
@@ -270,9 +270,9 @@ public class BTreeTest extends TestCase {
 
 		List<Third<String, Constraint, String>> constrs = new ArrayList<>();
 
-		constrs.add(Third.newThird("number", new Constraint(ConstraintType.LESS,
+		constrs.add(Third.newThird(tableName + "." + "number", new Constraint(ConstraintType.LESS,
 				new VarcharElement("002", (VarcharType) types[1])), tableName));
-		constrs.add(Third.newThird("number", new Constraint(ConstraintType.GREATER_OR_EQUAL,
+		constrs.add(Third.newThird(tableName + "." + "number", new Constraint(ConstraintType.GREATER_OR_EQUAL,
 				new VarcharElement("001", (VarcharType) types[1])), tableName));
 		SelectCommand sc = new SelectCommand(tableName, constrs);
 		Pair<Table, Iterator<HashMap<String, TableElement>>> result = sc.exec();
@@ -281,7 +281,7 @@ public class BTreeTest extends TestCase {
 		while (iter.hasNext()) {
 			size++;
 			HashMap<String, TableElement> row = iter.next();
-			System.out.println(row.get("number"));
+			System.out.println(row.get(tableName + "." + "number"));
 		}
 		assertEquals(1, size);
 	}
