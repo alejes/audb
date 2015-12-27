@@ -23,7 +23,8 @@ public class DeleteCommand extends Command {
         while (iterator.hasNext()) {
             TableLine curr = (TableLine)iterator.next();
             String tableName = curr.getTableName();
-            
+            if (curr.isDeleted())
+                continue;
             if(!tableManager.hasTable(tableName))
                 throw new Exception("No such table.");
             Table table = tableManager.getTable(tableName);
