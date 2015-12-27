@@ -2,6 +2,7 @@ package audb.result;
 
 import audb.command.Constraint;
 import audb.table.Table;
+import audb.table.TableLine;
 import audb.table.TableElement;
 import audb.type.Type;
 import audb.util.Pair;
@@ -80,7 +81,8 @@ public class JoinIterator implements TableIterator {
             }
             secondIterator = new ConditionalTableIterator(table.get(), ll);
         }
-        HashMap<String, TableElement> res = new HashMap<>(currentElement);
+        TableLine res = new TableLine("", 0, 0);
+        res.putAll(currentElement);
         res.putAll(secondIterator.next());
         return res;
     }
