@@ -53,27 +53,41 @@ public class AppTest
         assertTrue(a.compareTo(b) < 0);
     }
 
+    public void testBigTestFor4M() throws Exception {
+        assertTrue(true);
+        Parser parser = new Parser();
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+
+        parser.getCommand("CREATE TABLE tableload4m (number VARCHAR (15), text VARCHAR (9))").exec();
+
+
+        for (int i = 0; i < 100_000_0; i++) {
+            parser.getCommand(String.format("INSERT INTO tableload4m (number, text) VALUES ('%09d', 'sadfsd')", i)).exec();
+            if (i % 10000 == 25) {
+                System.out.println("Insert " + i + " items");
+            }
+        }
+
+        PageStructure.flush();
+    }
+
     public void testAddIndex() throws Exception {
         assertTrue(true);
         Parser parser = new Parser();
         TableManager tableManager = new TableManager();
         Command.setTableManager(tableManager);
 
-        Command command;
-        String q;
-        String qq = "CREATE TABLE table12 (number VARCHAR (15), text VARCHAR (9))";
-        command = parser.getCommand(qq);
-        command.exec();
+
+        parser.getCommand("CREATE TABLE table12 (number VARCHAR (15), text VARCHAR (9))").exec();
 
 
-        for (int i = 0; i < 10_000_0; i++) {
-            command = parser.getCommand(String.format("INSERT INTO table12 (number, text) VALUES ('%03d', 'sadfsd')", i));
-            command.exec();
+        for (int i = 0; i < 10; i++) {
+            parser.getCommand(String.format("INSERT INTO table12 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
         }
-        q = "CREATE UNIQUE INDEX indexname ON table12 (number DESC, text ASC) USING BTREE;";
 
-        command = parser.getCommand(q);
-        command.exec();
+        parser.getCommand("CREATE UNIQUE INDEX indexname ON table12 (number DESC, text ASC) USING BTREE;").exec();
 
         PageStructure.flush();
     }
