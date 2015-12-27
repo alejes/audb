@@ -176,7 +176,7 @@ public class Parser {
         String[] tableNames = tableStruct.getNames();
         Type[] tableTypes = tableStruct.getTypes();
 
-        ArrayList<Object> args = new ArrayList<Object>();
+        ArrayList<Object> args = new ArrayList<>();
 
         for (int i = 0; i < tableNames.length; i++) {
             boolean find = false;
@@ -403,8 +403,8 @@ public class Parser {
                     fieldName = from + "." + fieldList[0];
                     fieldTable = from;
                 } else if (fieldList.length == 2) {
-                    fieldTable = fieldList[0] + "." + fieldList[1];
-                    fieldName = fieldList[1];
+                    fieldTable = fieldList[0];
+                    fieldName = fieldList[0] + "." + fieldList[1];
                 } else {
                     throw new IllegalArgumentException("unknown table in where " + fullFieldName);
                 }
@@ -415,7 +415,7 @@ public class Parser {
                 }
 
 
-                ArrayList<Object> args = new ArrayList<Object>();
+                ArrayList<Object> args = new ArrayList<>();
 
                 String beginWith = statement.substring(splitConstraint[0].length());
                 Constraint.ConstraintType curent;
@@ -440,6 +440,9 @@ public class Parser {
                 Type fieldType = null;
                 //System.out.println("FT" + fieldTable);
                 Table currentWhereTable = tableManager.getTable(fieldTable);
+                if (currentWhereTable == null) {
+                    throw new IllegalArgumentException("unknown table " + fieldTable + " in where expression list");
+                }
                 String[] currentWhereTableNames = currentWhereTable.getNames();
                 Type[] currentWhereTableTypes = currentWhereTable.getTypes();
                 for (int columnId = 0; columnId < currentWhereTableNames.length; ++columnId) {

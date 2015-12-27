@@ -262,7 +262,7 @@ public class AppTest
         //assert (t != null);
 
 
-        Shower.show_exsept("SELECT * FROM table3 JOIN table2 ON table3.number = table2.number");
+        Shower.show_exsept("SELECT * FROM table3 JOIN table2 ON table3.number = table2.number WHERE ((table2.number < 010) and (table3.number >= 007))");
 
         PageStructure.flush();
 
