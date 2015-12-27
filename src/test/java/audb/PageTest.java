@@ -1,26 +1,26 @@
 package audb;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.LinkedList;
-
 import audb.command.*;
-import audb.util.*;
-import audb.result.*;
 import audb.page.PageStructure;
+import audb.parser.Parser;
+import audb.result.FullScanIterator;
+import audb.result.JoinIterator;
 import audb.table.Table;
 import audb.table.TableElement;
 import audb.table.TableManager;
 import audb.table.VarcharElement;
 import audb.type.Type;
 import audb.type.VarcharType;
+import audb.util.Pair;
+import audb.util.Third;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class PageTest extends TestCase {
     /**
@@ -194,55 +194,27 @@ public class PageTest extends TestCase {
 
 
     public void testJoin() {
-        if (true)
-            return;
+        //if (true)
+//            return;
 
         TableManager tableManager = new TableManager();
         Command.setTableManager(tableManager);
+        Parser parser = new Parser();
 
         try {
             Command command;
             Type[] types = new Type[]{new VarcharType((byte)3), new VarcharType((byte)3)};
             String[] names = new String[]{"a_field", "b_field"};
 
-            command = new CreateTableCommand("join1", types, names);
-            command.exec();
-            command = new CreateTableCommand("join2", types, names);
-            command.exec();
+            new CreateTableCommand("join1", types, names).exec();
+            new CreateTableCommand("join2", types, names).exec();
 
-            String s1;
-            String s2;
-            Object arr[];
+            parser.getCommand("INSERT INTO join1 (a_field, b_field) VALUES ('00a', '001')").exec();
+            parser.getCommand("INSERT INTO join1 (a_field, b_field) VALUES ('00b', '002')").exec();
+            parser.getCommand("INSERT INTO join1 (a_field, b_field) VALUES ('01b', '002')").exec();
+            parser.getCommand("INSERT INTO join2 (a_field, b_field) VALUES ('001', '00c')").exec();
+            parser.getCommand("INSERT INTO join2 (a_field, b_field) VALUES ('002', '00d')").exec();
 
-            s1 = "00a";
-            s2 = "001";
-            arr = new Object[]{s1, s2};
-            command = new InsertCommand("join1", arr);
-            command.exec();
-
-            s1 = "00b";
-            s2 = "002";
-            arr = new Object[]{s1, s2};
-            command = new InsertCommand("join1", arr);
-            command.exec();
-
-            s1 = "01b";
-            s2 = "002";
-            arr = new Object[]{s1, s2};
-            command = new InsertCommand("join1", arr);
-            command.exec();
-
-            s1 = "001";
-            s2 = "00c";
-            arr = new Object[]{s1, s2};
-            command = new InsertCommand("join2", arr);
-            command.exec();
-
-            s1 = "002";
-            s2 = "00d";
-            arr = new Object[]{s1, s2};
-            command = new InsertCommand("join2", arr);
-            command.exec();
 
             Table t1 = tableManager.getTable("join1");
             Table t2 = tableManager.getTable("join2");
