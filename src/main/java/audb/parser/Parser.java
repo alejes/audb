@@ -54,17 +54,70 @@ public class Parser {
         if (tableStruct == null) {
             throw new IllegalArgumentException("unknown table " + from);
         }
+
+        String[] tableNames = tableStruct.getNames();
+        Type[] tableTypes = tableStruct.getTypes();
+
         List fromJoin = plainSelect.getJoins();
 
         String leftColumnJoin = null;
         String rightColumnJoin = null;
+        String joinTable = null;
+        Table joinTableStruct = null;
+        String[] joinTableNames = null;
+        Type[] joinTableTypes = null;
         if (fromJoin != null) {
             if (fromJoin.size() >= 0) {
+                joinTable = (((Join) fromJoin.get(0)).getRightItem()).toString();
+                joinTableStruct = tableManager.getTable(joinTable);
+                if (joinTableStruct == null) {
+                    throw new IllegalArgumentException("unknown table in join " + joinTable);
+                }
+                joinTableNames = joinTableStruct.getNames();
+                joinTableTypes = joinTableStruct.getTypes();
                 //System.out.println(((Join) fromJoin.get(0)).getOnExpression().toString());
                 leftColumnJoin = ((Column) ((EqualsTo) ((Join) fromJoin.get(0)).getOnExpression()).getLeftExpression()).getWholeColumnName();
+                if (!leftColumnJoin.contains(".")) {
+                    leftColumnJoin = from + "." + leftColumnJoin;
+                }
                 rightColumnJoin = ((Column) ((EqualsTo) ((Join) fromJoin.get(0)).getOnExpression()).getRightExpression()).getWholeColumnName();
-                System.out.println(leftColumnJoin);
-                System.out.println(rightColumnJoin);
+                if (!rightColumnJoin.contains(".")) {
+                    rightColumnJoin = from + "." + rightColumnJoin;
+                }
+                if (!leftColumnJoin.startsWith(from + ".")) {
+                    String swp = leftColumnJoin;
+                    leftColumnJoin = rightColumnJoin;
+                    rightColumnJoin = swp;
+                }
+                if (!rightColumnJoin.startsWith(joinTable + ".")) {
+                    throw new IllegalArgumentException("left and right join expression link to one table and no one to " + joinTable);
+                }
+                int columnJoinId = -1;
+                for (int i = 0; i < joinTableNames.length; i++) {
+                    if (joinTableNames[i].compareTo(rightColumnJoin) == 0) {
+                        columnJoinId = i;
+                        break;
+                    }
+                }
+                if (columnJoinId < 0) {
+                    throw new IllegalArgumentException("Not found join column " + leftColumnJoin + " in table" + joinTable);
+                }
+                int columnOriginalId = -1;
+                for (int i = 0; i < tableNames.length; i++) {
+                    if (tableNames[i].compareTo(leftColumnJoin) == 0) {
+                        columnOriginalId = i;
+                        break;
+                    }
+                }
+                if (columnJoinId < 0) {
+                    throw new IllegalArgumentException("Not found join column " + leftColumnJoin + " in table" + joinTable);
+                }
+                if (joinTableTypes[columnJoinId].getId() != tableTypes[columnOriginalId].getId()) {
+                    throw new IllegalArgumentException("can't solve mismatch join column types " + leftColumnJoin + " [" + tableTypes[columnOriginalId] + "] with " + rightColumnJoin + " [" + joinTableTypes[columnJoinId] + "]");
+                }
+
+                //System.out.println(leftColumnJoin);
+                //System.out.println(rightColumnJoin);
             }
         }
 
@@ -84,8 +137,6 @@ public class Parser {
             //System.out.print(x.toString() + "|");
         }
         System.out.println();
-        String[] tableNames = tableStruct.getNames();
-        Type[] tableTypes = tableStruct.getTypes();
 
         ArrayList<Third<String, Constraint, String>> ConstraintsList = new ArrayList<>();
         if (where != null) {
