@@ -236,13 +236,13 @@ public class AppTest
         Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
         Iterator<HashMap<String, TableElement>> res = exRes.second;
 
-      /*  while (res.hasNext()) {
+        while (res.hasNext()) {
             HashMap<String, TableElement> arr = res.next();
             for (String name : arr.keySet()) {
                 System.out.print(arr.get(name).toString() + " ");
             }
             System.out.println();
-        }*/
+        }
 
         PageStructure.flush();
 

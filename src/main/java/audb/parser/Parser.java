@@ -150,16 +150,6 @@ public class Parser {
             System.out.println(x.third);
         }
 
-        System.out.println("JOIN");
-        for (Pair<String, String> __x : joinPars) {
-            System.out.println("F " + __x.first + "; " + __x.second);
-        }
-
-        if (limits == null)
-            System.out.println("No limits");
-        else
-            System.out.println("Limits: " + limits.toString());
-
         SelectCommand selector = new SelectCommand(from, ConstraintsList);
         if (joinTable == null) {
             return selector;
@@ -470,6 +460,7 @@ public class Parser {
                         } catch (NumberFormatException nfe) {
                             throw new IllegalArgumentException("illegal int in where " + statement);
                         }
+                        break;
                     case Type.DOUBLE:
                         try {
                             double val = Double.parseDouble(value);
@@ -477,12 +468,14 @@ public class Parser {
                         } catch (NumberFormatException nfe) {
                             throw new IllegalArgumentException("illegal double in where " + statement);
                         }
+                        break;
                     default:
                         if (value.length() >= fieldType.getSize()) {
                             throw new IllegalArgumentException("very long VARCHAR in where " + statement);
                         }
                         el = new VarcharElement(value, new VarcharType((byte) fieldType.getSize()));
                 }
+
                 ConstraintsList.add(Third.newThird(fieldName, new Constraint(curent, el), fieldTable));
             }
         }
