@@ -25,6 +25,8 @@ public class UpdateCommand extends Command {
         int affectedRows = 0;
         while (iterator.hasNext()) {
             TableLine curr = (TableLine)iterator.next();
+            if (curr.isDeleted())
+                continue;
             String tableName = curr.getTableName();
             
             if(!tableManager.hasTable(tableName))
