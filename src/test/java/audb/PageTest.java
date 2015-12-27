@@ -219,15 +219,17 @@ public class PageTest extends TestCase {
 
             Table t1 = tableManager.getTable("join1");
             Table t2 = tableManager.getTable("join2");
-            Iterator<HashMap<String, TableElement>> it;
-            Iterator<HashMap<String, TableElement>> it1;
+            TableIterator it;
+            TableIterator it1;
             List<Pair<String, String>> list;
             list = new LinkedList();
             list.add(Pair.newPair("join1.b_field", "join2.a_field"));
             it1 = new FullScanIterator(t1);
             it = new JoinIterator((TableIterator)it1, list, new LinkedList<Third<String, Constraint, String>>(), t2);
 
-            
+            for (String name: it.getNames()) {
+                System.out.println(name);
+            }
             while (it.hasNext()) {
                 HashMap<String, TableElement> elem = it.next();
                 for (String name : elem.keySet()) {
