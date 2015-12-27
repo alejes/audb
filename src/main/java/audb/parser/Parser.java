@@ -141,7 +141,7 @@ public class Parser {
 
         ArrayList<Third<String, Constraint, String>> ConstraintsList = whereParser(from, tableManager, where);
 
-        System.out.println("CONSTRAINTS");
+        System.out.println("CONSTRAINTS779");
         for (Third<String, Constraint, String> x : ConstraintsList) {
             System.out.print(x.first);
             System.out.print(" ");
@@ -410,8 +410,9 @@ public class Parser {
                 }
                 //System.out.println("! " + fieldName + "{}{}" + fieldTable);
                 String value = splitConstraint[1].trim();
-                if (value.charAt(value.length() - 1) == ')') {
-                    value = value.substring(0, value.length() - 1);
+
+                while (value.charAt(value.length() - 1) == ')') {
+                    value = value.substring(0, value.length() - 1).trim();
                 }
 
 
@@ -473,14 +474,26 @@ public class Parser {
                         }
                         break;
                     default:
+                        if ((value.charAt(0) != '\'') || (value.charAt(value.length() - 1) != '\'')) {
+                            throw new IllegalArgumentException("VARCHAR must be framed in quotes");
+                        }
+                        value = value.substring(1);
+                        value = value.substring(0, value.length() - 1);
                         if (value.length() >= fieldType.getSize()) {
                             throw new IllegalArgumentException("very long VARCHAR in where " + statement);
                         }
                         el = new VarcharElement(value, new VarcharType((byte) fieldType.getSize()));
                 }
-
                 ConstraintsList.add(Third.newThird(fieldName, new Constraint(curent, el), fieldTable));
             }
+        }
+        System.out.println("CONSTRAINTS123");
+        for (Third<String, Constraint, String> x : ConstraintsList) {
+            System.out.print(x.first);
+            System.out.print(" ");
+            System.out.print(x.second);
+            System.out.print(" ");
+            System.out.println(x.third);
         }
         return ConstraintsList;
     }

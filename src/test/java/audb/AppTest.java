@@ -95,7 +95,7 @@ public class AppTest
             command = parser.getCommand(String.format("INSERT INTO table123 (number, text) VALUES ('%03d', 'sadfsd')", i));
             command.exec();
         }
-        q = "update table123 set text = 'aaaaa' where number < 005;";
+        q = "update table123 set text = 'aaaaa' where number < '005';";
 
         command = parser.getCommand(q);
         command.exec();
@@ -170,9 +170,9 @@ public class AppTest
             parser.getCommand("INSERT INTO tbldeltetest2 (number, text) VALUES ('00" + i + "', 'tesxt');").exec();
         }
 
-        parser.getCommand("DELETE from tbldeltetest2 WHERE number < 005").exec();
-        parser.getCommand("DELETE from tbldeltetest2 WHERE number < 007").exec();
-        parser.getCommand("DELETE from tbldeltetest2 WHERE number < 010").exec();
+        parser.getCommand("DELETE from tbldeltetest2 WHERE number < '005'").exec();
+        parser.getCommand("DELETE from tbldeltetest2 WHERE number < '007'").exec();
+        parser.getCommand("DELETE from tbldeltetest2 WHERE (((((number < '010')))))").exec();
 
         PageStructure.flush();
 
@@ -262,7 +262,7 @@ public class AppTest
         //assert (t != null);
 
 
-        Shower.show_exsept("SELECT * FROM table3 JOIN table2 ON table3.number = table2.number WHERE ((table2.number < 010) and (table3.number >= 007))");
+        Shower.show_exsept("SELECT * FROM table3 JOIN table2 ON table3.number = table2.number WHERE (table2.number < '010') and (table3.number >= '007')");
 
         PageStructure.flush();
 
