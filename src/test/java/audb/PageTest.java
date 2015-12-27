@@ -8,12 +8,12 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.LinkedList;
 
-import audb.command.Command;
-import audb.command.CreateTableCommand;
-import audb.command.InsertCommand;
-import audb.command.UpdateCommand;
-import audb.command.DeleteCommand;
+import audb.command.*;
+import audb.util.*;
+import audb.result.*;
 import audb.page.PageStructure;
 import audb.table.Table;
 import audb.table.TableElement;
@@ -21,7 +21,6 @@ import audb.table.TableManager;
 import audb.table.VarcharElement;
 import audb.type.Type;
 import audb.type.VarcharType;
-import audb.result.FullScanIterator;
 
 public class PageTest extends TestCase {
     /**
@@ -185,6 +184,85 @@ public class PageTest extends TestCase {
                     System.out.println();
                 }
                 ++counter;
+            }
+
+            PageStructure.flush();
+        } catch(Exception e) {
+             e.printStackTrace();
+        }    
+    }
+
+
+    public void testJoin() {
+        if (true)
+            return;
+
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+        try {
+            Command command;
+            Type[] types = new Type[]{new VarcharType((byte)3), new VarcharType((byte)3)};
+            String[] names = new String[]{"a_field", "b_field"};
+
+            command = new CreateTableCommand("join1", types, names);
+            command.exec();
+            command = new CreateTableCommand("join2", types, names);
+            command.exec();
+
+            String s1;
+            String s2;
+            Object arr[];
+
+            s1 = "00a";
+            s2 = "001";
+            arr = new Object[]{s1, s2};
+            command = new InsertCommand("join1", arr);
+            command.exec();
+
+            s1 = "00b";
+            s2 = "002";
+            arr = new Object[]{s1, s2};
+            command = new InsertCommand("join1", arr);
+            command.exec();
+
+            s1 = "01b";
+            s2 = "002";
+            arr = new Object[]{s1, s2};
+            command = new InsertCommand("join1", arr);
+            command.exec();
+
+            s1 = "001";
+            s2 = "00c";
+            arr = new Object[]{s1, s2};
+            command = new InsertCommand("join2", arr);
+            command.exec();
+
+            s1 = "002";
+            s2 = "00d";
+            arr = new Object[]{s1, s2};
+            command = new InsertCommand("join2", arr);
+            command.exec();
+
+            Table t1 = tableManager.getTable("join1");
+            Table t2 = tableManager.getTable("join2");
+            Iterator<HashMap<String, TableElement>> it;
+            Iterator<HashMap<String, TableElement>> it1;
+            List<Pair<String, String>> list;
+            list = new LinkedList();
+            list.add(Pair.newPair("join1.b_field", "join2.a_field"));
+            it1 = new FullScanIterator(t1);
+            it = new JoinIterator(it1, list, new LinkedList<Third<String, Constraint, String>>(), t2);
+
+            
+            while (it.hasNext()) {
+                HashMap<String, TableElement> elem = it.next();
+                for (String name : elem.keySet()) {
+                    if (elem.get(name) instanceof VarcharElement) {
+                        System.out.print(elem.get(name).toString() + " ");
+                    }
+                }
+                System.out.println();
             }
 
             PageStructure.flush();
