@@ -256,13 +256,17 @@ public class AppTest
         TableManager tableManager = new TableManager();
         Command.setTableManager(tableManager);
 
-        Command command;
-        String q;
-        Table t = tableManager.getTable("parsertab");
-        //assert (t != null);
+        parser.getCommand("CREATE TABLE table002 (number VARCHAR (15), text VARCHAR (9))").exec();
+        parser.getCommand("CREATE TABLE table003 (number VARCHAR (15), text VARCHAR (9))").exec();
 
+        for (int i = 0; i < 15; i++) {
+            parser.getCommand(String.format("INSERT INTO table002 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
+        }
+        for (int i = 0; i < 15; i++) {
+            parser.getCommand(String.format("INSERT INTO table003 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
+        }
 
-        Shower.show_exsept("SELECT * FROM table3 JOIN table2 ON table3.number = table2.number WHERE (table2.number < '010') and (table3.number >= '007')");
+        Shower.show_exsept("SELECT * FROM table003 JOIN table002 ON table003.number = table002.number WHERE (table002.number <= '010') and (table003.number >= '007')");
 
         PageStructure.flush();
 

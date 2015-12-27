@@ -141,14 +141,6 @@ public class Parser {
 
         ArrayList<Third<String, Constraint, String>> ConstraintsList = whereParser(from, tableManager, where);
 
-        System.out.println("CONSTRAINTS779");
-        for (Third<String, Constraint, String> x : ConstraintsList) {
-            System.out.print(x.first);
-            System.out.print(" ");
-            System.out.print(x.second);
-            System.out.print(" ");
-            System.out.println(x.third);
-        }
 
         SelectCommand selector = new SelectCommand(from, ConstraintsList);
         if (joinTable == null) {
@@ -487,14 +479,14 @@ public class Parser {
                 ConstraintsList.add(Third.newThird(fieldName, new Constraint(curent, el), fieldTable));
             }
         }
-        System.out.println("CONSTRAINTS123");
+        /*System.out.println("CONSTRAINTS123");
         for (Third<String, Constraint, String> x : ConstraintsList) {
             System.out.print(x.first);
             System.out.print(" ");
             System.out.print(x.second);
             System.out.print(" ");
             System.out.println(x.third);
-        }
+        }*/
         return ConstraintsList;
     }
     public Command updateParser(String str) throws Exception {
