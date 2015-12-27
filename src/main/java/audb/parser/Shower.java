@@ -48,7 +48,7 @@ public class Shower {
             HashMap<String, TableElement> arr = res.next();
 
             if (!((TableLine) arr).isDeleted()) {
-                for (String name : arr.keySet()) {
+                for (String name : res.getNames()) {
                     if ((Parser.selectList == null) || Parser.selectList.isEmpty() || Parser.selectList.contains(name)) {
                         System.out.print(String.format("%30s", arr.get(name).showString() + " |"));
                     }
