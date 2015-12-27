@@ -157,6 +157,27 @@ public class AppTest
         assertTrue(true);
     }
 
+    public void testDeleteNullPointerTest() throws Exception {
+        assertTrue(true);
+        Parser parser = new Parser();
+        TableManager tableManager = new TableManager();
+        Command.setTableManager(tableManager);
+
+        parser.getCommand("CREATE TABLE tbldeltetest2 (number VARCHAR (15), text VARCHAR (9));").exec();
+
+        for (int i = 0; i < 10; ++i) {
+            parser.getCommand("INSERT INTO tbldeltetest2 (number, text) VALUES ('00" + i + "', 'tesxt');").exec();
+        }
+
+        parser.getCommand("DELETE from tbldeltetest2 WHERE number < 005").exec();
+        parser.getCommand("DELETE from tbldeltetest2 WHERE number < 007").exec();
+        parser.getCommand("DELETE from tbldeltetest2 WHERE number < 010").exec();
+
+        PageStructure.flush();
+
+        assertTrue(true);
+    }
+
     public void testSimpleUpdateTest() throws Exception {
         assertTrue(true);
         Parser parser = new Parser();
