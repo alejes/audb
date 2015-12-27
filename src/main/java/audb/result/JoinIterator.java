@@ -31,7 +31,7 @@ public class JoinIterator implements TableIterator {
     public JoinIterator(TableIterator it, List<Pair<String, String>> columnNames, 
         List<Third<String, Constraint, String>> constraints, Table table) {
 
-        this.table = new WeakReference<Table>(table);
+        this.table = new WeakReference<>(table);
         this.columnNames = columnNames;
         this.constraints = constraints;
 
@@ -72,15 +72,15 @@ public class JoinIterator implements TableIterator {
             if (!mainIterator.hasNext())
                 return null;
             currentElement = mainIterator.next();
-            LinkedList<Third<String, Constraint, String>> ll = 
-                new LinkedList<Third<String, Constraint, String>>(constraints);
+            LinkedList<Third<String, Constraint, String>> ll =
+                    new LinkedList<>(constraints);
             for (Pair<String, String> el: columnNames) {
                 Constraint c = new Constraint(Constraint.ConstraintType.EQUAL, currentElement.get(el.first));
                 ll.add(Third.newThird(el.second, c, ""));
             }
             secondIterator = new ConditionalTableIterator(table.get(), ll);
         }
-        HashMap<String, TableElement> res = new HashMap<String, TableElement>(currentElement);
+        HashMap<String, TableElement> res = new HashMap<>(currentElement);
         res.putAll(secondIterator.next());
         return res;
     }

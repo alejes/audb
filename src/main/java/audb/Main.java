@@ -8,7 +8,6 @@ import audb.table.Table;
 import audb.table.TableElement;
 import audb.table.TableManager;
 import audb.type.Type;
-import audb.type.VarcharType;
 import audb.util.Pair;
 
 import java.io.BufferedReader;
@@ -26,8 +25,8 @@ public class Main {
 
         try {
             Command command;
-            Type[] types = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
-            String[] names = new String[]{"number", "text"};
+            //Type[] types = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
+            //String[] names = new String[]{"number", "text"};
 
             String qq = "CREATE TABLE table1 (number VARCHAR (15), text VARCHAR (9))";
             command = parser.getCommand(qq);
