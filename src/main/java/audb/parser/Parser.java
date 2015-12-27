@@ -2,6 +2,7 @@ package audb.parser;
 
 import audb.command.*;
 import audb.index.Index;
+import audb.result.*;
 import audb.table.*;
 import audb.type.DoubleType;
 import audb.type.IntegerType;
@@ -166,7 +167,7 @@ public class Parser {
             //SelectCommand select = new SelectCommand(from, ConstraintsList);
             ///return new UpdateCommand(select.exec().second, nwValuesList);
             //public JoinCommand(Iterator<HashMap<String, TableElement>> it, List<Pair<String, String>> names,  List<Third<String, Constraint, String>> constraints, String tableName) {
-            return new JoinCommand(selector.exec().second, joinPars, ConstraintsList, joinTable);
+            return new JoinCommand((TableIterator)selector.exec().second, joinPars, ConstraintsList, joinTable);
         }
     }
 

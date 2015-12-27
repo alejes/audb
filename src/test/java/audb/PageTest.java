@@ -1,5 +1,6 @@
 package audb;
 
+import audb.result.*;
 import audb.command.*;
 import audb.page.PageStructure;
 import audb.parser.Parser;
@@ -224,7 +225,7 @@ public class PageTest extends TestCase {
             list = new LinkedList();
             list.add(Pair.newPair("join1.b_field", "join2.a_field"));
             it1 = new FullScanIterator(t1);
-            it = new JoinIterator(it1, list, new LinkedList<Third<String, Constraint, String>>(), t2);
+            it = new JoinIterator((TableIterator)it1, list, new LinkedList<Third<String, Constraint, String>>(), t2);
 
             
             while (it.hasNext()) {
