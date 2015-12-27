@@ -35,7 +35,6 @@ public class Parser {
     private static CCJSqlParserManager parserManager = new CCJSqlParserManager();
 
     public Command selectParse(String str) throws Exception {
-        final List exprList = new ArrayList();
         Select select = (Select) parserManager.parse(new StringReader(str));
         PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
         Expression where = plainSelect.getWhere();
@@ -60,12 +59,12 @@ public class Parser {
 
         List fromJoin = plainSelect.getJoins();
 
-        String leftColumnJoin = null;
-        String rightColumnJoin = null;
-        String joinTable = null;
-        Table joinTableStruct = null;
-        String[] joinTableNames = null;
-        Type[] joinTableTypes = null;
+        String leftColumnJoin;
+        String rightColumnJoin;
+        String joinTable;
+        Table joinTableStruct;
+        String[] joinTableNames;
+        Type[] joinTableTypes;
         if (fromJoin != null) {
             if (fromJoin.size() >= 0) {
                 joinTable = (((Join) fromJoin.get(0)).getRightItem()).toString();
@@ -124,7 +123,6 @@ public class Parser {
 
         System.out.println();
 
-        //System.out.println("");
         selectList = new HashSet<>();
         System.out.print("Select please: ");
         for (SelectItem x :
@@ -134,7 +132,6 @@ public class Parser {
                 break;
             }
             selectList.add(x.toString());
-            //System.out.print(x.toString() + "|");
         }
         System.out.println();
 
@@ -235,14 +232,7 @@ public class Parser {
             System.out.print(" ");
             System.out.println(x.third);
         }
-        //ConstraintType
-        /*
-        if (where == null)
-            System.out.println("No Where");
-        else {
-            System.out.println("Where: " + where.toString());
-        }
-        */
+
         if (limits == null)
             System.out.println("No limits");
         else
@@ -418,8 +408,6 @@ public class Parser {
             } else {
                 orders[i] = Index.Order.DESC;
             }
-            //System.out.println(items[0].trim() + "|" + items[1].trim());
-
         }
 
 
@@ -558,13 +546,12 @@ public class Parser {
             System.out.print(" ");
             System.out.println(x.third);
         }
-        //throw new IllegalArgumentException("delete parser unimplemented");
+
         SelectCommand select = new SelectCommand(from, ConstraintsList);
         return new DeleteCommand(select.exec().second);
     }
 
     public Command updateParser(String str) throws Exception {
-        System.out.println(str);
         Update update = (Update) parserManager.parse(new StringReader(str));
 
         String from = update.getTable().getName();
@@ -726,28 +713,11 @@ public class Parser {
         }
 
         SelectCommand select = new SelectCommand(from, ConstraintsList);
-        //return new DeleteCommand(select.exec().second);
         return new UpdateCommand(select.exec().second, nwValuesList);
-        //throw new IllegalArgumentException("unimplmented");
     }
 
     public Command getCommand(String str) throws Exception {
-        //str = "SELECT `id`, `password` FROM `table1` WHERE (`id` = '3' and `hyj`='dz')";
-        //str = "INSERT INTO table1 (number, text) VALUES ('33', 'sadfsd')";
-        //System.out.println("Parser had \"" + str + "\" on input and ignored it.");
-        //System.out.println("FullScan for table1 returned instead.");
-
         String cmd = str.substring(0, Math.min(str.length(), 6)).toLowerCase();
-
-
-        if (cmd.compareTo("insert") != 0) {
-            //str = "UPDATE table1 set col1='as', col2=?, col3=565 Where number >= 3";
-            //cmd = "update";
-        //str = "CREATE[UNIQUE] INDEX indexname ON tablename(col [ASC|DESC],[col]...) USING BTREE|HASH;"
-        //str = "CREATE UNIQUE INDEX indexname ON table1(number DESC, text ASC) USING BTREE;";
-            //str = "select * from table1 where (id > 4) and (id < 5)";
-            //cmd = "select";
-        }
 
         if (cmd.compareTo("select") == 0) {
             return selectParse(str);
