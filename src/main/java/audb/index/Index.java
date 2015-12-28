@@ -25,7 +25,7 @@ public abstract class Index {
     public abstract void init() throws Exception;
 
     public void create(String[] names, Order[] orders) throws KeySizeException {
-    	keyColumnsNames = Arrays.asList(names);
+    	keyColumnsNames = Arrays.asList(names.clone());
     	this.orders = orders;
     }
 

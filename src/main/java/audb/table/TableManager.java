@@ -37,9 +37,9 @@ public class TableManager {
 	}
 
 	public void createTable(String tableName, Type[] types, String[] names) throws Exception {
-        if(hasTable(tableName)) {
+        if (hasTable(tableName)) {
             Table table = hashMap.get(tableName);
-            table.create(types, names);
+            //table.create(types, names);
             // System.err.println("creating " + tableName);
             return;
         }
