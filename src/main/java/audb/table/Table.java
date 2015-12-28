@@ -138,6 +138,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		// System.arraycopy(names, 0, this.names, 0, names.length);
 		System.arraycopy(types, 0, this.types, 0, types.length);
 
+		indexList.clear();
 
 		calculateRecordInfo();
 	}
