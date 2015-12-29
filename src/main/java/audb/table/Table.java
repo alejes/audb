@@ -182,6 +182,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 		for(int i = 0; i < types.length; i++) {
 			if (objects[i] == null) {
 				ptr += types[i].getSize();
+				assert(types[i].getSize() < 110);
 				continue;
 			}
 			if (!types[i].isValid(objects[i]))
