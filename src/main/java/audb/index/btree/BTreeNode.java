@@ -81,7 +81,6 @@ public abstract class BTreeNode {
 
 	protected PageWriter writeDown() {
 		Page p = nodeReader.getPageStructure().getPage(pageNumber);
-		p.write();
 		PageWriter pw = new PageWriter(p);
 		pw.writeByte(getMyType());
 		pw.writeInteger(keys.size());

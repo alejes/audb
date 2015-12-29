@@ -46,8 +46,11 @@ public class BTreeIndex extends Index {
 		
 		assert (keyColumnsNumber >= 1);
 		
+		keyColumnsNames = new ArrayList<>(keyColumnsNumber);
 		for (int i = 0; i < keyColumnsNumber; i++) {
-			keyColumnIndexes.add(pr.readInteger());
+			int index = pr.readInteger();
+			keyColumnIndexes.add(index);
+			keyColumnsNames.add(table.getNames()[index]);
 		}
 		
 		
@@ -117,7 +120,6 @@ public class BTreeIndex extends Index {
 
 	private void fillMainPage() {
 		Page p = pageStructure.getPage(mainPage);
-		p.write(); // TODO this is SHIT
 		PageWriter pw = new PageWriter(p);
 		
 		int keyColumnsNumber = keyColumnIndexes.size();
@@ -382,6 +384,9 @@ public class BTreeIndex extends Index {
 	@Override
 	public boolean canResolve(List<Third<String, Constraint, String>> constrs) {
 		for (Third<String, Constraint, String> con : constrs) {
+			if (keyColumnsNames == null) {
+				System.out.println("keyColumnsNames is null!");
+			}
 			if (con.first.equals(keyColumnsNames.get(0))) {
 				return true;
 			}
