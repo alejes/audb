@@ -125,9 +125,10 @@ public class Parser {
         }
 
 
-        System.out.println();
+        //System.out.println();
 
         selectList = new HashSet<>();
+        /*
         System.out.print("Select please: ");
         for (SelectItem x :
                 selectItems) {
@@ -138,6 +139,7 @@ public class Parser {
             selectList.add(x.toString());
         }
         System.out.println();
+        */
 
         ArrayList<Third<String, Constraint, String>> ConstraintsList = whereParser(from, tableManager, where);
 
