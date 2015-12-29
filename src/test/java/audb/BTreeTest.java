@@ -14,12 +14,11 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class BTreeTest extends TestCase {
+	final Random random = new Random();
+
 	public BTreeTest(String testName) {
 		super(testName);
 	}
@@ -44,7 +43,7 @@ public class BTreeTest extends TestCase {
 		String tableName = "table1";
 		command = new CreateTableCommand(tableName, types, names);
 		command.exec();
-		
+
 		try {
 		Table t = tableManager.getTable(tableName);
 		Order[] orders = new Order[1];
@@ -56,9 +55,10 @@ public class BTreeTest extends TestCase {
 			e.printStackTrace(System.out);
 			assertTrue(false);
 		}
-		
+
 	}
-	
+
+
 	public void testCreateIndex() throws Exception {
 		Parser parser = new Parser();
 		TableManager tableManager = new TableManager();

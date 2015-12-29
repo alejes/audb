@@ -73,6 +73,7 @@ public class AppTest
         PageStructure.flush();
     }
 
+
     public void testAddIndex() throws Exception {
         assertTrue(true);
         Parser parser = new Parser();
