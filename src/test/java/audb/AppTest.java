@@ -6,6 +6,7 @@ import audb.page.PageStructure;
 import audb.parser.Parser;
 import audb.parser.Shower;
 import audb.table.Table;
+import audb.table.TableLine;
 import audb.table.TableElement;
 import audb.table.TableManager;
 import audb.table.VarcharElement;
@@ -215,15 +216,15 @@ public class AppTest
         Iterator<HashMap<String, TableElement>> res = exRes.second;
 
         while (res.hasNext()) {
-            HashMap<String, TableElement> arr = res.next();
+            TableLine arr = (TableLine)res.next();
             /*
             for (String name : arr.keySet()) {
                 System.out.print(arr.get(name).toString() + " ");
             }
             */
-            System.out.println(arr.get("simplupdtest.text").toString());
-
-            assertTrue(arr.get("simplupdtest.text").showString().compareTo("88888") == 0);
+            System.out.println("===> " + arr.get("simplupdtest.text").toString());
+            if (!arr.isDeleted())
+                assertTrue(arr.get("simplupdtest.text").showString().compareTo("88888") == 0);
             System.out.println();
         }
         PageStructure.flush();

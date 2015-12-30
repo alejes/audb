@@ -17,6 +17,10 @@ public class DoubleElement implements TableElement {
 		value = v;
 		this.type = new DoubleType(Type.DOUBLE);
 	}
+
+	public Object getObject() {
+		return value;
+	}
 	
 	public String toString() {
 		return "DOUBLE " + value.toString();

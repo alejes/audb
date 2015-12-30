@@ -29,14 +29,16 @@ public class UpdateCommand extends Command {
                 continue;
             String tableName = curr.getTableName();
             
-            if(!tableManager.hasTable(tableName))
+            if (!tableManager.hasTable(tableName))
                 throw new Exception("No such table " + tableName + ".");
             Table table = tableManager.getTable(tableName);
             String[] names = table.getNames();
             Object[] newValues = new Object[names.length];
-            for (int i = 0; i < names.length; ++i)
-                newValues[i] = values.containsKey(names[i]) ? values.get(names[i]) : null;
-            table.write(curr.getPageNumber(), curr.getOffset(), newValues);
+            for (int i = 0; i < names.length; ++i) 
+                newValues[i] = values.containsKey(names[i]) ? values.get(names[i]) : curr.get(names[i]).getObject();
+            
+            table.delete(curr.getPageNumber(), curr.getOffset());
+            table.addRecord(newValues);
             ++affectedRows;
         }
         Parser.affectedRows = affectedRows;

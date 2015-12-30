@@ -12,5 +12,8 @@ public interface TableElement extends Comparable<TableElement> {
 	int getSizeInBytes();
 
 	byte[] toBytes();
+
 	Type getType();
+
+    Object getObject();
 }

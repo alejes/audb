@@ -20,6 +20,10 @@ public class VarcharElement implements TableElement {
 	public int getSizeInBytes() {
 		return type.getSize();
 	}
+
+	public Object getObject() {
+		return value;
+	}
 	
     public byte[] toBytes() {
     	// TODO
