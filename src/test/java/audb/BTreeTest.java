@@ -1,10 +1,24 @@
 package audb;
 
-import audb.command.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+
+import audb.command.Command;
+import audb.command.Constraint;
 import audb.command.Constraint.ConstraintType;
+import audb.command.CreateTableCommand;
+import audb.command.InsertCommand;
+import audb.command.SelectCommand;
 import audb.index.Index.Order;
 import audb.parser.Parser;
-import audb.table.*;
+import audb.table.IntegerElement;
+import audb.table.Table;
+import audb.table.TableElement;
+import audb.table.TableManager;
+import audb.table.VarcharElement;
 import audb.type.IntegerType;
 import audb.type.Type;
 import audb.type.VarcharType;
@@ -13,8 +27,6 @@ import audb.util.Third;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import java.util.*;
 
 public class BTreeTest extends TestCase {
 	final Random random = new Random();
@@ -31,6 +43,55 @@ public class BTreeTest extends TestCase {
 		assertTrue(true);
 	}
 
+	public void testMain() throws Exception {
+		 Parser parser = new Parser();
+		 TableManager tableManager = new TableManager();
+		 Command.setTableManager(tableManager);
+		 Command command;
+        //Type[] types = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
+        //String[] names = new String[]{"number", "text"};
+
+		 String tableName = "mainTable";
+        String qq = "CREATE TABLE " + tableName + " (number VARCHAR (15), text VARCHAR (9))";
+        command = parser.getCommand(qq);
+        command.exec();
+        //command = new CreateTableCommand("table1", types, names);
+        //command.exec();
+
+        
+        
+        for (int i = 0; i < 10_00; i++) {
+            String q = String.format("INSERT INTO " + tableName+ " (number, text) VALUES ('%03d', 'sadfsd')", i);
+            command = parser.getCommand(q);
+            command.exec();
+            if (i % 10000 == 20) {
+                System.out.format("%d\n", i);
+            }
+        }
+        
+		Order[] orders = new Order[1];
+		String[] indexNames = new String[1];
+		indexNames[0] = tableName + ".number";
+		orders[0] = Order.ASC;
+		Table t = tableManager.getTable(tableName);
+		t.addBTreeIndex(indexNames, orders);
+		
+		List<Third<String, Constraint, String>> constrs = new ArrayList<>();
+		constrs.add(Third.newThird(tableName + "." + "number", new Constraint(ConstraintType.LESS,
+				new VarcharElement("005", (VarcharType) t.getTypes()[0])), tableName));
+		SelectCommand sc = new SelectCommand(tableName, constrs);
+		Pair<Table, Iterator<HashMap<String, TableElement>>> result = sc.exec();
+		Iterator<HashMap<String, TableElement>> iter = result.second;
+
+		int size = 0;
+		while (iter.hasNext()) {
+			size++;
+			HashMap<String, TableElement> row = iter.next();
+		}
+		assertEquals(5, size);
+        
+	}
+	
 	public void testIndexOnEmpty() throws Exception {
 		//Parser parser = new Parser();
 		TableManager tableManager = new TableManager();

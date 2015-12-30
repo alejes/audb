@@ -306,6 +306,7 @@ public class Parser {
                 throw new Exception("Wrong column constraint in create query");
             }
             String currentColumn = tableName + "." + items[0].trim().toLowerCase();
+            System.out.println(currentColumn);
             boolean find = false;
 
             for (String __x : tableNamesList) {
@@ -318,7 +319,7 @@ public class Parser {
                 throw new IllegalArgumentException("Not find column " + currentColumn);
             }
             indexColumnNames[i] = currentColumn;
-            if (items[1].trim().toLowerCase().compareTo("ASC") == 0) {
+            if (items[1].trim().toLowerCase().compareTo("asc") == 0) {
                 orders[i] = Index.Order.ASC;
             } else {
                 orders[i] = Index.Order.DESC;
@@ -336,9 +337,9 @@ public class Parser {
             throw new Exception("Support only BTREE index");
         }
 
-
+System.out.println(orders[0].toString());
         tableStruct.addBTreeIndex(indexColumnNames, orders);
-
+        
         return new EmptyCommand(tableName);
     }
     public Command createManager(String str) throws Exception {

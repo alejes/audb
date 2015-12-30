@@ -11,7 +11,7 @@ import junit.framework.TestSuite;
 import java.util.Random;
 
 public class LoadTest extends TestCase {
-    final Random random = new Random();
+   final Random random = new Random();
 
     public LoadTest(String testName) {
         super(testName);
@@ -25,7 +25,7 @@ public class LoadTest extends TestCase {
         assertTrue(true);
     }
 
-    public void testInsertWithoutIndex() throws Exception {
+    /*    public void testInsertWithoutIndex() throws Exception {
         assertTrue(true);
         System.out.println("testInsertWithoutIndex started");
         Parser parser = new Parser();
@@ -131,6 +131,6 @@ public class LoadTest extends TestCase {
 
         System.out.println("testInsertWithPostIndexSpeedSelect finished");
         PageStructure.flush();
-    }
+    }*/
 
 }
