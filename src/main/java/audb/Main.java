@@ -29,13 +29,13 @@ public class Main {
             //command.exec();
 
 
-            for (int i = 0; i < 10_00; i++) {
+            for (int i = 0; i < 1_000_000; i++) {
                 String q = String.format("INSERT INTO table1 (number, text) VALUES ('%03d', 'sadfsd')", i);
                 command = parser.getCommand(q);
                 command.exec();
-                if (i % 10000 == 20) {
+                /*if (i % 10000 == 20) {
                     System.out.format("%d\n", i);
-                }
+                }*/
             }
 
             //вставлять 10кк с 8 мб heap
@@ -54,7 +54,9 @@ public class Main {
             String s;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while ((s = in.readLine()) != null && s.length() != 0) {
+            	long t = System.currentTimeMillis();
                 Shower.show(s);
+                System.out.println("Elapsed time: " + Long.toString(System.currentTimeMillis() - t) + " ms.");
             }
             PageStructure.flush();
         } catch(Exception e) {
