@@ -567,6 +567,8 @@ public class Parser {
         */
 
         SelectCommand select = new SelectCommand(from, ConstraintsList);
+        
+        assert(false);
         return new UpdateCommand(select.exec().second, nwValuesList);
     }
 

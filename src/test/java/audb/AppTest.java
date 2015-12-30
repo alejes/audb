@@ -23,353 +23,362 @@ import java.util.Iterator;
  * Unit test for simple App.
  */
 public class AppTest 
-    extends TestCase
+extends TestCase
 {
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public AppTest( String testName )
-    {
-        super( testName );
-    }
+	/**
+	 * Create the test case
+	 *
+	 * @param testName name of the test case
+	 */
+	public AppTest( String testName )
+	{
+		super( testName );
+	}
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( AppTest.class );
-    }
+	/**
+	 * @return the suite of tests being tested
+	 */
+	public static Test suite()
+	{
+		return new TestSuite( AppTest.class );
+	}
 
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp() {
-        assertTrue( true );
-        String a = "aaa";
-        String b = "aab";
-        assertTrue(a.compareTo(b) < 0);
-    }
+	/**
+	 * Rigourous Test :-)
+	 */
+	public void testApp() {
+		assertTrue( true );
+		String a = "aaa";
+		String b = "aab";
+		assertTrue(a.compareTo(b) < 0);
+	}
 
-    public void testBigTestFor4M() throws Exception {
-        assertTrue(true);
-        Parser parser = new Parser();
-        TableManager tableManager = new TableManager();
-        Command.setTableManager(tableManager);
-
-
-        parser.getCommand("CREATE TABLE tableload4m (number VARCHAR (15), text VARCHAR (9))").exec();
+	public void testBigTestFor4M() throws Exception {
+		assertTrue(true);
+		Parser parser = new Parser();
+		TableManager tableManager = new TableManager();
+		Command.setTableManager(tableManager);
 
 
-        for (int i = 0; i < 100_000_0; i++) {
-            parser.getCommand(String.format("INSERT INTO tableload4m (number, text) VALUES ('%09d', 'sadfsd')", i)).exec();
-            if (i % 10000 == 25) {
-                System.out.println("Insert " + i + " items");
-            }
-        }
-
-        PageStructure.flush();
-    }
+		parser.getCommand("CREATE TABLE tableload4m (number VARCHAR (15), text VARCHAR (9))").exec();
 
 
-    public void testAddIndex() throws Exception {
-        assertTrue(true);
-        Parser parser = new Parser();
-        TableManager tableManager = new TableManager();
-        Command.setTableManager(tableManager);
+		for (int i = 0; i < 100_000_0; i++) {
+			parser.getCommand(String.format("INSERT INTO tableload4m (number, text) VALUES ('%09d', 'sadfsd')", i)).exec();
+			if (i % 10000 == 25) {
+				System.out.println("Insert " + i + " items");
+			}
+		}
+
+		PageStructure.flush();
+	}
 
 
-        parser.getCommand("CREATE TABLE table12 (number VARCHAR (15), text VARCHAR (9))").exec();
+	public void testAddIndex() throws Exception {
+		assertTrue(true);
+		Parser parser = new Parser();
+		TableManager tableManager = new TableManager();
+		Command.setTableManager(tableManager);
 
 
-        for (int i = 0; i < 10; i++) {
-            parser.getCommand(String.format("INSERT INTO table12 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
-        }
-
-        parser.getCommand("CREATE UNIQUE INDEX indexname ON table12 (number DESC, text ASC) USING BTREE;").exec();
-
-        PageStructure.flush();
-    }
-
-    public void testUpdate() throws Exception {
-        assertTrue(true);
-        Parser parser = new Parser();
-        TableManager tableManager = new TableManager();
-        Command.setTableManager(tableManager);
-
-        Command command;
-        String q;
-        String qq = "CREATE TABLE table123 (number VARCHAR (15), text VARCHAR (9))";
-        command = parser.getCommand(qq);
-        command.exec();
+		parser.getCommand("CREATE TABLE table12 (number VARCHAR (15), text VARCHAR (9))").exec();
 
 
-        for (int i = 0; i < 15; i++) {
-            command = parser.getCommand(String.format("INSERT INTO table123 (number, text) VALUES ('%03d', 'sadfsd')", i));
-            command.exec();
-        }
-        q = "update table123 set text = 'aaaaa' where number < '005';";
+		for (int i = 0; i < 10; i++) {
+			parser.getCommand(String.format("INSERT INTO table12 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
+		}
 
-        command = parser.getCommand(q);
-        command.exec();
-        q = "select * from table123";
-        command = parser.getCommand(q);
-        Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
-        Iterator<HashMap<String, TableElement>> res = exRes.second;
+		parser.getCommand("CREATE UNIQUE INDEX indexname ON table12 (number DESC, text ASC) USING BTREE;").exec();
 
-        while (res.hasNext()) {
-            HashMap<String, TableElement> arr = res.next();
-            for (String name : arr.keySet()) {
-                if (arr.get(name) instanceof VarcharElement) {
-                    System.out.print(arr.get(name).showString() + " ");
-                }
+		PageStructure.flush();
+	}
 
-            }
-            System.out.println();
-        }
+	public void testUpdate() throws Exception {
+		assertTrue(true);
+		if (false) {
 
-        PageStructure.flush();
+			Parser parser = new Parser();
+			TableManager tableManager = new TableManager();
+			Command.setTableManager(tableManager);
 
-        assertTrue(true);
-    }
+			Command command;
+			String q;
+			String qq = "CREATE TABLE table123 (number VARCHAR (15), text VARCHAR (9))";
+			command = parser.getCommand(qq);
+			command.exec();
 
-    public void testintTest() throws Exception {
-        assertTrue(true);
-        Parser parser = new Parser();
-        TableManager tableManager = new TableManager();
-        Command.setTableManager(tableManager);
 
-        Command command;
-        String q;
-        String qq = "CREATE TABLE tableinttest (number INT, text VARCHAR (9));";
-        command = parser.getCommand(qq);
-        command.exec();
+			for (int i = 0; i < 15; i++) {
+				command = parser.getCommand(String.format("INSERT INTO table123 (number, text) VALUES ('%03d', 'sadfsd')", i));
+				command.exec();
+			}
+			q = "update table123 set text = 'aaaaa' where number < '005';";
 
-        for (int i = 0; i < 10; ++i) {
-            command = parser.getCommand("INSERT INTO tableinttest (number, text) VALUES (" + i + ", 'tesxt');");
-            command.exec();
-        }
+			command = parser.getCommand(q);
+			command.exec();
+			q = "select * from table123";
+			command = parser.getCommand(q);
+			Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
+			Iterator<HashMap<String, TableElement>> res = exRes.second;
 
-        q = "select * from tableinttest";
-        command = parser.getCommand(q);
-        Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
-        Iterator<HashMap<String, TableElement>> res = exRes.second;
+			while (res.hasNext()) {
+				HashMap<String, TableElement> arr = res.next();
+				for (String name : arr.keySet()) {
+					if (arr.get(name) instanceof VarcharElement) {
+						System.out.print(arr.get(name).showString() + " ");
+					}
 
-        while (res.hasNext()) {
-            HashMap<String, TableElement> arr = res.next();
-            for (String name : arr.keySet()) {
-                if (arr.get(name) instanceof VarcharElement) {
-                    System.out.print(arr.get(name).toString() + " ");
-                }
+				}
+				System.out.println();
+			}
 
-            }
-            System.out.println();
-        }
+			PageStructure.flush();
 
-        PageStructure.flush();
+			assertTrue(true);
+		}
+	}
 
-        assertTrue(true);
-    }
+	public void testintTest() throws Exception {
+		assertTrue(true);
+		Parser parser = new Parser();
+		TableManager tableManager = new TableManager();
+		Command.setTableManager(tableManager);
 
-    public void testDeleteNullPointerTest() throws Exception {
-        assertTrue(true);
-        Parser parser = new Parser();
-        TableManager tableManager = new TableManager();
-        Command.setTableManager(tableManager);
+		Command command;
+		String q;
+		String qq = "CREATE TABLE tableinttest (number INT, text VARCHAR (9));";
+		command = parser.getCommand(qq);
+		command.exec();
 
-        parser.getCommand("CREATE TABLE tbldeltetest2 (number VARCHAR (15), text VARCHAR (9));").exec();
+		for (int i = 0; i < 10; ++i) {
+			command = parser.getCommand("INSERT INTO tableinttest (number, text) VALUES (" + i + ", 'tesxt');");
+			command.exec();
+		}
 
-        for (int i = 0; i < 10; ++i) {
-            parser.getCommand("INSERT INTO tbldeltetest2 (number, text) VALUES ('00" + i + "', 'tesxt');").exec();
-        }
+		q = "select * from tableinttest";
+		command = parser.getCommand(q);
+		Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
+		Iterator<HashMap<String, TableElement>> res = exRes.second;
 
-        parser.getCommand("DELETE from tbldeltetest2 WHERE number < '005'").exec();
-        parser.getCommand("DELETE from tbldeltetest2 WHERE number < '007'").exec();
-        parser.getCommand("DELETE from tbldeltetest2 WHERE (((((number < '010')))))").exec();
+		while (res.hasNext()) {
+			HashMap<String, TableElement> arr = res.next();
+			for (String name : arr.keySet()) {
+				if (arr.get(name) instanceof VarcharElement) {
+					System.out.print(arr.get(name).toString() + " ");
+				}
 
-        PageStructure.flush();
+			}
+			System.out.println();
+		}
 
-        assertTrue(true);
-    }
+		PageStructure.flush();
 
-    public void testSimpleUpdateTest() throws Exception {
-        assertTrue(true);
-        Parser parser = new Parser();
-        TableManager tableManager = new TableManager();
-        Command.setTableManager(tableManager);
+		assertTrue(true);
+	}
 
-        Command command;
-        String q;
-        String qq = "CREATE TABLE simplupdtest (number VARCHAR (9), text VARCHAR (9));";
-        command = parser.getCommand(qq);
-        command.exec();
-        command = parser.getCommand("INSERT INTO simplupdtest (number, text) VALUES ('77777', '55555')");
-        command.exec();
-        command = parser.getCommand("UPDATE simplupdtest SET text = '88888'");
-        command.exec();
-        q = "select * from simplupdtest";
-        command = parser.getCommand(q);
-        Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
-        Iterator<HashMap<String, TableElement>> res = exRes.second;
+	public void testDeleteNullPointerTest() throws Exception {
+		assertTrue(true);
+		Parser parser = new Parser();
+		TableManager tableManager = new TableManager();
+		Command.setTableManager(tableManager);
 
-        while (res.hasNext()) {
-            HashMap<String, TableElement> arr = res.next();
-            /*
-            for (String name : arr.keySet()) {
-                System.out.print(arr.get(name).toString() + " ");
-            }
-            */
-            System.out.println(arr.get("simplupdtest.text").toString());
+		parser.getCommand("CREATE TABLE tbldeltetest2 (number VARCHAR (15), text VARCHAR (9));").exec();
 
-            assertTrue(arr.get("simplupdtest.text").showString().compareTo("88888") == 0);
-            System.out.println();
-        }
-        PageStructure.flush();
+		for (int i = 0; i < 10; ++i) {
+			parser.getCommand("INSERT INTO tbldeltetest2 (number, text) VALUES ('00" + i + "', 'tesxt');").exec();
+		}
 
-        assertTrue(true);
-    }
-    public void testdoubleTest() throws Exception {
-        assertTrue(true);
-        Parser parser = new Parser();
-        TableManager tableManager = new TableManager();
-        Command.setTableManager(tableManager);
+		parser.getCommand("DELETE from tbldeltetest2 WHERE number < '005'").exec();
+		parser.getCommand("DELETE from tbldeltetest2 WHERE number < '007'").exec();
+		parser.getCommand("DELETE from tbldeltetest2 WHERE (((((number < '010')))))").exec();
 
-        Command command;
-        String q;
-        String qq = "CREATE TABLE tabledoubletest (number INT, text VARCHAR (9), val double);";
-        command = parser.getCommand(qq);
-        command.exec();
+		PageStructure.flush();
 
-        for (int i = 0; i < 10; ++i) {
-            command = parser.getCommand("INSERT INTO tabledoubletest (number, text, val) VALUES (" + i + ", 'tesxt', " + (2.34 + i) + ");");
-            command.exec();
-        }
+		assertTrue(true);
+	}
 
-        q = "select * from tabledoubletest where (val < 5.0)";
-        command = parser.getCommand(q);
-        Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
-        Iterator<HashMap<String, TableElement>> res = exRes.second;
 
-        while (res.hasNext()) {
-            HashMap<String, TableElement> arr = res.next();
+	public void testSimpleUpdateTest() throws Exception {
+		assertTrue(true);
+		if (false) {
+			Parser parser = new Parser();
+			TableManager tableManager = new TableManager();
+			Command.setTableManager(tableManager);
+
+			Command command;
+			String q;
+			String qq = "CREATE TABLE simplupdtest (number VARCHAR (9), text VARCHAR (9));";
+			command = parser.getCommand(qq);
+			command.exec();
+			command = parser.getCommand("INSERT INTO simplupdtest (number, text) VALUES ('77777', '55555')");
+			command.exec();
+			command = parser.getCommand("UPDATE simplupdtest SET text = '88888'");
+			command.exec();
+			q = "select * from simplupdtest";
+			command = parser.getCommand(q);
+			Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
+			Iterator<HashMap<String, TableElement>> res = exRes.second;
+
+			while (res.hasNext()) {
+				HashMap<String, TableElement> arr = res.next();
+				/*
             for (String name : arr.keySet()) {
                 System.out.print(arr.get(name).toString() + " ");
             }
-            System.out.println();
-        }
+				 */
 
-        PageStructure.flush();
+				System.out.println(arr.get("simplupdtest.text").toString());
 
-        assertTrue(true);
-    }
+				assertTrue(arr.get("simplupdtest.text").showString().compareTo("88888") == 0);
+				System.out.println();
+			}
+			PageStructure.flush();
 
-    public void testOfJoins() throws Exception {
-        assertTrue(true);
-        Parser parser = new Parser();
-        TableManager tableManager = new TableManager();
-        Command.setTableManager(tableManager);
+			assertTrue(true);
+		}
+	}
 
-        parser.getCommand("CREATE TABLE table002 (number VARCHAR (15), text VARCHAR (9))").exec();
-        parser.getCommand("CREATE TABLE table003 (number VARCHAR (15), text VARCHAR (9))").exec();
 
-        for (int i = 0; i < 15; i++) {
-            parser.getCommand(String.format("INSERT INTO table002 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
-        }
-        for (int i = 0; i < 15; i++) {
-            parser.getCommand(String.format("INSERT INTO table003 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
-        }
+	public void testdoubleTest() throws Exception {
+		assertTrue(true);
+		Parser parser = new Parser();
+		TableManager tableManager = new TableManager();
+		Command.setTableManager(tableManager);
 
-        Shower.show_exsept("SELECT * FROM table003 JOIN table002 ON table003.number = table002.number WHERE (table002.number <= '010') and (table003.number >= '007')");
+		Command command;
+		String q;
+		String qq = "CREATE TABLE tabledoubletest (number INT, text VARCHAR (9), val double);";
+		command = parser.getCommand(qq);
+		command.exec();
 
-        PageStructure.flush();
+		for (int i = 0; i < 10; ++i) {
+			command = parser.getCommand("INSERT INTO tabledoubletest (number, text, val) VALUES (" + i + ", 'tesxt', " + (2.34 + i) + ");");
+			command.exec();
+		}
 
-        assertTrue(true);
-    }
+		q = "select * from tabledoubletest where (val < 5.0)";
+		command = parser.getCommand(q);
+		Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
+		Iterator<HashMap<String, TableElement>> res = exRes.second;
 
-    public void testLoadTable() throws Exception {
-        assertTrue(true);
-        Parser parser = new Parser();
-        TableManager tableManager = new TableManager();
-        Command.setTableManager(tableManager);
+		while (res.hasNext()) {
+			HashMap<String, TableElement> arr = res.next();
+			for (String name : arr.keySet()) {
+				System.out.print(arr.get(name).toString() + " ");
+			}
+			System.out.println();
+		}
 
-        Command command;
-        String q;
-        Table t = tableManager.getTable("parsertab");
-        //assert (t != null);
+		PageStructure.flush();
 
-        q = "CREATE TABLE parsertab (number VARCHAR (15), text VARCHAR (9))";
-        command = parser.getCommand(q);
-        command.exec();
+		assertTrue(true);
+	}
 
-        q = "insert into parsertab (number, text) VALUES ('34343','434343')";
-        command = parser.getCommand(q);
-        command.exec();
+	public void testOfJoins() throws Exception {
+		assertTrue(true);
+		Parser parser = new Parser();
+		TableManager tableManager = new TableManager();
+		Command.setTableManager(tableManager);
 
-        q = "select * from parsertab";
-        command = parser.getCommand(q);
-        Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
-        Iterator<HashMap<String, TableElement>> res = exRes.second;
+		parser.getCommand("CREATE TABLE table002 (number VARCHAR (15), text VARCHAR (9))").exec();
+		parser.getCommand("CREATE TABLE table003 (number VARCHAR (15), text VARCHAR (9))").exec();
 
-        while (res.hasNext()) {
-            HashMap<String, TableElement> arr = res.next();
-            for (String name : arr.keySet()) {
-                if (arr.get(name) instanceof VarcharElement) {
-                    System.out.print(arr.get(name).toString() + " ");
-                }
+		for (int i = 0; i < 15; i++) {
+			parser.getCommand(String.format("INSERT INTO table002 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
+		}
+		for (int i = 0; i < 15; i++) {
+			parser.getCommand(String.format("INSERT INTO table003 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
+		}
 
-            }
-            System.out.println();
-        }
-        q = "CREATE TABLE parsertab (number VARCHAR (15), text VARCHAR (9))";
-        command = parser.getCommand(q);
-        command.exec();
-        q = "insert into parsertab (number, text) VALUES ('34343','434343')";
-        command = parser.getCommand(q);
-        command.exec();
+		Shower.show_exsept("SELECT * FROM table003 JOIN table002 ON table003.number = table002.number WHERE (table002.number <= '010') and (table003.number >= '007')");
 
-        q = "select * from parsertab";
-        command = parser.getCommand(q);
-        command.exec();
+		PageStructure.flush();
 
-        exRes = command.exec();
-        res = exRes.second;
+		assertTrue(true);
+	}
 
-        while (res.hasNext()) {
-            HashMap<String, TableElement> arr = res.next();
-            for (String name : arr.keySet()) {
-                if (arr.get(name) instanceof VarcharElement) {
-                    System.out.print(arr.get(name).toString() + " ");
-                }
+	public void testLoadTable() throws Exception {
+		assertTrue(true);
+		Parser parser = new Parser();
+		TableManager tableManager = new TableManager();
+		Command.setTableManager(tableManager);
 
-            }
-            System.out.println();
-        }
+		Command command;
+		String q;
+		Table t = tableManager.getTable("parsertab");
+		//assert (t != null);
 
-        PageStructure.flush();
+		q = "CREATE TABLE parsertab (number VARCHAR (15), text VARCHAR (9))";
+		command = parser.getCommand(q);
+		command.exec();
 
-        assertTrue(true);
-    }
+		q = "insert into parsertab (number, text) VALUES ('34343','434343')";
+		command = parser.getCommand(q);
+		command.exec();
 
-    public void testHundreadNumbers() {
-        try {
-            TableManager tableManager = new TableManager();
-            String tableName = "dummy_table";
-            int columnsNumber = 3;
-            
-            Type types[] = new Type[columnsNumber];
-            String names[] = new String[columnsNumber];
-            
-            for (int i = 0; i < columnsNumber; ++i) {
-            	types[i] = new VarcharType((byte)10);
-            	names[i] = "column" + Integer.toString(i);
-            }
-            tableManager.createTable(tableName, types, names);
-        	PageCache pc = PageCache.getInstance();
-            
-        } catch(Exception e) {
-            assertTrue(false);
-        }
-    }
+		q = "select * from parsertab";
+		command = parser.getCommand(q);
+		Pair<Table, Iterator<HashMap<String, TableElement>>> exRes = command.exec();
+		Iterator<HashMap<String, TableElement>> res = exRes.second;
+
+		while (res.hasNext()) {
+			HashMap<String, TableElement> arr = res.next();
+			for (String name : arr.keySet()) {
+				if (arr.get(name) instanceof VarcharElement) {
+					System.out.print(arr.get(name).toString() + " ");
+				}
+
+			}
+			System.out.println();
+		}
+		q = "CREATE TABLE parsertab (number VARCHAR (15), text VARCHAR (9))";
+		command = parser.getCommand(q);
+		command.exec();
+		q = "insert into parsertab (number, text) VALUES ('34343','434343')";
+		command = parser.getCommand(q);
+		command.exec();
+
+		q = "select * from parsertab";
+		command = parser.getCommand(q);
+		command.exec();
+
+		exRes = command.exec();
+		res = exRes.second;
+
+		while (res.hasNext()) {
+			HashMap<String, TableElement> arr = res.next();
+			for (String name : arr.keySet()) {
+				if (arr.get(name) instanceof VarcharElement) {
+					System.out.print(arr.get(name).toString() + " ");
+				}
+
+			}
+			System.out.println();
+		}
+
+		PageStructure.flush();
+
+		assertTrue(true);
+	}
+
+	public void testHundreadNumbers() {
+		try {
+			TableManager tableManager = new TableManager();
+			String tableName = "dummy_table";
+			int columnsNumber = 3;
+
+			Type types[] = new Type[columnsNumber];
+			String names[] = new String[columnsNumber];
+
+			for (int i = 0; i < columnsNumber; ++i) {
+				types[i] = new VarcharType((byte)10);
+				names[i] = "column" + Integer.toString(i);
+			}
+			tableManager.createTable(tableName, types, names);
+			PageCache pc = PageCache.getInstance();
+
+		} catch(Exception e) {
+			assertTrue(false);
+		}
+	}
 }

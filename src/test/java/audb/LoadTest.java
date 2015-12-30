@@ -27,6 +27,7 @@ public class LoadTest extends TestCase {
 
     public void testInsertWithoutIndex() throws Exception {
         assertTrue(true);
+        System.out.println("testInsertWithoutIndex started");
         Parser parser = new Parser();
         TableManager tableManager = new TableManager();
         Command.setTableManager(tableManager);
@@ -41,12 +42,13 @@ public class LoadTest extends TestCase {
                 System.out.println("Insert " + i + " items");
             }
         }
-
+        System.out.println("testInsertWithoutIndex finished");
         PageStructure.flush();
     }
 
     public void testInsertWithPreIndex() throws Exception {
         assertTrue(true);
+        System.out.println("testInsertWithPreIndex started");
         Parser parser = new Parser();
         TableManager tableManager = new TableManager();
         Command.setTableManager(tableManager);
@@ -61,11 +63,13 @@ public class LoadTest extends TestCase {
             }
         }
 
+        System.out.println("testInsertWithPreIndex finished");
         PageStructure.flush();
     }
 
     public void testInsertWithPostIndex() throws Exception {
         assertTrue(true);
+        System.out.println("testInsertWithPostIndex started");
         Parser parser = new Parser();
         TableManager tableManager = new TableManager();
         Command.setTableManager(tableManager);
@@ -80,11 +84,13 @@ public class LoadTest extends TestCase {
         }
         parser.getCommand("CREATE UNIQUE INDEX indexname ON tableload4mpostindex (number DESC) USING BTREE;").exec();
 
+        System.out.println("testInsertWithPostIndex finished");
         PageStructure.flush();
     }
 
     public void testInsertWithoutIndexSpeedSelect() throws Exception {
         assertTrue(true);
+        System.out.println("testInsertWithoutIndexSpeedSelect started");
         Parser parser = new Parser();
         TableManager tableManager = new TableManager();
         Command.setTableManager(tableManager);
@@ -93,11 +99,13 @@ public class LoadTest extends TestCase {
             parser.getCommand(String.format("SELECT * FROM tableload4m WHERE number = '%09d'", random.nextInt(120_000_0))).exec();
         }
 
+        System.out.println("testInsertWithoutIndexSpeedSelect finished");
         PageStructure.flush();
     }
 
     public void testInsertWithPreIndexSpeedSelect() throws Exception {
         assertTrue(true);
+        System.out.println("testInsertWithPreIndexSpeedSelect started");
         Parser parser = new Parser();
         TableManager tableManager = new TableManager();
         Command.setTableManager(tableManager);
@@ -106,11 +114,13 @@ public class LoadTest extends TestCase {
             parser.getCommand(String.format("SELECT * FROM tableload4mpreindex WHERE number = '%09d'", random.nextInt(120_000_0))).exec();
         }
 
+        System.out.println("testInsertWithPreIndexSpeedSelect finished");
         PageStructure.flush();
     }
 
     public void testInsertWithPostIndexSpeedSelect() throws Exception {
         assertTrue(true);
+        System.out.println("testInsertWithPostIndexSpeedSelect started");
         Parser parser = new Parser();
         TableManager tableManager = new TableManager();
         Command.setTableManager(tableManager);
@@ -119,6 +129,7 @@ public class LoadTest extends TestCase {
             parser.getCommand(String.format("SELECT * FROM tableload4mpostindex WHERE number = '%09d'", random.nextInt(120_000_0))).exec();
         }
 
+        System.out.println("testInsertWithPostIndexSpeedSelect finished");
         PageStructure.flush();
     }
 

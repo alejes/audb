@@ -34,6 +34,7 @@ public class UpdateCommand extends Command {
             Table table = tableManager.getTable(tableName);
             String[] names = table.getNames();
             Object[] newValues = new Object[names.length];
+            // TODO index should be updated also
             for (int i = 0; i < names.length; ++i)
                 newValues[i] = values.containsKey(names[i]) ? values.get(names[i]) : null;
             table.write(curr.getPageNumber(), curr.getOffset(), newValues);

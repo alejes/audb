@@ -32,7 +32,7 @@ public class BTreeTest extends TestCase {
 	}
 
 	public void testIndexOnEmpty() throws Exception {
-		Parser parser = new Parser();
+		//Parser parser = new Parser();
 		TableManager tableManager = new TableManager();
 		Command.setTableManager(tableManager);
 
@@ -89,8 +89,9 @@ public class BTreeTest extends TestCase {
 		t.addBTreeIndex(indexNames, orders);
 	}
 
+
 	public void testfindIndex() throws Exception {
-		Parser parser = new Parser();
+		//Parser parser = new Parser();
 		TableManager tableManager = new TableManager();
 		Command.setTableManager(tableManager);
 
@@ -174,7 +175,7 @@ public class BTreeTest extends TestCase {
 	}
 	
 	public void testCompositKey() throws Exception {
-		Parser parser = new Parser();
+		//Parser parser = new Parser();
 		TableManager tableManager = new TableManager();
 		Command.setTableManager(tableManager);
 
@@ -246,7 +247,7 @@ public class BTreeTest extends TestCase {
 	}
 	
 	public void testAlexei() throws Exception {
-		Parser parser = new Parser();
+		//Parser parser = new Parser();
 		TableManager tableManager = new TableManager();
 		Command.setTableManager(tableManager);
 

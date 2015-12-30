@@ -110,6 +110,7 @@ public class Table implements Iterable<HashMap<String, TableElement>> {
 
 		pageStructure.clear();
 
+		//this.countOfPages = 0;
 		Page page = pageStructure.getPage(INFO_PAGE);
 		int ptr = TYPES_INFO;
 		page.data[ptr++] = (byte) types.length;
