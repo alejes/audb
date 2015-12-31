@@ -41,6 +41,9 @@ public class VarcharType extends Type {
         byte[] result = concat(size, bytes);
         
         assert(result.length == getSize());
+        for (int i = 0; i < Integer.BYTES; i++) {
+        	assert(result[i] == size[i]);
+        }
         return result;
     }
 
@@ -53,10 +56,10 @@ public class VarcharType extends Type {
     	
     	if (length > this.length)
     	{
-    		System.out.println("length read is " + Integer.toString(length) + " and actual length should be <= " 
-    				+ Integer.toString(this.length));
-    		new Exception().printStackTrace();
-    		
+    		// System.out.println("length read is " + Integer.toString(length) + " and actual length should be <= " 
+    		// 		+ Integer.toString(this.length));
+    		// new Exception().printStackTrace();
+    		length = this.length;
     	}
     		
     	byte[] bytes = new byte[length];

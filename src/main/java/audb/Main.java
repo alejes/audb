@@ -5,9 +5,12 @@ import audb.page.PageStructure;
 import audb.parser.Parser;
 import audb.parser.Shower;
 import audb.table.TableManager;
+import audb.page.PageCache;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Random;
+
 
 public class Main {
 
@@ -22,21 +25,22 @@ public class Main {
             //Type[] types = new Type[]{new VarcharType((byte) 15), new VarcharType((byte) 9)};
             //String[] names = new String[]{"number", "text"};
 
-            String qq = "CREATE TABLE table1 (number VARCHAR (15), text VARCHAR (9))";
-            command = parser.getCommand(qq);
-            command.exec();
-            //command = new CreateTableCommand("table1", types, names);
-            //command.exec();
+            // String qq = "CREATE TABLE table2 (number INT, text VARCHAR (9))";
+            // command = parser.getCommand(qq);
+            // command.exec();
+            // //command = new CreateTableCommand("table1", types, names);
+            // //command.exec();
 
-
-            for (int i = 0; i < 10_00; i++) {
-                String q = String.format("INSERT INTO table1 (number, text) VALUES ('%03d', 'sadfsd')", i);
-                command = parser.getCommand(q);
-                command.exec();
-                if (i % 10000 == 20) {
-                    System.out.format("%d\n", i);
-                }
-            }
+            // for (int i = 0; i < 1_000_000; i++) {
+            //     String q = String.format("INSERT INTO table2 (number, text) VALUES (%d, '"
+            //         + generateString(new Random(), "abcdef", 7) + "')", i);
+            //     command = parser.getCommand(q);
+            //     command.exec();
+            //     if (i % 100000 == 0) {
+            //         System.out.format("%d\n", i);
+            //     }
+            // }
+            // System.out.println("Ready.");
 
             //вставлять 10кк с 8 мб heap
             //select no fullscan where and etc.
@@ -54,7 +58,14 @@ public class Main {
             String s;
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             while ((s = in.readLine()) != null && s.length() != 0) {
+            	long t = System.currentTimeMillis();
+                PageCache.totalNumber = 0;
+                PageCache.hitNumber = 0;
+                
                 Shower.show(s);
+                System.out.println("Elapsed time: " + Long.toString(System.currentTimeMillis() - t) + " ms.");
+                System.out.println("Total page read number: " + PageCache.totalNumber + "; hit number " +
+                    PageCache.hitNumber);
             }
             PageStructure.flush();
         } catch(Exception e) {
@@ -99,5 +110,12 @@ public class Main {
         // }
 
     }
-
+    public static String generateString(Random rng, String characters, int length) {
+        char[] text = new char[length];
+        for (int i = 0; i < length; i++)
+        {
+            text[i] = characters.charAt(rng.nextInt(characters.length()));
+        }
+        return new String(text);
+    }
 }

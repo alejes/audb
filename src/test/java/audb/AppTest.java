@@ -1,5 +1,7 @@
 package audb;
 
+
+import audb.Main;
 import audb.command.Command;
 import audb.page.PageCache;
 import audb.page.PageStructure;
@@ -17,6 +19,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import java.util.Random;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -64,7 +67,7 @@ public class AppTest
         parser.getCommand("CREATE TABLE tableload4m (number VARCHAR (15), text VARCHAR (9))").exec();
 
 
-        for (int i = 0; i < 100_000_0; i++) {
+        for (int i = 0; i < 100_0; i++) {
             parser.getCommand(String.format("INSERT INTO tableload4m (number, text) VALUES ('%09d', 'sadfsd')", i)).exec();
             if (i % 10000 == 25) {
                 System.out.println("Insert " + i + " items");
@@ -275,12 +278,16 @@ public class AppTest
         parser.getCommand("CREATE TABLE table002 (number VARCHAR (15), text VARCHAR (9))").exec();
         parser.getCommand("CREATE TABLE table003 (number VARCHAR (15), text VARCHAR (9))").exec();
 
+        for (int k = 0; k < 2; k++) {
         for (int i = 0; i < 15; i++) {
-            parser.getCommand(String.format("INSERT INTO table002 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
+            parser.getCommand(String.format("INSERT INTO table002 (number, text) VALUES ('%03d', '" + 
+                Main.generateString(new Random(), "abcdefg", 7) +  "')", i)).exec();
         }
         for (int i = 0; i < 15; i++) {
-            parser.getCommand(String.format("INSERT INTO table003 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
-        }
+            parser.getCommand(String.format("INSERT INTO table003 (number, text) VALUES ('%03d', '" + 
+                Main.generateString(new Random(), "abcdefg", 7) +  "')", i)).exec();
+            // parser.getCommand(String.format("INSERT INTO table003 (number, text) VALUES ('%03d', 'sadfsd')", i)).exec();
+        }}
 
         Shower.show_exsept("SELECT * FROM table003 JOIN table002 ON table003.number = table002.number WHERE (table002.number <= '010') and (table003.number >= '007')");
 

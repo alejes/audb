@@ -6,6 +6,9 @@ import java.io.IOException;
 
 public class PageCache {
 	private static final PageCache instance = new PageCache();
+
+    public static int totalNumber;
+    public static int hitNumber;
 	
     private boolean DEBUG = false;
     private int MAX_SIZE = 100;
@@ -24,8 +27,10 @@ public class PageCache {
 
     public Page getPage(PageManager pm, int number) {
         Page page = null;
+        ++totalNumber;
         String key = pm.getFileName() + "/" + number;
         if(hashMap.containsKey(key)) {
+            ++hitNumber;
             page = hashMap.get(key);
         } else {
             if(hashMap.size() >= MAX_SIZE) {

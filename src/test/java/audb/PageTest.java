@@ -92,7 +92,7 @@ public class PageTest extends TestCase {
         }    
     }
 
-    public void testUpdate() {
+  /*  public void testUpdate() {
         if (true)
             return;
 
@@ -140,7 +140,7 @@ public class PageTest extends TestCase {
         } catch(Exception e) {
              e.printStackTrace();
         }    
-    }
+    }*/
 
     public void testMillionsNumbers() {
         if (true)

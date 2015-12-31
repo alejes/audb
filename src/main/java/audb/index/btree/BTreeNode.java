@@ -35,7 +35,7 @@ public abstract class BTreeNode {
 		maxKeysNumber = fanout - 1;
 		minChildrenNumber = (fanout + 1) / 2;
 		this.nodeReader = nr;
-		this.pageNumber = pageNumber == -1 ? (int)nr.getPageStructure().getEmptyPage() : pageNumber;
+		this.pageNumber = pageNumber == -1 ? nr.getPageStructure().getEmptyPage() : pageNumber;
 		assert(this.pageNumber != 0);
 	}
 

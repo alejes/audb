@@ -34,11 +34,13 @@ public class UpdateCommand extends Command {
             Table table = tableManager.getTable(tableName);
             String[] names = table.getNames();
             Object[] newValues = new Object[names.length];
+
             for (int i = 0; i < names.length; ++i) 
                 newValues[i] = values.containsKey(names[i]) ? values.get(names[i]) : curr.get(names[i]).getObject();
             
             table.delete(curr.getPageNumber(), curr.getOffset());
             table.addRecord(newValues);
+
             ++affectedRows;
         }
         Parser.affectedRows = affectedRows;

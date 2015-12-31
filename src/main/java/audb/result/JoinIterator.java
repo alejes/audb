@@ -77,7 +77,7 @@ public class JoinIterator implements TableIterator {
                     new LinkedList<>(constraints);
             for (Pair<String, String> el: columnNames) {
                 Constraint c = new Constraint(Constraint.ConstraintType.EQUAL, currentElement.get(el.first));
-                ll.add(Third.newThird(el.second, c, ""));
+                ll.add(Third.newThird(el.second, c, table.get().getTableName()));
             }
             secondIterator = new ConditionalTableIterator(table.get(), ll);
         }
